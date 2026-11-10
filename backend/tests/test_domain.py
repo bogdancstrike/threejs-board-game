@@ -66,7 +66,7 @@ def test_story_choice_rewards_and_affordability():
     assert room["game"]["active"] == 1
 
 
-@pytest.mark.parametrize("kind", range(6))
+@pytest.mark.parametrize("kind", range(10))
 def test_challenge_types_are_validated_and_private_answers_are_not_public(kind):
     room = party()
     card = domain.challenge(kind, 1000)
@@ -130,6 +130,8 @@ def test_complete_eight_player_games_preserve_invariants():
             action, payload = (
                 ("ROLL_DIE", {})
                 if phase == "ready"
+                else ("RESOLVE_ROAD", {"choice": room["game"]["road"]["choices"][-1]["key"]})
+                if phase == "road"
                 else ("CHOOSE", {"index": 1})
                 if phase == "event"
                 else ("SKIP_CHALLENGE", {})
@@ -142,3 +144,153 @@ def test_complete_eight_player_games_preserve_invariants():
             )
         assert room["phase"] == "finished"
         assert len({p["character"] for p in room["game"]["players"]}) == 8
+
+
+def land(room, tile, die=1):
+    p = room["game"]["players"][room["game"]["active"]]
+    p["position"], p["furthest"] = tile - die, tile - die
+    return domain.apply(room, p["id"], "ROLL_DIE", {}, clock=1000, randbelow=lambda n: die - 1)[0]
+
+
+@pytest.mark.parametrize(
+    "tile,kind",
+    [
+        (6, "box"),
+        (11, "hazard"),
+        (16, "minigame"),
+        (23, "dare"),
+        (29, "dragon"),
+        (33, "shrine"),
+        (53, "curse"),
+        (69, "camp"),
+    ],
+)
+def test_eight_road_encounter_categories_are_playable(tile, kind):
+    room = land(party(), tile)
+    assert room["game"]["phase"] == "road"
+    assert room["game"]["road"]["kind"] == kind
+    assert room["game"]["road"]["choices"]
+    assert room["turnDeadline"] == 46000
+
+
+def test_dragon_trial_failure_retreats_and_ward_absorbs_it():
+    room = land(party(), 29)
+    actor = room["hostId"]
+    room, _ = domain.apply(
+        room, actor, "RESOLVE_ROAD", {"choice": "trial"}, clock=2000, randbelow=lambda n: 0
+    )
+    assert room["game"]["challenge"]["context"] == "dragon"
+    assert room["game"]["challenge"]["rewardPoints"] == 75
+    failed, event = domain.apply(room, actor, "SUBMIT_CHALLENGE", {"answer": 3}, clock=3000)
+    assert failed["game"]["players"][0]["position"] == 26
+    assert event[0]["payload"]["route"] == [28, 27, 26]
+    room["game"]["players"][0]["wards"] = 1
+    protected, _ = domain.apply(room, actor, "SKIP_CHALLENGE", {}, clock=3000)
+    assert protected["game"]["players"][0]["position"] == 29
+    assert protected["game"]["players"][0]["wards"] == 0
+    won, _ = domain.apply(room, actor, "SUBMIT_CHALLENGE", {"answer": 0}, clock=3000)
+    assert won["game"]["players"][0]["position"] == 31
+    assert won["game"]["players"][0]["gold"] == 4
+
+
+@pytest.mark.parametrize("draw,outcome", [(0, "gold"), (1, "gold"), (2, "mimic"), (3, "game")])
+def test_box_uses_server_draw_and_bounded_outcomes(draw, outcome):
+    room = land(party(), 6)
+    room, _ = domain.apply(
+        room,
+        room["hostId"],
+        "RESOLVE_ROAD",
+        {"choice": "open"},
+        clock=2000,
+        randbelow=lambda n: draw,
+    )
+    p = room["game"]["players"][0]
+    if outcome == "gold":
+        assert p["gold"] == 4
+    elif outcome == "mimic":
+        assert p["gold"] == 0 and p["points"] == 0
+    else:
+        assert room["game"]["phase"] == "challenge"
+
+
+def test_road_dare_optout_and_rewards_are_explicit_and_bounded():
+    room = land(party(), 23)
+    actor = room["hostId"]
+    passed, _ = domain.apply(room, actor, "RESOLVE_ROAD", {"choice": "leave"}, clock=2000)
+    assert passed["game"]["players"][0]["points"] == 1
+    dared, _ = domain.apply(room, actor, "RESOLVE_ROAD", {"choice": "dare"}, clock=2000)
+    assert dared["game"]["players"][0]["points"] == 26
+    assert dared["game"]["players"][0]["gold"] == 1
+    with pytest.raises(domain.GameError):
+        domain.apply(room, actor, "RESOLVE_ROAD", {"choice": "reward_me"})
+
+
+def test_hex_reduces_only_next_roll_and_progress_cannot_be_farmed():
+    room = land(party(1), 53)
+    room, _ = domain.apply(room, room["hostId"], "RESOLVE_ROAD", {"choice": "hex"}, clock=2000)
+    room, _ = domain.apply(room, room["hostId"], "ROLL_DIE", {}, clock=3000, randbelow=lambda n: 0)
+    assert room["game"]["players"][0]["position"] == 54
+    assert room["game"]["players"][0]["hex"] == 0
+    p = room["game"]["players"][0]
+    before = p["points"]
+    domain.move(p, -3)
+    domain.move(p, 3)
+    assert p["points"] == before
+
+
+def test_hotseat_controller_plays_all_seats_without_granting_remote_impersonation():
+    room = party(3)
+    room["hotseat"] = True
+    room["game"]["active"] = 1
+    room, _ = domain.apply(room, room["hostId"], "ROLL_DIE", {}, randbelow=lambda n: 0)
+    assert room["game"]["players"][1]["position"] == 1
+    room["phase"] = "lobby"
+    second = room["game"]["players"][1]["id"]
+    room, _ = domain.apply(
+        room, room["hostId"], "SELECT_CHARACTER", {"playerId": second, "character": "orion"}
+    )
+    assert room["game"]["players"][1]["character"] == "orion"
+    room["hotseat"] = False
+    with pytest.raises(domain.GameError):
+        domain.apply(
+            room, room["hostId"], "SELECT_CHARACTER", {"playerId": second, "character": "kael"}
+        )
+
+
+def test_maze_rejects_teleport_and_alchemy_checks_values_on_server():
+    room = party()
+    room["game"].update(phase="challenge", challenge=domain.challenge(8, 1000))
+    cheated, _ = domain.apply(
+        room, room["hostId"], "SUBMIT_CHALLENGE", {"answer": [0, 24]}, clock=2000
+    )
+    assert cheated["game"]["players"][0]["completed"] == 0
+    path = [0, 1, 6, 5, 6, 1, 0, 5]  # valid moves but not the goal
+    failed, _ = domain.apply(room, room["hostId"], "SUBMIT_CHALLENGE", {"answer": path}, clock=2000)
+    assert failed["game"]["players"][0]["completed"] == 0
+    won, _ = domain.apply(
+        room,
+        room["hostId"],
+        "SUBMIT_CHALLENGE",
+        {"answer": [0, 1, 6, 11, 12, 13, 18, 23, 24]},
+        clock=2000,
+    )
+    assert won["game"]["players"][0]["completed"] == 1
+    room["game"]["challenge"] = domain.challenge(9, 1000)
+    good, _ = domain.apply(
+        room, room["hostId"], "SUBMIT_CHALLENGE", {"answer": [0, 1, 2]}, clock=2000
+    )
+    assert good["game"]["players"][0]["completed"] == 1
+
+
+def test_memory_cannot_be_submitted_during_reveal_and_wards_are_capped():
+    room = party()
+    card = domain.challenge(2, 1000)
+    room["game"].update(phase="challenge", challenge=card)
+    with pytest.raises(domain.GameError, match="disappear"):
+        domain.apply(
+            room, room["hostId"], "SUBMIT_CHALLENGE", {"answer": card["sequence"]}, clock=2000
+        )
+    room = land(party(), 33)
+    room["game"]["players"][0]["wards"] = 2
+    room, _ = domain.apply(room, room["hostId"], "RESOLVE_ROAD", {"choice": "ward"})
+    assert room["game"]["players"][0]["wards"] == 2

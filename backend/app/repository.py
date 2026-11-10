@@ -50,13 +50,20 @@ class PostgresRooms:
         return {"playerId": str(row["id"]), "roomId": str(row["room_id"])}
 
     async def create(
-        self, name: str, map_id: str, mode: str, challenges: bool
+        self, name: str, map_id: str, mode: str, challenges: bool, hotseat=False, names=None
     ) -> tuple[dict, str, str]:
         room_id, actor, token = str(uuid4()), str(uuid4()), secrets.token_urlsafe(32)
         alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
         for _ in range(5):
             code = "".join(secrets.choice(alphabet) for _ in range(6))
             room = domain.initial_room(room_id, code, actor, name, map_id, mode, challenges)
+            if names and not hotseat:
+                raise domain.GameError(
+                    "invalid_party", "Extra seats belong to same-device parties.", 422
+                )
+            for seat_name in names or []:
+                domain.join(room, str(uuid4()), seat_name)
+            room["hotseat"] = hotseat
             room.update(revision=1, eventSeq=1)
             try:
                 async with self.pool.acquire() as connection, connection.transaction():
@@ -66,14 +73,15 @@ class PostgresRooms:
                         code,
                         room,
                     )
-                    await connection.execute(
-                        "INSERT INTO room_members(id,room_id,name,character_id,token_hash) VALUES($1,$2,$3,$4,$5)",
-                        UUID(actor),
-                        UUID(room_id),
-                        room["game"]["players"][0]["name"],
-                        "lyra",
-                        token_hash(token),
-                    )
+                    for seat in room["game"]["players"]:
+                        await connection.execute(
+                            "INSERT INTO room_members(id,room_id,name,character_id,token_hash) VALUES($1,$2,$3,$4,$5)",
+                            UUID(seat["id"]),
+                            UUID(room_id),
+                            seat["name"],
+                            seat["character"],
+                            token_hash(token if seat["id"] == actor else secrets.token_urlsafe(32)),
+                        )
                     await connection.execute(
                         "INSERT INTO room_events(room_id,seq,event_type,actor_id,payload,snapshot) VALUES($1,1,$2,$3,$4,$5)",
                         UUID(room_id),
@@ -98,6 +106,8 @@ class PostgresRooms:
             if not row:
                 raise domain.GameError("room_not_found", "No expedition uses that room code.", 404)
             room = row["snapshot"]
+            if room.get("hotseat"):
+                raise domain.GameError("same_device", "This party plays on one device.")
             p = domain.join(room, actor, name)
             room.update(revision=row["revision"] + 1, eventSeq=row["event_seq"] + 1)
             await connection.execute(
@@ -159,12 +169,12 @@ class PostgresRooms:
             event = events[0]
             await self._write(connection, room, actor, event["type"], event["payload"])
             if command["type"] in {"SELECT_CHARACTER", "SET_NAME"}:
-                p = domain.member(room, actor)
+                p = domain.member(room, command["payload"].get("playerId", actor))
                 await connection.execute(
                     "UPDATE room_members SET name=$1,character_id=$2 WHERE id=$3 AND room_id=$4",
                     p["name"],
                     p["character"],
-                    UUID(actor),
+                    UUID(p["id"]),
                     UUID(room_id),
                 )
             response = {
@@ -236,12 +246,33 @@ class PostgresRooms:
             if room["phase"] != "playing" or (room.get("turnDeadline") or 10**20) > domain.now_ms():
                 return None
             p = room["game"]["players"][room["game"]["active"]]
-            domain.journal(room["game"], f"{p['name']}’s turn expired. No points were removed.")
+            from . import adventures
+
+            card = room["game"].get("challenge") or {}
+            route = (
+                adventures.setback(room, p, card.get("context"))
+                if card.get("context") in {"dragon", "hazard", "curse"}
+                else []
+            )
+            domain.journal(
+                room["game"],
+                f"{p['name']}’s turn expired."
+                + (
+                    " The accepted danger is resolved."
+                    if route or card.get("context") in {"dragon", "hazard", "curse"}
+                    else " No points were removed."
+                ),
+            )
+            active = room["game"]["active"]
             domain.end_turn(room, domain.now_ms())
             room.update(revision=row["revision"] + 1, eventSeq=row["event_seq"] + 1)
             await self._write(connection, room, p["id"], "TURN_TIMED_OUT", {"actorId": p["id"]})
             return {
                 "room": room,
-                "event": {"type": "TURN_TIMED_OUT", "seq": room["eventSeq"], "payload": {}},
+                "event": {
+                    "type": "TURN_TIMED_OUT",
+                    "seq": room["eventSeq"],
+                    "payload": {"route": route, "playerIndex": active},
+                },
                 "serverTime": domain.now_ms(),
             }

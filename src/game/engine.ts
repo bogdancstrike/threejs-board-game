@@ -11,6 +11,8 @@ export interface Player {
   points?: number;
   completed?: number;
   ready?: boolean;
+  wards?: number;
+  hex?: number;
   connected?: boolean;
   name: string;
   character: string;
@@ -29,7 +31,7 @@ export interface GameState {
   players: Player[];
   active: number;
   turn: number;
-  phase: "ready" | "event" | "won" | "challenge";
+  phase: "ready" | "event" | "won" | "challenge" | "road";
   mystery: number | null;
   dice: number;
   journal: JournalEntry[];

@@ -38,6 +38,8 @@ class CreateRoom(BaseModel):
     map: str = Field(default="verdant", max_length=32)
     mode: Literal["classic", "score"] = "classic"
     challenges: bool = True
+    hotseat: bool = False
+    players: list[str] = Field(default_factory=list, max_length=7)
 
 
 class JoinRoom(BaseModel):
@@ -54,6 +56,7 @@ class Command(BaseModel):
         "START_GAME",
         "ROLL_DIE",
         "CHOOSE",
+        "RESOLVE_ROAD",
         "SUBMIT_CHALLENGE",
         "CHALLENGE_TAP",
         "SKIP_CHALLENGE",
@@ -231,7 +234,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def create(body: CreateRoom, request: Request):
         hub.throttle("create:" + (request.client.host if request.client else "?"), 12)
         room, actor, token = await app.state.repo.create(
-            body.name, body.map, body.mode, body.challenges
+            body.name, body.map, body.mode, body.challenges, body.hotseat, body.players
         )
         return {
             "room": public_room(room),

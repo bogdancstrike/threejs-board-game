@@ -10,15 +10,17 @@ Development: start the db with Compose, run `uv sync --directory backend`, then 
 
 ## Rooms
 
-Create/join, unique names and heroes, ready checks, host start, 1–8 members, classic or score victory, points, six skill challenges, host rematch. A shared browser still has the original offline 1–4 player pass-and-play. Online browser credentials are separate from the local save.
+Create/join, unique names and heroes, ready checks, host start, 1–8 members, classic or score victory, points, ten skill mini-games and seventeen road stops, host rematch. Solo and same-device parties support 1–8 named seats with unique heroes and a turn handoff. A shared browser also retains the original offline 1–4 player Classic. Online browser credentials are separate from the local save.
 
 Each guest receives a random room-scoped bearer credential; only its SHA-256 hash is persisted. Sessions expire after 12 hours. WebSocket handshakes consume single-use 30-second tickets and validate Origin. No bearer token enters a WebSocket URL. Names are escaped when rendered. The server generates dice, challenge seeds, timing and points; clients submit intentions.
 
-A PostgreSQL room row lock serializes all mutations; a unique `(room_id, character_id)` index enforces claims. Revisions reject stale commands, command UUIDs deduplicate retries, and event sequences support replay. A committed snapshot survives process restart. Disconnected players can reconnect; a server deadline advances stalled turns without a score penalty.
+A PostgreSQL room row lock serializes all mutations; a unique `(room_id, character_id)` index enforces claims. Revisions reject stale commands, command UUIDs deduplicate retries, and event sequences support replay. A committed snapshot survives process restart. Disconnected players can reconnect; a server deadline advances stalled turns without a score penalty, except an accepted dangerous trial applies its disclosed setback.
 
 REST paths: `GET /api/health`, `GET /api/v1/catalogue`, `POST /api/v1/rooms`, `POST /api/v1/rooms/{code}/join`, authenticated snapshot/events/commands/ticket under `/api/v1/rooms/{id}`. Socket path `/api/v1/rooms/{id}/ws?ticket=…`. OpenAPI is at API port 8000 `/docs`.
 
 Run a **single API worker**: socket presence, tickets and fan-out currently live in that process. Horizontal scaling requires a shared broker. The PostgreSQL aggregate remains durable. Configure `ALLOWED_ORIGINS` before using another hostname; localhost defaults are intentional.
+
+See [road adventure rules](../specifications/ROAD_ADVENTURES.md) for encounter actions, reward values, punishments, protection and API commands.
 
 ## Maps and art
 

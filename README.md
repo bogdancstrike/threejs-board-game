@@ -80,9 +80,9 @@ For backend development, run `docker compose up -d db`, then `uv sync --director
 
 ## 👥 Bring your party
 
-Choose **Play together**, enter your name, and create a room or join a six-character code. **1–8 online players** each claim a unique hero, mark ready, and let the host begin. Character claims are enforced by a PostgreSQL constraint and transactional server rules. Every browser sees the same die roll, movement, active player, journal, and points.
+Choose **Play · Solo & party**, enter player names, and choose **On this device** for solo/pass-and-play or **Online** to create/join a six-character room code. Same-device Adventure supports **1–8 named players**, unique heroes, and a “pass the device” dialog between turns. Both Adventure play styles use the running game server. **1–8 online players** each claim a unique hero, mark ready, and let the host begin. Character claims are enforced by a PostgreSQL constraint and transactional server rules. Every browser sees the same die roll, movement, active player, journal, and points.
 
-Classic races end at the finish. Score expeditions finish the current round, then rank players by points. The server awards progress, treasure, clues, challenge rewards, and a finish bonus. Six skill challenges currently include riddles, counting, memory, patterns, balance, and rhythm. Rematches return the party to the lobby.
+Classic races end at the finish. Score expeditions finish the current round, then rank players by points. The server awards progress, treasure, clues, challenge rewards, and a finish bonus. **Ten mini-games** include riddles, counting, memory, patterns, balance, rhythm, arithmetic, spotting a mimic, a navigable maze, and alchemy. Rematches return the party to the lobby.
 
 Room progress persists in PostgreSQL. Browser sessions reconnect to an authoritative snapshot; commands use revision checks and idempotency keys to prevent duplicate rolls. Turns and encounters have server deadlines. Room sessions last 12 hours. **Local 1–4 player pass-and-play remains available without the backend.**
 
@@ -187,9 +187,17 @@ Dragonkind is an original fan-inspired setting. It includes no copied novel text
 | 🌀 Portal | Move **3 extra tiles**. |
 | 🏰 Destination | Complete the journey and celebrate. |
 
-Bonus movement ends without triggering a chain of tile effects. Gold and clues record discoveries; they do not gate the finish. All character cosmetics share the same rules.
+Bonus movement ends without triggering a chain of tile effects. Gold and clues record discoveries and can pay for safe passage at Adventure encounters; they do not gate the finish. All character cosmetics share the same rules.
 
 Play solo or choose **2–4 local players** in settings. Each player takes a turn on this device and can choose a different character. **Journey** opens the progress, inventory, and journal drawer. Restarting or changing worlds requires confirmation before replacing the saved expedition.
+
+## 🐉 The road has other plans
+
+Seventeen marked stops turn each map into an adventure: **dragon guardians**, **mystery boxes**, **mini-game pavilions**, **creative dares**, **dangerous crossings**, **warding shrines**, **hexes**, and **rest camps**. Guardians stand beside their protected tiles; boxes and shrines have animated roadside props. Hover a marked tile for its encounter.
+
+Face a dragon's trial for **75 points, 4 gold and a shortcut**, offer tribute, or retreat safely. Boxes can contain treasure, a mimic, or a mini-game. Wards absorb danger; camps clear hexes. A failed risky trial can cost gold or points, push you back, or slow your next move. **Every risk is stated before accepting it**, and currencies stay at zero or above. Creative dares are optional and self-reported, with puzzle and pass alternatives.
+
+Read the [full encounter and multiplayer specification](docs/specifications/ROAD_ADVENTURES.md) for rewards, deadlines, probabilities and protections. Choose Story only at creation to keep the original road rules.
 
 ## 🧙 Meet your adventurer
 
@@ -284,7 +292,7 @@ npm run test:e2e                 # Chromium/WebGL gameplay, previews, animation 
 npm run build                   # Strict TypeScript and production bundle
 ```
 
-The browser suite exercises character selection and movement, save restoration, all thirty themes, mobile layout, live map previews, animation bounds, and nonzero Web Audio output. It uses software WebGL in headless Chromium; install the browser with `npx playwright install chromium` if needed. Low-quality smoke checks and normal-quality visual renders serve different validation purposes.
+The browser suite checks two independent multiplayer browsers, same-device names/hero picks/turn handoff, and exercises character selection and movement, save restoration, all thirty themes, mobile layout, live map previews, animation bounds, and nonzero Web Audio output. It uses software WebGL in headless Chromium; install the browser with `npx playwright install chromium` if needed. Low-quality smoke checks and normal-quality visual renders serve different validation purposes.
 
 ## 🎨 Art status & credits
 

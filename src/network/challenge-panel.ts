@@ -13,6 +13,8 @@ export class ChallengePanel {
   private cardId = "";
   private sending = false;
   private lastBeat = -1;
+  private path: number[] = [];
+  private ingredients: number[] = [];
   constructor(
     private client: RealtimeClient,
     private ui: UI,
@@ -37,6 +39,8 @@ export class ChallengePanel {
     if (card.id !== this.cardId) {
       this.selected = [];
       this.cardId = card.id;
+      this.path = [card.start || 0];
+      this.ingredients = [];
       this.lastBeat = -1;
     }
     const i = this.ui.icon,
@@ -46,6 +50,11 @@ export class ChallengePanel {
     let content = "";
     if (card.type === "count" || card.type === "pattern")
       content += `<div class="challenge-symbols ${card.type}">${card.symbols!.map((s) => `<span>${e(s)}</span>`).join("")}</div>`;
+    if (card.type === "maze") {
+      content += `<div class="maze-grid">${Array.from({ length: 25 }, (_, cell) => `<button data-challenge-action="maze" data-choice="${cell}" class="maze-cell ${card.walls!.includes(cell) ? "wall" : ""} ${cell === 0 ? "visited" : ""}" ${!owner || card.walls!.includes(cell) ? "disabled" : ""}>${cell === 0 ? "●" : cell === 24 ? "✦" : "·"}</button>`).join("")}</div><button class="text-button" data-challenge-action="reset" ${owner ? "" : "disabled"}>Reset path</button>`;
+    }
+    if (card.type === "alchemy")
+      content += `<div id="alchemy-progress" class="alchemy-progress">0 / 3 ingredients · total 0 / 10</div><button class="text-button" data-challenge-action="reset" ${owner ? "" : "disabled"}>Empty the cauldron</button>`;
     if (card.type === "memory")
       content +=
         '<div id="memory-display" class="challenge-symbols memory"></div>';
@@ -62,9 +71,27 @@ export class ChallengePanel {
         card.title,
         false,
       ) +
-        `<p class="challenge-prompt">${e(card.prompt)}</p>${content}<div class="challenge-footer"><span id="challenge-clock"></span><span>Success: +50 points · +2 gold</span></div><button class="text-button" data-challenge-action="skip" ${owner ? "" : "disabled"}>${owner ? "Pass this challenge · no penalty" : e(player.name) + " is playing. Watch their progress."}</button>`,
+        `<p class="challenge-prompt">${e(card.prompt)}</p>${card.sourceTitle ? `<p class="trial-source">${e(card.sourceTitle)} · ${e(card.failure || "No penalty.")}</p>` : ""}${content}<div class="challenge-footer"><span id="challenge-clock"></span><span>Success: +${card.rewardPoints || 50} points · +${card.rewardGold || 2} gold</span></div><button class="text-button" data-challenge-action="skip" ${owner ? "" : "disabled"}>${owner ? (card.context && ["dragon", "hazard", "curse"].includes(card.context) ? "Forfeit trial · stated setback applies" : "Pass this challenge · no penalty") : e(player.name) + " is playing. Watch their progress."}</button>`,
     );
     this.tick();
+  }
+  openRoad() {
+    this.stop();
+    const room = this.client.room,
+      card = room?.game.road;
+    if (!room || !card) return;
+    const owner = this.client.myTurn,
+      e = this.ui.escape,
+      p = room.game.players[room.game.active];
+    this.ui.open(
+      "road",
+      this.ui.header(
+        `${card.kind.toUpperCase()} · ${e(p.name)}’S TURN`,
+        card.title,
+        false,
+      ) +
+        `<div class="road-encounter-art ${card.kind}">${this.ui.icon(card.icon)}<span>✧</span></div><p class="challenge-prompt">${e(card.description)}</p>${card.dare ? `<blockquote class="dare-prompt">${e(card.dare)}</blockquote><p class="modal-note">Creative dares are optional and self-reported. Choose a puzzle or pass whenever you prefer.</p>` : ""}<div class="road-choices">${card.choices.map((c) => `<button data-challenge-action="road" data-choice="${c.key}" ${!owner || (c.key === "pay" && p.gold < 3) || (c.key === "clue" && p.clues < 1) ? "disabled" : ""}><strong>${e(c.label)}</strong><small>${e(c.detail)}</small></button>`).join("")}</div><p class="modal-note">${owner ? "Read each outcome before choosing. Setbacks affect only the game; gold and points never drop below zero." : e(p.name) + " is choosing. Everyone will see the outcome."}</p>`,
+    );
   }
   private card(): Challenge | null {
     return this.client.room?.game.challenge || null;
@@ -121,10 +148,46 @@ export class ChallengePanel {
   private async action(kind: string, choice?: string) {
     if (!this.client.myTurn || this.sending) return;
     const card = this.card();
-    if (!card) return;
+    if (!card && kind !== "road") return;
     try {
       this.sending = true;
-      if (kind === "skip") await this.client.command("SKIP_CHALLENGE");
+      if (kind === "road") {
+        await this.client.command("RESOLVE_ROAD", { choice });
+        return;
+      }
+      if (!card) return;
+      if (kind === "reset") {
+        this.path = [card.start || 0];
+        this.ingredients = [];
+        document
+          .querySelectorAll<HTMLElement>(".maze-cell")
+          .forEach((el, i) => el.classList.toggle("visited", i === 0));
+        const progress = document.getElementById("alchemy-progress");
+        if (progress) progress.textContent = "0 / 3 ingredients · total 0 / 10";
+      } else if (kind === "maze") {
+        const cell = Number(choice),
+          last = this.path[this.path.length - 1];
+        if (
+          Math.abs(Math.floor(cell / 5) - Math.floor(last / 5)) +
+            Math.abs((cell % 5) - (last % 5)) !==
+          1
+        ) {
+          this.ui.toast("Choose a square beside your current path.");
+          return;
+        }
+        if (this.path.length >= 30) {
+          this.ui.toast("Reset and try a shorter route.");
+          return;
+        }
+        this.path.push(cell);
+        document
+          .querySelector(
+            `[data-challenge-action="maze"][data-choice="${cell}"]`,
+          )
+          ?.classList.add("visited");
+        if (cell === card.goal)
+          await this.client.command("SUBMIT_CHALLENGE", { answer: this.path });
+      } else if (kind === "skip") await this.client.command("SKIP_CHALLENGE");
       else if (kind === "balance")
         await this.client.command("SUBMIT_CHALLENGE");
       else if (kind === "rhythm")
@@ -132,7 +195,20 @@ export class ChallengePanel {
           (card.taps?.length || 0) >= 4 ? "SUBMIT_CHALLENGE" : "CHALLENGE_TAP",
         );
       else if (kind === "choice") {
-        if (card.type === "memory") {
+        if (card.type === "alchemy") {
+          this.ingredients.push(Number(choice));
+          const total = this.ingredients.reduce(
+            (sum, n) => sum + card.values![n],
+            0,
+          );
+          const progress = document.getElementById("alchemy-progress");
+          if (progress)
+            progress.textContent = `${this.ingredients.length} / 3 ingredients · total ${total} / 10`;
+          if (this.ingredients.length === 3)
+            await this.client.command("SUBMIT_CHALLENGE", {
+              answer: this.ingredients,
+            });
+        } else if (card.type === "memory") {
           if (Date.now() + this.client.clockOffset < (card.revealUntil || 0))
             return;
           this.selected.push(card.options[Number(choice)]);

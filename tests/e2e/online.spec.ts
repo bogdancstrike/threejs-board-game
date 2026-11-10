@@ -22,6 +22,7 @@ test("two browsers share unique heroes, turns, points and reconnect", async ({
     await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 60000 });
   await host.locator('[data-action="rooms"]').click();
   await host.locator("#online-player-name").fill("Ada");
+  await host.locator("#room-play-style").selectOption("online");
   await host.locator("#room-challenges").uncheck();
   await host.locator('[data-room-action="create"]').click();
   await expect(host.locator(".lobby-room-code strong")).toBeVisible();
@@ -50,16 +51,32 @@ test("two browsers share unique heroes, turns, points and reconnect", async ({
   await host.locator("#roll-button").click();
   await expect(
     host.locator(".party-score-row").first().locator("b"),
-  ).not.toHaveText("0");
+  ).not.toHaveText(/^0PTS$/);
+  await expect
+    .poll(
+      async () =>
+        (await guest.locator("#roll-button").isEnabled()) ||
+        (await host.locator('[data-choice="1"]').isVisible()),
+      { timeout: 45000 },
+    )
+    .toBe(true);
   if (await host.locator('[data-choice="1"]').isVisible())
     await host.locator('[data-choice="1"]').click();
   await expect(guest.locator("#roll-button")).toBeEnabled({ timeout: 45000 });
   await expect(host.locator("#roll-button")).toBeDisabled();
-  const hostScore = await host.locator(".party-score-row").first().locator("b").innerText();
-  await expect(guest.locator(".party-score-row").first().locator("b")).toHaveText(hostScore);
+  const hostScore = await host
+    .locator(".party-score-row")
+    .first()
+    .locator("b")
+    .textContent();
+  await expect(
+    guest.locator(".party-score-row").first().locator("b"),
+  ).toHaveText(hostScore!);
   await guest.reload();
   await expect(guest.locator("#roll-button")).toBeEnabled({ timeout: 60000 });
-  await expect(guest.locator(".party-score-row").first().locator("b")).toHaveText(hostScore);
+  await expect(
+    guest.locator(".party-score-row").first().locator("b"),
+  ).toHaveText(hostScore!);
   expect(errors).toEqual([]);
   await hostContext.close();
   await guestContext.close();

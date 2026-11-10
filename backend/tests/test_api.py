@@ -5,6 +5,7 @@ import httpx
 import pytest
 
 from app.main import create_app
+from app import domain
 
 
 @pytest.fixture
@@ -124,3 +125,71 @@ async def test_room_and_names_are_bounded_and_commands_require_host(api):
     assert (await command(api, guest, "START_GAME")).status_code == 403
     assert (await command(api, host, "START_GAME")).status_code == 409
     assert (await command(api, guest, "SET_READY", {"ready": True})).status_code == 200
+
+
+async def test_same_device_party_can_name_pick_and_play_each_seat(api):
+    client, app, ids = api
+    host = (
+        await client.post(
+            "/api/v1/rooms",
+            json={
+                "name": "Ada",
+                "hotseat": True,
+                "players": ["Grace", "Linus"],
+                "challenges": False,
+            },
+        )
+    ).json()
+    ids.append(host["room"]["id"])
+    assert host["room"]["hotseat"] is True
+    assert len(host["room"]["game"]["players"]) == 3
+    assert (
+        await client.post(
+            "/api/v1/rooms/" + host["room"]["code"] + "/join", json={"name": "Remote"}
+        )
+    ).status_code == 409
+    for p in host["room"]["game"]["players"]:
+        assert (
+            await command(api, host, "SET_READY", {"ready": True, "playerId": p["id"]})
+        ).status_code == 200
+    second = host["room"]["game"]["players"][1]["id"]
+    assert (
+        await command(api, host, "SELECT_CHARACTER", {"character": "orion", "playerId": second})
+    ).status_code == 200
+    assert (
+        await command(api, host, "SET_READY", {"ready": True, "playerId": second})
+    ).status_code == 200
+    assert (
+        await app.state.repo.pool.fetchval(
+            "SELECT character_id FROM room_members WHERE id=$1", UUID(second)
+        )
+        == "orion"
+    )
+    assert (await command(api, host, "START_GAME")).status_code == 200
+    for _ in range(2):
+        result = await command(api, host, "ROLL_DIE")
+        assert result.status_code == 200
+        if result.json()["room"]["game"]["phase"] == "event":
+            assert (await command(api, host, "CHOOSE", {"index": 1})).status_code == 200
+    snapshot = await app.state.repo.snapshot(host["room"]["id"], host["playerId"])
+    assert snapshot["game"]["players"][1]["position"] > 0
+
+
+async def test_expired_accepted_danger_applies_once_and_persists_route(api):
+    host = await create(api)
+    _, app, _ = api
+    room = await app.state.repo.snapshot(host["room"]["id"], host["playerId"])
+    room["phase"] = "playing"
+    room["game"]["players"][0].update(position=29, furthest=29, gold=1)
+    room["game"].update(
+        phase="challenge", challenge={**domain.challenge(0, 0), "context": "dragon"}
+    )
+    room["turnDeadline"] = 1
+    await app.state.repo.pool.execute(
+        "UPDATE rooms SET snapshot=$1 WHERE id=$2", room, UUID(room["id"])
+    )
+    result = await app.state.repo.timeout(room["id"])
+    assert result["room"]["game"]["players"][0]["position"] == 26
+    assert result["room"]["game"]["players"][0]["gold"] == 0
+    assert result["event"]["payload"]["route"] == [28, 27, 26]
+    assert await app.state.repo.timeout(room["id"]) is None

@@ -51,6 +51,7 @@ import {
   Circle,
   CheckCheck,
 } from "lucide";
+import { roadStop } from "./game/road";
 import { CHARACTERS, getTiles, TILE_INFO } from "./game/data";
 import { SKY_ROUTES, layerName } from "./game/layers";
 import { MAP_SHAPES } from "./world/shapes";
@@ -162,7 +163,7 @@ const safe = (s: string) =>
       ]!,
   );
 app.innerHTML = `
-<header class="topbar"><a class="brand" href="/" aria-label="Wilder home"><span class="brand-mark"><img src="/brand/wilder-mark.svg" alt=""/></span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> A little courage. A little magic. <span class="tiny-star">✧</span></div><nav><button class="nav-link online-nav" data-action="rooms">${icon("users")}<span id="room-nav-label">Play together</span></button><button class="nav-link" data-action="journey" aria-label="Toggle journey details">${icon("book-open")}<span>Journey</span></button><button class="nav-link" data-action="characters" aria-label="Choose character">${icon("users")}<span>Adventurer</span></button><button class="nav-link" data-action="maps">${icon("map")}<span>Worlds</span><span class="count-badge">${MAPS.length}</span></button><button class="nav-link" data-action="help">${icon("circle-help")}<span>How to play</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="Enable sound">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="Game settings">${icon("settings-2")}</button></nav></header>
+<header class="topbar"><a class="brand" href="/" aria-label="Wilder home"><span class="brand-mark"><img src="/brand/wilder-mark.svg" alt=""/></span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> A little courage. A little magic. <span class="tiny-star">✧</span></div><nav><button class="nav-link online-nav" data-action="rooms">${icon("users")}<span id="room-nav-label">Play · Solo & party</span></button><button class="nav-link" data-action="journey" aria-label="Toggle journey details">${icon("book-open")}<span>Journey</span></button><button class="nav-link" data-action="characters" aria-label="Choose character">${icon("users")}<span>Adventurer</span></button><button class="nav-link" data-action="maps">${icon("map")}<span>Worlds</span><span class="count-badge">${MAPS.length}</span></button><button class="nav-link" data-action="help">${icon("circle-help")}<span>How to play</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="Enable sound">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="Game settings">${icon("settings-2")}</button></nav></header>
 <main class="game-shell"><aside class="sidebar"><div class="expedition-intro"><div class="eyebrow">AN ADVENTURE AWAITS</div><h1 id="map-title"></h1><p class="intro-copy">Follow the path.<br>Find your own story.</p><button class="map-link" data-action="maps">${icon("map")}<span>Explore another world</span>${icon("arrow-up-right")}</button></div>
 <div class="sidebar-rule"></div><div class="section-label">YOUR ADVENTURER<button data-action="characters">Change ${icon("chevron-right")}</button></div><button class="hero-card" data-action="characters"><div id="hero-avatar" class="hero-avatar">${icon("wand-sparkles")}</div><div><strong id="hero-name"></strong><span id="hero-class"></span></div><span class="hero-online"></span></button>
 <div class="journey"><div class="section-label"><span>THE JOURNEY</span><span class="tile-counter"><b id="tile-current">01</b> / 93</span></div><div class="progress-track"><div id="progress-fill"></div></div><div id="region-list" class="region-list"></div></div>
@@ -181,6 +182,7 @@ let roomQueue = Promise.resolve(),
   shownNetworkEncounter = "",
   visualRoomPhase = "";
 let challengePanel: ChallengePanel | null = null;
+let hotseatSelection = -1;
 const realtime = new RealtimeClient(
   (message) => {
     roomQueue = roomQueue
@@ -202,6 +204,7 @@ const realtime = new RealtimeClient(
   (message) => toast(message),
 );
 function ownPlayerIndex() {
+  if (realtime.room?.hotseat && hotseatSelection >= 0) return hotseatSelection;
   return realtime.session
     ? Math.max(
         0,
@@ -326,7 +329,7 @@ function update() {
       $("turn-description").textContent =
         "The server rolls the die. You choose the adventure.";
     }
-  } else $("room-nav-label").textContent = "Play together";
+  } else $("room-nav-label").textContent = "Play · Solo & party";
   renderParty();
   if (scene) {
     scene.active = state.active;
@@ -439,7 +442,8 @@ function closeModal() {
   if (
     modalType === "encounter" ||
     modalType === "victory" ||
-    modalType === "challenge"
+    modalType === "challenge" ||
+    modalType === "road"
   )
     return;
   challengePanel?.stop();
@@ -491,8 +495,13 @@ challengePanel = new ChallengePanel(
   },
   app,
 );
-function showCharacters() {
+function showCharacters(index?: number) {
   if (busy) return;
+  hotseatSelection = realtime.room?.hotseat
+    ? index !== undefined && index >= 0
+      ? index
+      : state.active
+    : -1;
   selected = CHARACTERS.findIndex(
     (c) => c.id === state.players[ownPlayerIndex()].character,
   );
@@ -748,6 +757,11 @@ function attachScene() {
       return;
     }
     const t = getTiles(state.map)[id];
+    const stop = realtime.room?.challenges ? roadStop(id) : undefined;
+    if (stop) {
+      tip.innerHTML = `<span style="color:${theme.accent}">✧</span><div><strong>${stop.title}</strong><small>Tile ${id + 1} · ${stop.description}</small></div>`;
+      return;
+    }
     tip.innerHTML = `<span style="color:${TILE_INFO[t.kind].color}">${TILE_INFO[t.kind].icon}</span><div><strong>${t.kind === "finish" ? theme.regions[3] : t.kind === "start" ? theme.regions[0] : TILE_INFO[t.kind].label}</strong><small>Tile ${id + 1} · ${t.kind === "finish" ? "The end of this path. The beginning of your legend." : TILE_INFO[t.kind].description}</small></div>`;
     tip.hidden = false;
   };
@@ -791,6 +805,9 @@ app.addEventListener("click", async (e) => {
         await realtime.command("SELECT_CHARACTER", {
           character: CHARACTERS[selected].id,
           ...(previewTint ? { tint: previewTint } : {}),
+          ...(realtime.room?.hotseat
+            ? { playerId: state.players[ownPlayerIndex()].id }
+            : {}),
         });
         closeModal();
         roomPanels.lobby();
@@ -887,7 +904,8 @@ dialog.addEventListener("cancel", (e) => {
   if (
     modalType === "encounter" ||
     modalType === "victory" ||
-    modalType === "challenge"
+    modalType === "challenge" ||
+    modalType === "road"
   )
     e.preventDefault();
   else {
@@ -967,7 +985,7 @@ function renderParty() {
   const panel = $("party-panel");
   panel.hidden = state.players.length === 1 && !realtime.session;
   if (panel.hidden) return;
-  panel.innerHTML = `<div class="party-title"><span>${realtime.session ? "LIVE EXPEDITION" : "TURN ORDER"}</span><button class="icon-button" data-action="rooms" aria-label="Open room">${icon("users")}</button></div>${state.players.map((p, i) => `<div class="party-score-row ${i === state.active ? "active" : ""}"><span class="party-player-dot" style="--player:${p.tint}">${i === state.active ? "✧" : String(i + 1)}</span><div><strong>${safe(p.name)}${p.id === realtime.session?.playerId ? " <small>YOU</small>" : ""}</strong><span>${CHARACTERS.find((c) => c.id === p.character)!.name} · Tile ${p.position + 1}</span></div><b>${playerScore(p)}<small>PTS</small></b></div>`).join("")}<div class="party-footer">${realtime.session ? `${realtime.room?.mode === "score" ? "Score expedition" : "Classic race"} · Room ${realtime.room?.code}` : "Pass-and-play on this device"}</div>`;
+  panel.innerHTML = `<div class="party-title"><span>${realtime.room?.hotseat ? "PASS THE DEVICE" : realtime.session ? "LIVE EXPEDITION" : "TURN ORDER"}</span><button class="icon-button" data-action="rooms" aria-label="Open room">${icon("users")}</button></div>${state.players.map((p, i) => `<div class="party-score-row ${i === state.active ? "active" : ""}"><span class="party-player-dot" style="--player:${p.tint}">${i === state.active ? "✧" : String(i + 1)}</span><div><strong>${safe(p.name)}${p.id === realtime.session?.playerId ? " <small>YOU</small>" : ""}</strong><span>${CHARACTERS.find((c) => c.id === p.character)!.name} · Tile ${p.position + 1}${p.wards ? " · ◇" + p.wards : ""}${p.hex ? " · Hexed" : ""}</span></div><b>${playerScore(p)}<small>PTS</small></b></div>`).join("")}<div class="party-footer">${realtime.session ? `${realtime.room?.mode === "score" ? "Score expedition" : "Classic race"} · Room ${realtime.room?.code}` : "Pass-and-play on this device"}</div>`;
 }
 async function leaveOnline() {
   challengePanel?.stop();
@@ -1000,8 +1018,8 @@ async function receiveRoom(message: RoomUpdate) {
     initial = visualRoomId !== room.id,
     partyChanged =
       initial ||
-      previous.players.map((p) => p.id + ":" + p.character).join("|") !==
-        room.game.players.map((p) => p.id + ":" + p.character).join("|"),
+      previous.players.map((p) => p.id + ":" + p.character + ":" + p.tint).join("|") !==
+        room.game.players.map((p) => p.id + ":" + p.character + ":" + p.tint).join("|"),
     mapChanged = state.map !== room.game.map,
     wasLobby = visualRoomPhase === "lobby";
   visualRoomId = room.id;
@@ -1024,6 +1042,7 @@ async function receiveRoom(message: RoomUpdate) {
     $("scene-loading").hidden = true;
     busy = false;
   }
+  scene.setRoadEncounters(Boolean(room.challenges));
   const payload = message.event?.payload;
   if (payload?.route?.length && !initial && !partyChanged && !mapChanged) {
     if (dialog.open) {
@@ -1046,7 +1065,11 @@ async function receiveRoom(message: RoomUpdate) {
       scene.react(payload.playerIndex ?? previous.active, "celebrate");
       scene.impact(payload.playerIndex ?? previous.active, "victory");
       sound("victory");
-    } else if (room.game.phase === "event" || room.game.phase === "challenge") {
+    } else if (
+      room.game.phase === "event" ||
+      room.game.phase === "challenge" ||
+      room.game.phase === "road"
+    ) {
       scene.react(payload.playerIndex ?? previous.active, "magic");
       scene.impact(payload.playerIndex ?? previous.active, "mystery");
     } else if (room.game.journal[0]?.text.includes("gold")) {
@@ -1085,6 +1108,7 @@ async function receiveRoom(message: RoomUpdate) {
     (room.game.challenge?.id || state.mystery || "");
   if (
     (state.phase === "event" ||
+      state.phase === "road" ||
       state.phase === "challenge" ||
       state.phase === "won") &&
     shownNetworkEncounter !== encounterKey
@@ -1092,19 +1116,35 @@ async function receiveRoom(message: RoomUpdate) {
     shownNetworkEncounter = encounterKey;
     if (state.phase === "event") showEncounter();
     else if (state.phase === "challenge") challengePanel?.open();
+    else if (state.phase === "road") challengePanel?.openRoad();
     else showVictory();
   } else if (
     state.phase === "ready" &&
-    ["encounter", "challenge"].includes(modalType)
+    ["encounter", "challenge", "road"].includes(modalType)
   ) {
     challengePanel?.stop();
     dialog.close();
     modalType = "";
   }
+  if (
+    room.hotseat &&
+    state.players.length > 1 &&
+    state.phase === "ready" &&
+    !initial &&
+    previous.active !== state.active
+  ) {
+    const player = state.players[state.active],
+      hero = CHARACTERS.find((c) => c.id === player.character)!;
+    openModal(
+      "handoff",
+      modalHeader("PASS THE DEVICE", `${safe(player.name)}, your turn.`) +
+        `<div class="handoff-hero" style="--hero-color:${hero.color}">${icon("users")}</div><p class="encounter-text">${hero.name} is waiting on tile ${player.position + 1}. Pass the phone or keyboard to ${safe(player.name)}.</p><button class="primary-button full-width" data-action="close-modal">${icon("check")}I’m ready to explore</button>`,
+    );
+  }
   if (payload?.success !== undefined)
     toast(
       payload.success
-        ? "Challenge complete! +50 points and 2 gold."
-        : "The challenge is passed. Your adventure continues.",
+        ? "Challenge complete! Your reward is added to the party scores."
+        : "The trial is resolved. Check the journal for its outcome.",
     );
 }

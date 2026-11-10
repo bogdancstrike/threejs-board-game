@@ -47,3 +47,8 @@ Never trust the client's animation completion as a condition for authoritative s
 
 ## Anti-cheat and resilience
 No client-supplied die value or direct score changes; every action requires room membership, active turn, expected version, and idempotency key. Same action retries return prior result, not a second roll.
+
+
+## Wilder runtime extension · road adventures
+
+The implemented Wilder rules for dragon-protected tiles, mystery boxes, dangers, dares, wards, hexes, camps, ten mini-games, score victory and solo/same-device/remote parties are defined in [ROAD_ADVENTURES](../specifications/ROAD_ADVENTURES.md). This later user-requested extension takes priority over conflicting historical Drink Up mechanics in this document. All setbacks are in-game, bounded and disclosed before accepting a risk.

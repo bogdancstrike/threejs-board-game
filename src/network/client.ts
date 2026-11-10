@@ -1,3 +1,4 @@
+import type { RoadStop } from "../game/road";
 import { CHARACTERS } from "../game/data";
 import type { GameState } from "../game/engine";
 export interface OnlinePlayer {
@@ -15,7 +16,28 @@ export interface OnlinePlayer {
 }
 export interface Challenge {
   id: string;
-  type: "riddle" | "count" | "memory" | "pattern" | "balance" | "rhythm";
+  type:
+    | "riddle"
+    | "count"
+    | "memory"
+    | "pattern"
+    | "balance"
+    | "rhythm"
+    | "math"
+    | "oddone"
+    | "maze"
+    | "alchemy";
+  size?: number;
+  walls?: number[];
+  start?: number;
+  goal?: number;
+  values?: number[];
+  targetSum?: number;
+  context?: string;
+  sourceTitle?: string;
+  rewardPoints?: number;
+  rewardGold?: number;
+  failure?: string;
   title: string;
   prompt: string;
   options: string[];
@@ -29,7 +51,13 @@ export interface Challenge {
   taps?: number[];
   beat?: number;
 }
+export interface RoadCard extends RoadStop {
+  choices: { key: string; label: string; detail: string }[];
+  dare?: string;
+  deadline: number;
+}
 export interface Room {
+  hotseat?: boolean;
   id: string;
   code: string;
   hostId: string;
@@ -40,7 +68,11 @@ export interface Room {
   eventSeq: number;
   turnDeadline: number | null;
   finishing: boolean;
-  game: GameState & { players: OnlinePlayer[]; challenge: Challenge | null };
+  game: GameState & {
+    players: OnlinePlayer[];
+    challenge: Challenge | null;
+    road: RoadCard | null;
+  };
 }
 export interface RoomUpdate {
   type?: string;
@@ -99,7 +131,10 @@ export class RealtimeClient {
   }
   get myTurn() {
     return Boolean(
-      this.room?.phase === "playing" && this.room.game.active === this.myIndex,
+      this.room?.phase === "playing" &&
+        (this.room.hotseat
+          ? this.isHost
+          : this.room.game.active === this.myIndex),
     );
   }
   get connected() {
@@ -136,13 +171,15 @@ export class RealtimeClient {
     map: string,
     mode: "classic" | "score",
     challenges = true,
+    hotseat = false,
+    players: string[] = [],
   ) {
     const result = await this.request<{
       room: Room;
       playerId: string;
       token: string;
       serverTime: number;
-    }>("/rooms", { name, map, mode, challenges });
+    }>("/rooms", { name, map, mode, challenges, hotseat, players });
     this.adopt(result);
   }
   async join(code: string, name: string) {

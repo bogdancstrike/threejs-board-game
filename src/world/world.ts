@@ -9,6 +9,7 @@ import {
 import type { MapTheme } from "../game/maps";
 import { waterMaterial } from "./water";
 import { ENVIRONMENT_RESERVES } from "./environment";
+import { roadMarkers } from "./road-markers";
 import { skyways } from "./skyways";
 import { biomeDetails } from "./biome-details";
 import { sculptTerrain } from "./terrain";
@@ -32,6 +33,7 @@ import {
 export interface World {
   group: THREE.Group;
   tiles: THREE.InstancedMesh;
+  encounters: THREE.Group;
   animated: ((t: number) => void)[];
   dispose: () => void;
 }
@@ -147,6 +149,9 @@ export function buildWorld(theme: MapTheme): World {
     props = new THREE.Group(),
     animated: ((t: number) => void)[] = [],
     rng = seededRandom(4759 + theme.id.length);
+  const road = roadMarkers(theme);
+  group.add(road.group);
+  animated.push(...road.animated);
   group.add(sculptTerrain(theme));
   const sky = skyways(theme);
   group.add(sky.group);
@@ -815,6 +820,7 @@ export function buildWorld(theme: MapTheme): World {
   return {
     group,
     tiles,
+    encounters: road.group,
     animated,
     dispose() {
       group.traverse((o) => {

@@ -8,6 +8,7 @@ import secrets
 import time
 from uuid import uuid4
 
+from . import adventures
 from .catalogue import CHARACTERS, MAPS
 
 COLORS = ["#cbb17a", "#90c7ba", "#c49adc", "#e89783", "#8bbbd3", "#c5cb89", "#dfb5c8", "#d4a777"]
@@ -40,6 +41,10 @@ def player(player_id: str, name: str, character: str, index: int) -> dict:
         "clues": 0,
         "points": 0,
         "completed": 0,
+        "wards": 0,
+        "hex": 0,
+        "furthest": 0,
+        "visitedStops": [],
         "ready": False,
         "tint": COLORS[index % 8],
     }
@@ -59,6 +64,7 @@ def initial_room(
         "phase": "ready",
         "mystery": None,
         "challenge": None,
+        "road": None,
         "dice": 0,
         "journal": [],
         "winner": None,
@@ -148,7 +154,7 @@ def finish(room: dict, active: int) -> bool:
 
 def end_turn(room: dict, clock: int) -> None:
     game = room["game"]
-    game["mystery"], game["challenge"] = None, None
+    game["mystery"], game["challenge"], game["road"] = None, None, None
     if finish(room, game["active"]):
         return
     next_player = (game["active"] + 1) % len(game["players"])
@@ -178,12 +184,25 @@ def move(p: dict, steps: int) -> list[int]:
         if p["position"] != previous
         else []
     )
-    award(p, max(0, p["position"] - previous))
+    furthest = max(p.get("furthest", previous), previous)
+    award(p, max(0, p["position"] - furthest))
+    p["furthest"] = max(furthest, p["position"])
     return route
 
 
 def challenge(seed: int, clock: int) -> dict:
-    kind = ["riddle", "count", "memory", "pattern", "balance", "rhythm"][seed % 6]
+    kind = [
+        "riddle",
+        "count",
+        "memory",
+        "pattern",
+        "balance",
+        "rhythm",
+        "math",
+        "oddone",
+        "maze",
+        "alchemy",
+    ][seed % 10]
     result = {
         "id": str(uuid4()),
         "type": kind,
@@ -243,6 +262,40 @@ def challenge(seed: int, clock: int) -> dict:
             taps=[],
             beat=700,
         )
+    elif kind == "math":
+        a, b = 3 + seed % 9, 2 + (seed // 7) % 8
+        answer = a * 2 + b
+        result.update(
+            title="The merchant’s arithmetic",
+            prompt=f"Two moonstones cost {a} gold each. A map costs {b}. What is the total?",
+            options=[str(answer + 2), str(answer), str(answer - 1), str(answer + 4)],
+            _answer=1,
+        )
+    elif kind == "oddone":
+        result.update(
+            title="The mimic’s disguise",
+            prompt="Which creature does not belong among the winged travellers?",
+            symbols=["Dragon", "Phoenix", "Owl", "Fox"],
+            options=["Dragon", "Phoenix", "Owl", "Fox"],
+            _answer=3,
+        )
+    elif kind == "maze":
+        result.update(
+            title="The crystal maze",
+            prompt="Trace a path from the golden start to the star. Select adjacent open squares; retrace with Reset.",
+            size=5,
+            walls=[2, 7, 10, 14, 17, 19, 20, 21],
+            start=0,
+            goal=24,
+        )
+    elif kind == "alchemy":
+        result.update(
+            title="The alchemist’s cauldron",
+            prompt="Choose exactly three ingredients whose values add to 10. Ingredients may repeat.",
+            options=["Moonleaf · 2", "Stardust · 3", "Emberseed · 5", "Dewdrop · 7"],
+            values=[2, 3, 5, 7],
+            targetSum=10,
+        )
     return result
 
 
@@ -260,12 +313,13 @@ def apply(
     p = member(room, actor)
     game, players = room["game"], room["game"]["players"]
     allowed = {
-        "SELECT_CHARACTER": {"character", "tint"},
-        "SET_NAME": {"name"},
-        "SET_READY": {"ready"},
+        "SELECT_CHARACTER": {"character", "tint", "playerId"},
+        "SET_NAME": {"name", "playerId"},
+        "SET_READY": {"ready", "playerId"},
         "START_GAME": set(),
         "ROLL_DIE": set(),
         "CHOOSE": {"index"},
+        "RESOLVE_ROAD": {"choice"},
         "SUBMIT_CHALLENGE": {"answer"},
         "CHALLENGE_TAP": set(),
         "SKIP_CHALLENGE": set(),
@@ -281,28 +335,42 @@ def apply(
     lobby_actions = {"SELECT_CHARACTER", "SET_NAME", "SET_READY", "START_GAME", "SET_WORLD"}
     if kind in lobby_actions and room["phase"] != "lobby":
         raise GameError("not_in_lobby", "The party is already on its expedition.")
+    controller = room.get("hotseat", False) and actor == room["hostId"]
+    target_id = payload.get("playerId", actor)
+    if target_id != actor and not controller:
+        raise GameError("not_your_seat", "You can only choose for your own player.", 403)
+    if kind in {"SELECT_CHARACTER", "SET_NAME", "SET_READY"}:
+        if not isinstance(target_id, str):
+            raise GameError("invalid_seat", "Choose a valid party member.", 422)
+        p = member(room, target_id)
+    elif controller and kind not in host_actions:
+        p = players[game["active"]]
     event = {"type": kind, "payload": {"actorId": actor}}
     if kind == "SELECT_CHARACTER":
         selected = payload.get("character")
         if not isinstance(selected, str) or selected not in CHARACTERS:
             raise GameError("invalid_character", "Choose a character from the roster.", 422)
-        if any(v["id"] != actor and v["character"] == selected for v in players):
+        if any(v["id"] != p["id"] and v["character"] == selected for v in players):
             raise GameError("character_taken", "Another player has already claimed this character.")
         tint = payload.get("tint", p["tint"])
-        if tint != p["tint"] and tint not in {
-            "#cbb17a",
-            "#a88bcf",
-            "#8fc5b3",
-            "#8dbed2",
-            "#da998d",
-        }:
+        if not isinstance(tint, str) or (
+            tint != p["tint"]
+            and tint
+            not in {
+                "#cbb17a",
+                "#a88bcf",
+                "#8fc5b3",
+                "#8dbed2",
+                "#da998d",
+            }
+        ):
             raise GameError("invalid_tint", "Choose an available aura color.", 422)
         p["character"], p["ready"], p["tint"] = selected, False, tint
     elif kind == "SET_NAME":
         if not isinstance(payload.get("name"), str):
             raise GameError("invalid_name", "Player names must be text.", 422)
         name = clean_name(payload["name"])
-        if any(v["id"] != actor and v["name"].casefold() == name.casefold() for v in players):
+        if any(v["id"] != p["id"] and v["name"].casefold() == name.casefold() for v in players):
             raise GameError("name_taken", "That player name is already in this room.")
         p["name"] = name
     elif kind == "SET_READY":
@@ -330,29 +398,48 @@ def apply(
             phase="ready",
             mystery=None,
             challenge=None,
+            road=None,
             dice=0,
             journal=[],
             winner=None,
         )
         for v in players:
-            v.update(position=0, gold=0, clues=0, points=0, completed=0, ready=False)
+            v.update(
+                position=0,
+                gold=0,
+                clues=0,
+                points=0,
+                completed=0,
+                ready=False,
+                wards=0,
+                hex=0,
+                furthest=0,
+                visitedStops=[],
+            )
             v.pop("finishAwarded", None)
     else:
         if room["phase"] != "playing":
             raise GameError("not_playing", "Start an expedition first.")
         active = game["active"]
-        if players[active]["id"] != actor and kind != "SKIP_TURN":
+        if players[active]["id"] != actor and kind != "SKIP_TURN" and not controller:
             raise GameError("wrong_turn", "It is another player’s turn.", 403)
         if kind == "ROLL_DIE":
             if game["phase"] != "ready":
                 raise GameError("wrong_phase", "Resolve the current encounter first.")
             die = randbelow(6) + 1
+            hex_amount = p.get("hex", 0)
+            p["hex"] = 0
+            steps = max(1, die - hex_amount)
             game["dice"] = die
-            route = move(p, die)
+            route = move(p, steps)
             event["type"] = "DIE_ROLLED"
             event["payload"].update(dice=die, route=route, playerIndex=active)
             journal(game, f"{p['name']} rolled {die} and reached tile {p['position'] + 1}.")
             if finish(room, active):
+                return room, [event]
+            if hex_amount:
+                journal(game, f"A lingering hex reduces {p['name']}’s move to {steps} tiles.")
+            if adventures.begin(room, p, clock):
                 return room, [event]
             tile = tile_kind(p["position"])
             if tile == "mystery":
@@ -381,6 +468,9 @@ def apply(
                     route.extend(move(p, 3))
                     journal(game, f"{p['name']} takes an ancient portal three tiles forward.")
                 end_turn(room, clock)
+        elif kind == "RESOLVE_ROAD":
+            route = adventures.resolve(room, p, payload.get("choice"), clock, randbelow)
+            event["payload"].update(route=route, playerIndex=active)
         elif kind == "CHOOSE":
             if game["phase"] != "event":
                 raise GameError("wrong_phase", "There is no mystery to resolve.")
@@ -427,18 +517,53 @@ def apply(
                     success = len(taps) == 4 and all(
                         abs((b - a) - card["beat"]) <= 220 for a, b in itertools.pairwise(taps)
                     )
+                elif card["type"] == "maze":
+                    success = (
+                        isinstance(answer, list)
+                        and 1 < len(answer) <= 30
+                        and all(
+                            type(v) is int and 0 <= v < 25 and v not in card["walls"]
+                            for v in answer
+                        )
+                        and answer[0] == card["start"]
+                        and answer[-1] == card["goal"]
+                        and all(
+                            abs(a // 5 - b // 5) + abs(a % 5 - b % 5) == 1
+                            for a, b in itertools.pairwise(answer)
+                        )
+                    )
+                elif card["type"] == "alchemy":
+                    success = (
+                        isinstance(answer, list)
+                        and len(answer) == 3
+                        and all(type(v) is int and 0 <= v < 4 for v in answer)
+                        and sum(card["values"][v] for v in answer) == card["targetSum"]
+                    )
                 else:
                     success = type(answer) is type(card["_answer"]) and answer == card["_answer"]
+            route = []
             if success:
                 p["completed"] += 1
-                p["gold"] += 2
-                award(p, 50)
+                p["gold"] += card.get("rewardGold", 2)
+                award(p, card.get("rewardPoints", 50))
+                route = move(p, card.get("winMove", 0))
+            elif card.get("context") in {"dragon", "hazard", "curse"} or kind != "SKIP_CHALLENGE":
+                route = adventures.setback(room, p, card.get("context"))
             journal(
                 game,
                 f"{p['name']} {'completed' if success else 'passed'} {card['title']}."
-                + (" +50 points and 2 gold!" if success else " The adventure continues."),
+                + (
+                    f" +{card.get('rewardPoints', 50)} points and {card.get('rewardGold', 2)} gold!"
+                    if success
+                    else " The adventure continues."
+                ),
             )
-            event["payload"].update(success=success, playerIndex=active)
+            event["payload"].update(
+                success=success,
+                playerIndex=active,
+                route=route,
+                rewardPoints=card.get("rewardPoints", 50) if success else 0,
+            )
             end_turn(room, clock)
         elif kind == "SKIP_TURN":
             journal(game, f"The host passed {players[active]['name']}’s turn.")

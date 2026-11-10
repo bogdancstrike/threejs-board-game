@@ -339,6 +339,9 @@ export class GameScene {
         start: performance.now(),
       };
   }
+  setRoadEncounters(enabled: boolean) {
+    this.world.encounters.visible = enabled;
+  }
   resetCamera() {
     this.camera.position.copy(this.homePosition);
     this.controls.target.copy(this.homeTarget);

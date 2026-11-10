@@ -15,4 +15,13 @@ let readme=await readFile('README.md','utf8');if(readme.includes(start)){const a
 if(process.argv.includes('--maps-only')){await browser.close();console.log('Published map gallery.');process.exitCode=errors.length?1:0;process.exit();}
 // Capture the actual UI after image publication, including the current gallery.
 await page.setViewportSize({width:1440,height:1000});await page.goto(baseUrl+'/');await page.locator('#scene-loading').waitFor({state:'hidden',timeout:120000});await page.evaluate(()=>document.fonts.ready);await sharp(await page.screenshot()).webp({quality:86}).toFile('docs/screenshots/game.webp');await page.locator('[data-action="characters"]').first().click();await page.waitForTimeout(1200);await sharp(await page.screenshot()).webp({quality:86}).toFile('docs/screenshots/characters.webp');await page.locator('[data-action="close-modal"]').click();await page.locator('[data-action="maps"]').first().click();await page.waitForFunction(()=>[...document.querySelectorAll('.map-thumbnail')].filter(i=>i.getBoundingClientRect().top<innerHeight).every(i=>i.complete&&i.naturalWidth>0));await sharp(await page.screenshot()).webp({quality:86}).toFile('docs/screenshots/worlds.webp');
+await page.locator('[data-action="close-modal"]').click();
+await page.locator('[data-action="rooms"]').click();
+await page.locator('#online-player-name').fill('Rowan');
+await page.locator('#hotseat-count').selectOption('3');
+await page.getByLabel('Player 2 name',{exact:true}).fill('Mira');
+await page.getByLabel('Player 3 name',{exact:true}).fill('Ash');
+await page.locator('[data-room-action="create"]').click();
+await page.locator('.lobby-player').nth(2).waitFor();
+await sharp(await page.screenshot()).webp({quality:86}).toFile('docs/screenshots/party.webp');
 await browser.close();if(errors.length){console.error('Rendering errors:',errors);process.exitCode=1;}else console.log(`Published ${maps.length} previews, contact sheet, UI screenshots and README gallery.`);
