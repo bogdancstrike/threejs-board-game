@@ -1,0 +1,4 @@
+import {createServer} from 'vite';
+import {writeFile,mkdir} from 'node:fs/promises';
+const server=await createServer({server:{middlewareMode:true},appType:'custom'});
+try{const data=await server.ssrLoadModule('/src/game/data.ts'),maps=await server.ssrLoadModule('/src/game/maps.ts');const catalogue={ruleset:'wilder-v2',tileCount:93,characters:data.CHARACTERS.map(({id,name,title,age,color})=>({id,name,title,age,color})),maps:maps.MAPS.map(m=>({id:m.id,name:m.name,regions:m.regions,encounters:m.encounters.length?m.encounters:data.MYSTERIES}))};await mkdir('backend/data',{recursive:true});await writeFile('backend/data/catalogue.json',JSON.stringify(catalogue,null,2)+'\n');console.log(`Exported ${catalogue.maps.length} maps and ${catalogue.characters.length} heroes for the authoritative engine.`);}finally{await server.close();}

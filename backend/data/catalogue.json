@@ -1,0 +1,1817 @@
+{
+  "ruleset": "wilder-v2",
+  "tileCount": 93,
+  "characters": [
+    {
+      "id": "lyra",
+      "name": "Lyra",
+      "title": "The Violet Enchantress",
+      "age": 25,
+      "color": "#aa87d9"
+    },
+    {
+      "id": "seraphine",
+      "name": "Seraphine",
+      "title": "The Moonlight Knight",
+      "age": 27,
+      "color": "#a6c6e2"
+    },
+    {
+      "id": "rhea",
+      "name": "Rhea",
+      "title": "The Scarlet Rogue",
+      "age": 24,
+      "color": "#df816f"
+    },
+    {
+      "id": "elowen",
+      "name": "Elowen",
+      "title": "The Elven Priestess",
+      "age": 26,
+      "color": "#8fbe9b"
+    },
+    {
+      "id": "akari",
+      "name": "Akari",
+      "title": "The Kitsune Sorceress",
+      "age": 24,
+      "color": "#e99e7d"
+    },
+    {
+      "id": "nyx",
+      "name": "Nyx",
+      "title": "The Shadow Assassin",
+      "age": 28,
+      "color": "#9589b7"
+    },
+    {
+      "id": "aurelia",
+      "name": "Aurelia",
+      "title": "The Golden Valkyrie",
+      "age": 29,
+      "color": "#e3c173"
+    },
+    {
+      "id": "selene",
+      "name": "Selene",
+      "title": "The Frost Witch",
+      "age": 25,
+      "color": "#96cfdd"
+    },
+    {
+      "id": "vesper",
+      "name": "Vesper",
+      "title": "The Crimson Demoness",
+      "age": 27,
+      "color": "#c46c87"
+    },
+    {
+      "id": "alaric",
+      "name": "Alaric",
+      "title": "The Royal Paladin",
+      "age": 29,
+      "color": "#81a8d3"
+    },
+    {
+      "id": "kael",
+      "name": "Kael",
+      "title": "The Shadow Swordsman",
+      "age": 27,
+      "color": "#b197ca"
+    },
+    {
+      "id": "orion",
+      "name": "Orion",
+      "title": "The Arcane Scholar",
+      "age": 30,
+      "color": "#8badd8"
+    }
+  ],
+  "maps": [
+    {
+      "id": "verdant",
+      "name": "The Verdant Crown",
+      "regions": [
+        "Hearthwick Village",
+        "Whispering Woods",
+        "Arcane Highlands",
+        "Crownfall Castle"
+      ],
+      "encounters": [
+        {
+          "title": "The lantern keeper",
+          "icon": "flame",
+          "text": "An old keeper offers you a lantern. “It reveals what the moon cannot,” she says. A hidden path glimmers between the trees.",
+          "choices": [
+            {
+              "label": "Take the hidden path",
+              "detail": "Move forward 2 tiles",
+              "gold": 0,
+              "clues": 0,
+              "move": 2
+            },
+            {
+              "label": "Ask about the island",
+              "detail": "Discover 2 clues",
+              "gold": 0,
+              "clues": 2,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A riddle in the roots",
+          "icon": "sprout",
+          "text": "“I have cities but no houses, forests but no trees, and rivers but no water. What am I?” The ancient oak waits for your answer.",
+          "choices": [
+            {
+              "label": "A map",
+              "detail": "Answer the riddle · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            },
+            {
+              "label": "A dream",
+              "detail": "The oak smiles · take a quiet step back",
+              "gold": 0,
+              "clues": 0,
+              "move": -1
+            }
+          ]
+        },
+        {
+          "title": "The wandering merchant",
+          "icon": "gem",
+          "text": "A merchant’s cart shimmers with impossible things. Among them: a tiny compass that points to whatever your heart is looking for.",
+          "choices": [
+            {
+              "label": "Trade for the compass",
+              "detail": "Spend 2 gold · move forward 3 tiles",
+              "gold": -2,
+              "clues": 0,
+              "move": 3
+            },
+            {
+              "label": "Share stories instead",
+              "detail": "Discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "Whispers in the well",
+          "icon": "waves",
+          "text": "A voice rises from the stone well, repeating a name forgotten centuries ago. Something golden glints far below.",
+          "choices": [
+            {
+              "label": "Investigate the voice",
+              "detail": "Discover 2 clues",
+              "gold": 0,
+              "clues": 2,
+              "move": 0
+            },
+            {
+              "label": "Lower your lucky rope",
+              "detail": "Collect 4 gold · move back 1 tile",
+              "gold": 4,
+              "clues": 0,
+              "move": -1
+            }
+          ]
+        },
+        {
+          "title": "The sleeping guardian",
+          "icon": "moon",
+          "text": "A great stone fox sleeps across the path. Beside it, a narrow ledge winds around a glowing pool. Its ears twitch as you approach.",
+          "choices": [
+            {
+              "label": "Sing an old lullaby",
+              "detail": "The guardian dreams · move forward 2",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Explore the glowing pool",
+              "detail": "Collect 3 gold",
+              "gold": 3,
+              "clues": 0,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A letter from tomorrow",
+          "icon": "scroll-text",
+          "text": "A paper bird lands in your palm. The handwriting looks strangely familiar. “When you find the arch, trust the light,” it reads.",
+          "choices": [
+            {
+              "label": "Follow the paper bird",
+              "detail": "Move forward 3 tiles",
+              "gold": 0,
+              "clues": 0,
+              "move": 3
+            },
+            {
+              "label": "Keep the letter safe",
+              "detail": "Discover 2 clues and 1 gold",
+              "gold": 1,
+              "clues": 2,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dragonkind",
+      "name": "Dragonkind",
+      "regions": [
+        "Rider’s Vale",
+        "The Parapet",
+        "The Gauntlet",
+        "Dragonspire Academy"
+      ],
+      "encounters": [
+        {
+          "title": "The crossing",
+          "text": "The parapet is slick with rain. Far below, clouds swirl between the mountain spires. A bronze dragon circles the academy.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Trust your balance",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Read the wind",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "The choosing",
+          "text": "An immense shadow falls across the clearing. A dragon watches you with molten-gold eyes. This bond must be earned.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Stand your ground",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Offer your trust",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A signet awakens",
+          "text": "Lightning dances across your fingertips. Your dragon’s voice echoes in your mind: “Power follows courage.”",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Channel the storm",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study your signet",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "frost",
+      "name": "The Frostbound Passage",
+      "regions": [
+        "Snowbell Hamlet",
+        "Silverpine Forest",
+        "The Frozen Reach",
+        "Winterglass Palace"
+      ],
+      "encounters": [
+        {
+          "title": "The ice remembers",
+          "text": "Beneath the frozen lake, an ancient city glows. A melody rises through the ice.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the melody",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the ancient lights",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "The white fox",
+          "text": "A silver fox leaves no tracks in the snow. It turns, waiting for you to follow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow its footsteps",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Offer a little kindness",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "desert",
+      "name": "Sands of the Oracle",
+      "regions": [
+        "Saffron Bazaar",
+        "The Amber Dunes",
+        "Oracle’s Oasis",
+        "Temple of the Sun"
+      ],
+      "encounters": [
+        {
+          "title": "The sand oracle",
+          "text": "A face takes shape in the shifting dunes. “What you seek is already walking toward you.”",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Ask about your future",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Search the buried ruins",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "An impossible oasis",
+          "text": "Palm trees shimmer on the horizon. The water reflects a sky full of unfamiliar stars.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Drink from the spring",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Read the constellations",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sakura",
+      "name": "Moonblossom Reach",
+      "regions": [
+        "Petalbridge Village",
+        "The Blushing Grove",
+        "Jade Terraces",
+        "Sanctuary of the Moon"
+      ],
+      "encounters": [
+        {
+          "title": "The paper crane",
+          "text": "A paper crane unfolds itself on your shoulder. Inside is a poem written by the moon.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the crane",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Finish the poem",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "Tea with a spirit",
+          "text": "Under a thousand falling petals, a fox spirit pours a second cup of tea.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Accept the invitation",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Ask the spirit’s name",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ember",
+      "name": "Emberfall Caldera",
+      "regions": [
+        "Ashen Outpost",
+        "Cinderwood",
+        "The Molten Steps",
+        "Emberfall Keep"
+      ],
+      "encounters": [
+        {
+          "title": "The ember smith",
+          "text": "A hammer rings out over the lava. “Every blade has a story,” the smith says. “What is yours?”",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Help at the forge",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Trade a story",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "Heart of the mountain",
+          "text": "A crystal beats like a heart within the obsidian. Warmth flows through the stone.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Touch the crystal",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Listen to the mountain",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tide",
+      "name": "The Tideglass Isles",
+      "regions": [
+        "Coralhaven Port",
+        "The Palmway",
+        "Pearlwater Cliffs",
+        "The Last Lighthouse"
+      ],
+      "encounters": [
+        {
+          "title": "A message in glass",
+          "text": "The tide delivers a bottle from a ship that disappeared a hundred years ago. The ink is still wet.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Find the missing ship",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Decode the message",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "The pearl keeper",
+          "text": "A tiny crab presents you with a pearl. The entire ocean seems to glow inside it.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the crab",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Examine the pearl",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mycelium",
+      "name": "The Mycelium Hollow",
+      "regions": [
+        "Sporelight Village",
+        "The Violet Canopy",
+        "Luminescent Grotto",
+        "The Mycelial Throne"
+      ],
+      "encounters": [
+        {
+          "title": "The mushroom choir",
+          "text": "A circle of luminous mushrooms hums a chord you recognize from a dream. A tiny door opens in the largest stem.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Step inside",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Join the song",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A thousand tiny stars",
+          "text": "A cloud of spores forms a map in the darkness. There is a glowing mark where you stand.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the spore map",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Collect a glowing sample",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "astral",
+      "name": "The Astral Observatory",
+      "regions": [
+        "Starfall Landing",
+        "Nebula Gardens",
+        "The Lunar Stair",
+        "Observatory of Ages"
+      ],
+      "encounters": [
+        {
+          "title": "The wandering star",
+          "text": "A tiny star has fallen into your pocket. It is homesick, and it knows a shortcut through the night.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Help it return home",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Ask about the cosmos",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "Tomorrow’s constellation",
+          "text": "Through a cracked telescope, the stars spell out your name. One begins to move.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the moving star",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Chart the constellation",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clockwork",
+      "name": "The Clockwork Citadel",
+      "regions": [
+        "Tinkerton",
+        "The Copper Gardens",
+        "Pendulum Heights",
+        "The Clockwork Citadel"
+      ],
+      "encounters": [
+        {
+          "title": "The clockmaker’s apprentice",
+          "text": "A brass bird winds itself up and offers a key. Somewhere, a clock begins ticking backward.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Turn the key",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Find the clockmaker",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A minute to spare",
+          "text": "The world stands perfectly still. A little automaton offers you a minute it has been saving for years.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Borrow a minute",
+              "detail": "Take a chance · move forward 2 tiles",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Repair the automaton",
+              "detail": "Explore carefully · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stormreach",
+      "name": "Stormreach Bastion",
+      "regions": [
+        "Thunderfoot Camp",
+        "Galehook Pass",
+        "The Lightning Stair",
+        "Stormreach Beacon"
+      ],
+      "encounters": [
+        {
+          "title": "The thunder bell",
+          "text": "A bell rings without a rope. Each note splits the storm and reveals one more step toward the summit.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Ring the bell again",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Listen between the thunder",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from Stormreach Beacon",
+          "text": "A sealed note bears the mark of Stormreach Beacon. “The old way through The Lightning Stair still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "autumn",
+      "name": "The Amberwood Harvest",
+      "regions": [
+        "Ciderbrook",
+        "The Copper Orchard",
+        "Harvest Heights",
+        "The Evergold Tree"
+      ],
+      "encounters": [
+        {
+          "title": "The last apple",
+          "text": "The orchard keeper offers you the final golden apple of the season. Inside its skin, an autumn sky is moving.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Plant its shining seeds",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Share the harvest",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Evergold Tree",
+          "text": "A sealed note bears the mark of The Evergold Tree. “The old way through Harvest Heights still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jade",
+      "name": "The Jade Lotus",
+      "regions": [
+        "Lotus Landing",
+        "Jadeleaf Gardens",
+        "Eight-Petal Stair",
+        "The Jade Dragon Shrine"
+      ],
+      "encounters": [
+        {
+          "title": "The silent dragon",
+          "text": "A jade dragon statue opens one eye. “What grows stronger when it is shared?” it asks, as the lotus flowers turn toward you.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Offer the dragon your hope",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Share an old story",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Jade Dragon Shrine",
+          "text": "A sealed note bears the mark of The Jade Dragon Shrine. “The old way through Eight-Petal Stair still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "necropolis",
+      "name": "The Pale Necropolis",
+      "regions": [
+        "Lastlight Gate",
+        "The Quiet Gardens",
+        "Namesake Steps",
+        "Cathedral of Remembrance"
+      ],
+      "encounters": [
+        {
+          "title": "A name in the marble",
+          "text": "A forgotten name appears on a blank stone. Your lantern burns silver, and a grateful voice whispers a passage through the crypt.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the silver flame",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Remember the name",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from Cathedral of Remembrance",
+          "text": "A sealed note bears the mark of Cathedral of Remembrance. “The old way through Namesake Steps still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "skyharbor",
+      "name": "Cloudwake Skyharbor",
+      "regions": [
+        "Cloudwake Docks",
+        "Balloon Gardens",
+        "The Aerial Lanes",
+        "The Harbor Beacon"
+      ],
+      "encounters": [
+        {
+          "title": "The runaway airship",
+          "text": "A tiny airship has slipped its moorings. Its captain waves a handkerchief and promises you a view beyond the clouds.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Catch the dangling ladder",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Repair the mooring line",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Harbor Beacon",
+          "text": "A sealed note bears the mark of The Harbor Beacon. “The old way through The Aerial Lanes still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "coral",
+      "name": "The Coral Spiral",
+      "regions": [
+        "Shellwake Cove",
+        "The Pink Reef",
+        "Spiralwater Steps",
+        "Sanctuary of the Reef"
+      ],
+      "encounters": [
+        {
+          "title": "The coral gardener",
+          "text": "A coral gardener is planting stars beneath the water. One rises to the surface and asks for directions home.",
+          "icon": "waves",
+          "choices": [
+            {
+              "label": "Carry the little star",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Help tend the reef",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from Sanctuary of the Reef",
+          "text": "A sealed note bears the mark of Sanctuary of the Reef. “The old way through Spiralwater Steps still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "waves",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "amber",
+      "name": "The Honeyglass Expanse",
+      "regions": [
+        "Nectarford",
+        "The Amber Hives",
+        "Honeyglass Rise",
+        "The Sun Queen’s Apiary"
+      ],
+      "encounters": [
+        {
+          "title": "The amber messenger",
+          "text": "A mechanical bee lands on your sleeve. Its honeycomb message contains a map drawn in liquid sunlight.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the messenger",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Decode the honeycomb",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Sun Queen’s Apiary",
+          "text": "A sealed note bears the mark of The Sun Queen’s Apiary. “The old way through Honeyglass Rise still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "obsidian",
+      "name": "The Obsidian Forge",
+      "regions": [
+        "Coalheart Camp",
+        "The Anvil Gardens",
+        "Molten Hammer Pass",
+        "The Worldforge"
+      ],
+      "encounters": [
+        {
+          "title": "The unfinished blade",
+          "text": "The forge master holds a blade that reflects every choice you have made. “It still needs a name,” she says.",
+          "icon": "flame",
+          "choices": [
+            {
+              "label": "Strike the final spark",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Give the blade a name",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Worldforge",
+          "text": "A sealed note bears the mark of The Worldforge. “The old way through Molten Hammer Pass still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "flame",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "crystal",
+      "name": "The Prism Sanctuary",
+      "regions": [
+        "Prismfall Landing",
+        "The Glasswood",
+        "Spectrum Heights",
+        "The Living Prism"
+      ],
+      "encounters": [
+        {
+          "title": "The missing color",
+          "text": "A prism has lost one of its colors. A tiny violet light hides inside your shadow, waiting to be invited out.",
+          "icon": "snowflake",
+          "choices": [
+            {
+              "label": "Release the violet light",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the prism’s memory",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Living Prism",
+          "text": "A sealed note bears the mark of The Living Prism. “The old way through Spectrum Heights still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "snowflake",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jungle",
+      "name": "The Serpent Canopy",
+      "regions": [
+        "Vinehaven",
+        "The Emerald Coil",
+        "Serpentback Steps",
+        "The Overgrown Sun Altar"
+      ],
+      "encounters": [
+        {
+          "title": "The vine bridge",
+          "text": "A bridge of living vines uncoils across the ravine. The jungle asks for a song it has never heard before.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Sing your own melody",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Listen to the jungle’s song",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Overgrown Sun Altar",
+          "text": "A sealed note bears the mark of The Overgrown Sun Altar. “The old way through Serpentback Steps still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rose",
+      "name": "The Roseheart Court",
+      "regions": [
+        "Rosebridge",
+        "The Velvet Gardens",
+        "Wishwater Terrace",
+        "The Heartwell Fountain"
+      ],
+      "encounters": [
+        {
+          "title": "A wish in the fountain",
+          "text": "A paper rose floats upstream. Its petals carry a wish someone was too afraid to speak aloud.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Carry the wish onward",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Plant the paper rose",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Heartwell Fountain",
+          "text": "A sealed note bears the mark of The Heartwell Fountain. “The old way through Wishwater Terrace still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lunar",
+      "name": "The Twin Moon Enclave",
+      "regions": [
+        "Moonwake Gate",
+        "The Paired Gardens",
+        "Silver Promise Steps",
+        "The Twin Moon Stones"
+      ],
+      "encounters": [
+        {
+          "title": "The second shadow",
+          "text": "Under the twin moons, your shadow divides in two. One points toward the castle. The other holds out a silver key.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Take the silver key",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Follow the patient shadow",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Twin Moon Stones",
+          "text": "A sealed note bears the mark of The Twin Moon Stones. “The old way through Silver Promise Steps still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "brass",
+      "name": "The Brass Hourglass",
+      "regions": [
+        "Tickerton",
+        "The Sandwork Gardens",
+        "Pendulum Rise",
+        "The Hourglass of Ages"
+      ],
+      "encounters": [
+        {
+          "title": "The borrowed minute",
+          "text": "A clockwork fox offers you a minute from a day that never happened. It ticks softly in a small brass box.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Borrow the missing minute",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Repair the brass box",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Hourglass of Ages",
+          "text": "A sealed note bears the mark of The Hourglass of Ages. “The old way through Pendulum Rise still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pearl",
+      "name": "The Manta Lagoon",
+      "regions": [
+        "Opalshore",
+        "The Manta Gardens",
+        "Pearlwater Steps",
+        "The Great Opal Shell"
+      ],
+      "encounters": [
+        {
+          "title": "The shell’s song",
+          "text": "An enormous shell hums the lullaby of the deep ocean. A little pearl rolls toward you like a curious eye.",
+          "icon": "waves",
+          "choices": [
+            {
+              "label": "Answer the ocean’s song",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Polish the wandering pearl",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Great Opal Shell",
+          "text": "A sealed note bears the mark of The Great Opal Shell. “The old way through Pearlwater Steps still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "waves",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verdigris",
+      "name": "The Verdigris Engine",
+      "regions": [
+        "Copperroot",
+        "The Eight Spokes",
+        "Turbine Heights",
+        "The Verdigris Heart"
+      ],
+      "encounters": [
+        {
+          "title": "The sleeping engine",
+          "text": "A thousand gears stand still. A single seedling is growing through the engine’s heart, and its leaves turn like little wheels.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Wind the sleeping engine",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Water the copper seedling",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Verdigris Heart",
+          "text": "A sealed note bears the mark of The Verdigris Heart. “The old way through Turbine Heights still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "snowspire",
+      "name": "Snowspire Ascent",
+      "regions": [
+        "Snowshoe Camp",
+        "Blue Glacier Pass",
+        "The Ninefold Stair",
+        "The Summit Beacon"
+      ],
+      "encounters": [
+        {
+          "title": "The climber’s lantern",
+          "text": "A lantern hangs from a rope above the clouds. The climber who left it is still searching for the first sunrise.",
+          "icon": "snowflake",
+          "choices": [
+            {
+              "label": "Carry the lantern higher",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Read the climber’s journal",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Summit Beacon",
+          "text": "A sealed note bears the mark of The Summit Beacon. “The old way through The Ninefold Stair still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "snowflake",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sunken",
+      "name": "The Sunken Atoll",
+      "regions": [
+        "Tidewake Ruins",
+        "The Coral Cloister",
+        "Lagoon Steps",
+        "The Palace Below"
+      ],
+      "encounters": [
+        {
+          "title": "The city under glass",
+          "text": "At low tide, a street of blue glass rises from the lagoon. Every door opens onto a different memory of the sea.",
+          "icon": "waves",
+          "choices": [
+            {
+              "label": "Enter the blue street",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Map the returning city",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Palace Below",
+          "text": "A sealed note bears the mark of The Palace Below. “The old way through Lagoon Steps still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "waves",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dream",
+      "name": "The Dreamer’s Labyrinth",
+      "regions": [
+        "Pillowgate",
+        "The Wandering Halls",
+        "Seven Dream Steps",
+        "The Book of Elsewhere"
+      ],
+      "encounters": [
+        {
+          "title": "The unwritten page",
+          "text": "An enormous book opens to a page bearing your name. The next sentence waits patiently for you to choose its first word.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Write a brave beginning",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Read the margin notes",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Book of Elsewhere",
+          "text": "A sealed note bears the mark of The Book of Elsewhere. “The old way through Seven Dream Steps still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nightmarket",
+      "name": "The Lantern Night Market",
+      "regions": [
+        "Lantern Quay",
+        "The Silk Gardens",
+        "Wishkeeper Rise",
+        "The Thousand-Light Shrine"
+      ],
+      "encounters": [
+        {
+          "title": "The lantern seller",
+          "text": "A lantern seller offers you a light that glows with the memory of your happiest day. “Carry it where it is needed.”",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Share the lantern’s warmth",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Tell the seller your story",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Thousand-Light Shrine",
+          "text": "A sealed note bears the mark of The Thousand-Light Shrine. “The old way through Wishkeeper Rise still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aurora",
+      "name": "The Aurora Ribbon",
+      "regions": [
+        "Northwake",
+        "The Glimmering Pines",
+        "Eight-Color Stair",
+        "Sanctuary of the Aurora"
+      ],
+      "encounters": [
+        {
+          "title": "The fallen northern light",
+          "text": "A ribbon of aurora has tangled in a pine tree. It sings in colors, and the forest is waiting for you to set it free.",
+          "icon": "snowflake",
+          "choices": [
+            {
+              "label": "Untangle the northern light",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Learn its colored song",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from Sanctuary of the Aurora",
+          "text": "A sealed note bears the mark of Sanctuary of the Aurora. “The old way through Eight-Color Stair still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "snowflake",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

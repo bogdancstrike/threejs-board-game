@@ -1,6 +1,10 @@
 import * as THREE from "three";
 import { clone } from "three/addons/utils/SkeletonUtils.js";
-import { groundHeight, getTiles, seededRandom } from "../game/data";
+import {
+  groundHeight as baseGroundHeight,
+  getTiles,
+  seededRandom,
+} from "../game/data";
 import type { MapTheme } from "../game/maps";
 import { shapeField } from "./shapes";
 import { loadModel } from "./assets";
@@ -48,6 +52,7 @@ function normalize(source: THREE.Object3D, height: number, footprint: number) {
   return group;
 }
 export function addEnvironmentAssets(theme: MapTheme): EnvironmentAssets {
+  const groundHeight = (z: number) => baseGroundHeight(z, theme.id);
   const group = new THREE.Group();
   group.userData.sharedAsset = true;
   const mixers: THREE.AnimationMixer[] = [],

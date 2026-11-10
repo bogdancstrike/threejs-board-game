@@ -10,11 +10,14 @@ import { atmosphere, type Atmosphere } from "./atmosphere";
 import { addEnvironmentAssets, type EnvironmentAssets } from "./environment";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import {
+  groundHeight,
   getTiles,
   CHARACTERS,
   seededRandom,
   type Character,
 } from "../game/data";
+import { SKY_ROUTES } from "../game/layers";
+import { geography } from "../game/geography";
 import type { Player } from "../game/engine";
 import type { MapTheme } from "../game/maps";
 import { buildWorld, type World } from "./world";
@@ -50,11 +53,14 @@ export class GameScene {
   onTile: (id: number | null) => void = () => {};
   onReady: () => void = () => {};
   onStep: () => void = () => {};
+  onLand: () => void = () => {};
   private observer: ResizeObserver;
   private raycaster = new THREE.Raycaster();
   private pointer = new THREE.Vector2();
   private ring: THREE.Mesh;
   private generation = 0;
+  private homePosition = new THREE.Vector3(28, 36, 39);
+  private homeTarget = new THREE.Vector3();
   private light: THREE.DirectionalLight;
   private focusTween: {
     from: THREE.Vector3;
@@ -85,13 +91,26 @@ export class GameScene {
       "Interactive 3D game board. Drag to orbit, scroll to zoom.",
     );
     this.camera = new THREE.PerspectiveCamera(36, 1, 0.1, 160);
-    this.camera.position.set(28, 36, 39);
+    const profile = geography(theme.id),
+      factor = Math.max(1, Math.max(profile.width, profile.depth) / 21),
+      rise = (profile.floors - 1) * profile.rise;
+    const skyRise = Math.max(
+      0,
+      ...(SKY_ROUTES[theme.id] || []).map((layer) => layer.height),
+    );
+    this.homePosition.set(
+      28 * factor,
+      36 * factor + rise * 0.25 + skyRise * 0.55,
+      39 * factor,
+    );
+    this.homeTarget.set(0, rise * 0.25 + skyRise * 0.2, 0);
+    this.camera.position.copy(this.homePosition);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.target.set(0, 0, 0);
+    this.controls.target.copy(this.homeTarget);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.07;
     this.controls.minDistance = 13;
-    this.controls.maxDistance = 85;
+    this.controls.maxDistance = 110;
     this.controls.minPolarAngle = 0.18;
     this.controls.maxPolarAngle = Math.PI * 0.46;
     this.controls.maxTargetRadius = 20;
@@ -285,6 +304,10 @@ export class GameScene {
           const t = Math.min(1, (performance.now() - start) / duration),
             e = t * t * (3 - 2 * t);
           pawn.position.lerpVectors(from, to, e);
+          pawn.position.y = Math.max(
+            pawn.position.y,
+            groundHeight(pawn.position.z, this.theme.id) + 0.135,
+          );
           pawn.position.y += Math.sin(t * Math.PI) * 0.09;
           if (t < 1) requestAnimationFrame(tick);
           else resolve();
@@ -294,6 +317,7 @@ export class GameScene {
     }
     setAction(pawn, "idle");
     this.vfx.burst(pawn.position, "landing", this.clock.elapsedTime);
+    this.onLand();
     this.moving = false;
   }
   impact(player: number, effect: WorldEffect) {
@@ -316,15 +340,15 @@ export class GameScene {
       };
   }
   resetCamera() {
-    this.camera.position.set(28, 36, 39);
-    this.controls.target.set(0, 0, 0);
+    this.camera.position.copy(this.homePosition);
+    this.controls.target.copy(this.homeTarget);
     this.focusTween = null;
     this.controls.update();
   }
   zoom(delta: number) {
     const v = this.camera.position.clone().sub(this.controls.target);
     v.multiplyScalar(delta);
-    const distance = THREE.MathUtils.clamp(v.length(), 13, 85);
+    const distance = THREE.MathUtils.clamp(v.length(), 13, 110);
     v.setLength(distance);
     this.camera.position.copy(this.controls.target).add(v);
   }
@@ -345,7 +369,8 @@ export class GameScene {
     this.resize();
   }
   dispose() {
-    cancelAnimationFrame(this.frame);this.generation++;
+    cancelAnimationFrame(this.frame);
+    this.generation++;
     this.observer.disconnect();
     this.controls.dispose();
     this.world.dispose();
@@ -359,7 +384,8 @@ export class GameScene {
     this.ring.geometry.dispose();
     (this.ring.material as THREE.Material).dispose();
     this.light.shadow.map?.dispose();
-    this.renderer.dispose();this.renderer.forceContextLoss();
+    this.renderer.dispose();
+    this.renderer.forceContextLoss();
     this.renderer.domElement.remove();
   }
 }
@@ -477,7 +503,8 @@ export class CharacterPreview {
     this.generation++;
     this.controls.dispose();
     this.observer.disconnect();
-    this.renderer.dispose();this.renderer.forceContextLoss();
+    this.renderer.dispose();
+    this.renderer.forceContextLoss();
     this.renderer.domElement.remove();
   }
 }

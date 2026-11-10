@@ -95,10 +95,10 @@ describe("game rules", () => {
 import { MAPS } from "../src/game/maps";
 import { getTiles } from "../src/game/data";
 import { currentMystery } from "../src/game/engine";
-describe("the ten worlds", () => {
-  it("has ten distinct themed worlds with complete routes", () => {
-    expect(MAPS).toHaveLength(10);
-    expect(new Set(MAPS.map((m) => m.theme)).size).toBe(10);
+describe("the thirty worlds", () => {
+  it("has thirty distinct themed worlds with complete routes", () => {
+    expect(MAPS).toHaveLength(30);
+    expect(new Set(MAPS.map((m) => m.id)).size).toBe(30);
     for (const m of MAPS) {
       const tiles = getTiles(m.id);
       expect(tiles).toHaveLength(93);
@@ -130,7 +130,7 @@ describe("the ten worlds", () => {
 
 import { shapeField, rawShapeField, MAP_SHAPES } from "../src/world/shapes";
 describe("distinct physical landscapes", () => {
-  it("has ten different silhouettes while supporting every tile corner", () => {
+  it("has thirty different silhouettes while supporting every tile corner", () => {
     const fingerprints = new Set();
     for (const map of MAPS) {
       expect(MAP_SHAPES[map.id]).toBeDefined();
@@ -147,11 +147,55 @@ describe("distinct physical landscapes", () => {
               `${map.id} supports tile ${tile.id}`,
             ).toBeGreaterThan(0);
     }
-    expect(fingerprints.size).toBe(10);
+    expect(fingerprints.size).toBe(30);
   });
   it("keeps an open crater, crescent cutout, and archipelago channels", () => {
     expect(rawShapeField("ember", 0, -2.25)).toBeLessThan(0);
     expect(rawShapeField("astral", 9, 1)).toBeLessThan(0);
     expect(rawShapeField("tide", 0, 8.25)).toBeLessThan(0);
+  });
+});
+
+import { GEOGRAPHY } from "../src/game/geography";
+import { groundHeight } from "../src/game/data";
+describe("varied floors and dimensions", () => {
+  it("uses independent three-to-nine-floor profiles for all thirty maps", () => {
+    const counts = new Set<number>(),
+      sizes = new Set<string>();
+    for (const m of MAPS) {
+      const g = GEOGRAPHY[m.id];
+      expect(g.floors).toBeGreaterThanOrEqual(3);
+      expect(g.floors).toBeLessThanOrEqual(9);
+      expect(groundHeight(12, m.id)).toBeCloseTo(0.8);
+      expect(groundHeight(-18, m.id)).toBeCloseTo(
+        0.8 + (g.floors - 1) * g.rise,
+      );
+      for (const tile of getTiles(m.id))
+        expect(tile.y).toBeCloseTo(
+          groundHeight(tile.z, m.id) + 0.04 + skyOffset(m.id, tile.id),
+        );
+      counts.add(g.floors);
+      sizes.add(g.width + "x" + g.depth);
+    }
+    expect(counts.size).toBe(7);
+    expect(sizes.size).toBeGreaterThan(20);
+  });
+});
+
+import { SKY_ROUTES, skyOffset } from "../src/game/layers";
+describe("ascending and descending sky routes", () => {
+  it("climbs above the main island and returns to ground on every excursion", () => {
+    for (const [id, layers] of Object.entries(SKY_ROUTES))
+      for (const layer of layers) {
+        const tiles = getTiles(id);
+        expect(skyOffset(id, layer.start)).toBe(0);
+        expect(skyOffset(id, layer.upEnd)).toBe(layer.height);
+        expect(skyOffset(id, layer.end)).toBe(0);
+        expect(
+          tiles[layer.upEnd].y - groundHeight(tiles[layer.upEnd].z, id),
+        ).toBeGreaterThan(6);
+        expect(skyOffset(id, layer.downStart + 1)).toBeLessThan(layer.height);
+      }
+    expect(SKY_ROUTES.dream).toHaveLength(2);
   });
 });

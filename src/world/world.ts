@@ -1,9 +1,16 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-import { groundHeight, seededRandom, getTiles, TILE_INFO } from "../game/data";
+import {
+  groundHeight as baseGroundHeight,
+  seededRandom,
+  getTiles,
+  TILE_INFO,
+} from "../game/data";
 import type { MapTheme } from "../game/maps";
 import { waterMaterial } from "./water";
 import { ENVIRONMENT_RESERVES } from "./environment";
+import { skyways } from "./skyways";
+import { biomeDetails } from "./biome-details";
 import { sculptTerrain } from "./terrain";
 import { shapeField, rawShapeField } from "./shapes";
 import { destination } from "./landmarks";
@@ -134,12 +141,19 @@ function batch(group: THREE.Group) {
   return out;
 }
 export function buildWorld(theme: MapTheme): World {
+  const groundHeight = (z: number) => baseGroundHeight(z, theme.id);
   const TILES = getTiles(theme.id);
   const group = new THREE.Group(),
     props = new THREE.Group(),
     animated: ((t: number) => void)[] = [],
     rng = seededRandom(4759 + theme.id.length);
   group.add(sculptTerrain(theme));
+  const sky = skyways(theme);
+  group.add(sky.group);
+  animated.push(...sky.animated);
+  const extra = biomeDetails(theme);
+  group.add(extra.group);
+  animated.push(...extra.animated);
   const tiles = new THREE.InstancedMesh(
     roundedTile(),
     new THREE.MeshStandardMaterial({ roughness: 0.8, metalness: 0.04 }),
@@ -192,6 +206,24 @@ export function buildWorld(theme: MapTheme): World {
     );
     road.rotation.y = Math.atan2(b.x - a.x, b.z - a.z);
     road.rotation.x = -Math.atan2(b.y - a.y, len);
+    if (Math.abs(b.y - a.y) > 0.2) {
+      const steps = Math.ceil(Math.abs(b.y - a.y) / 0.13),
+        angle = Math.atan2(b.x - a.x, b.z - a.z);
+      for (let j = 0; j < steps; j++) {
+        const t = (j + 0.5) / steps,
+          stair = box(
+            props,
+            theme.terrain[Math.min(3, a.region)],
+            a.x + (b.x - a.x) * t,
+            a.y + (b.y - a.y) * t + 0.01,
+            a.z + (b.z - a.z) * t,
+            1.08,
+            0.13,
+            len / steps + 0.05,
+          );
+        stair.rotation.y = angle;
+      }
+    }
   }
   for (const t of TILES) {
     if (t.kind === "path" && t.id % 3 === 0) {

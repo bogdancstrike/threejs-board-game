@@ -6,7 +6,7 @@
 
 ### A path of mysteries
 
-**Twelve adventurers. Ten worlds. One unforgettable journey.**
+**Twelve adventurers. Thirty worlds. One unforgettable journey.**
 
 Roll the dice, follow a trail of weathered stones, and discover what waits beyond the next bend.<br>
 A browser fantasy board game built with Three.js, original ambient audio, and living miniature worlds.
@@ -14,11 +14,13 @@ A browser fantasy board game built with Three.js, original ambient audio, and li
 [![Three.js](https://img.shields.io/badge/Three.js-r180-142b34?style=flat-square&logo=threedotjs&logoColor=e0c68c)](https://threejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript&logoColor=white)](src)
 [![Vite](https://img.shields.io/badge/Vite-localhost%3A7777-697953?style=flat-square&logo=vite&logoColor=white)](#-quick-start)
-[![Worlds](https://img.shields.io/badge/worlds-10-d0ad6e?style=flat-square)](#-ten-worlds-ten-shapes)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?style=flat-square&logo=fastapi&logoColor=white)](backend/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169e1?style=flat-square&logo=postgresql&logoColor=white)](compose.yaml)
+[![Worlds](https://img.shields.io/badge/worlds-30-d0ad6e?style=flat-square)](#-thirty-worlds-thirty-shapes)
 [![Heroes](https://img.shields.io/badge/adventurers-12-9b87b7?style=flat-square)](#-meet-your-adventurer)
-[![Players](https://img.shields.io/badge/players-1–4-66968a?style=flat-square)](#-how-to-play)
+[![Players](https://img.shields.io/badge/players-1–8_online-66968a?style=flat-square)](#-how-to-play)
 
-[Quick start](#-quick-start) · [World gallery](#-ten-worlds-ten-shapes) · [Characters](#-meet-your-adventurer) · [Audio & atmosphere](#-a-world-that-breathes) · [Architecture](#-under-the-island) · [Testing](#-tested-on-the-trail) · [Art status](#-art-status--credits)
+[Quick start](#-quick-start) · [World gallery](#-thirty-worlds-thirty-shapes) · [Characters](#-meet-your-adventurer) · [Audio & atmosphere](#-a-world-that-breathes) · [Architecture](#-under-the-island) · [Testing](#-tested-on-the-trail) · [Art status](#-art-status--credits)
 
 <img src="public/previews/verdant.webp" width="880" alt="The Verdant Crown: a floating fantasy board with a village, forest, river, glowing portal, and castle" />
 
@@ -32,10 +34,10 @@ A browser fantasy board game built with Three.js, original ambient audio, and li
 
 A little strategy. A little luck. A lot of curiosity.
 
-Wilder brings a tabletop adventure into an interactive 3D diorama. Your character follows **93 connected tiles** from a welcoming village through four rising regions to a final destination. Along the way, hidden treasure, ancient portals, and strange encounters ask what kind of traveler you want to be.
+Wilder brings a tabletop adventure into an interactive 3D diorama. Your character follows **93 connected tiles** from a welcoming village through four chapters across three to nine floors to a final destination. Along the way, hidden treasure, ancient portals, and strange encounters ask what kind of traveler you want to be.
 
-- 🏝️ **Ten distinct landscapes:** different physical island shapes, terrain palettes, destinations, regional names, and encounter decks.
-- 🎲 **A complete game:** fair six-sided dice, animated movement, branching encounters, gold, clues, local turns, and victory.
+- 🏝️ **Thirty distinct landscapes:** different physical island shapes, terrain palettes, destinations, regional names, and encounter decks.
+- 🎲 **A complete game:** fair six-sided dice, animated movement, branching encounters, gold, clues, points, local turns, live online rooms, and victory.
 - 🧙 **Twelve adult adventurers:** next/previous selection, a rotating 3D preview, equipment and close-up views, action previews, and cosmetic aura colors.
 - 🌿 **A path in the landscape:** low weathered stones, moss, plants, bridges, and visible changes in elevation.
 - 🌙 **Twilight rendering:** cool moonlight, warm windows, flickering forge light, soft shadows, ambient occlusion, restrained bloom, and drifting mist.
@@ -55,7 +57,7 @@ npm run dev
 
 Open **[localhost:7777](http://localhost:7777)**.
 
-Vite listens on `0.0.0.0:7777` with a strict port. Source changes appear through hot reload. No backend, database, API keys, or account are required.
+Vite listens on `0.0.0.0:7777` with a strict port. Source changes appear through hot reload. This starts the browser game and local pass-and-play. Online rooms use the FastAPI/PostgreSQL service below. No external account or API keys are required.
 
 | Requirement | What you need |
 |---|---|
@@ -65,32 +67,105 @@ Vite listens on `0.0.0.0:7777` with a strict port. Source changes appear through
 | Network | Optional Google Fonts; models, previews, and game logic are served locally |
 
 ```bash
+# Full game: persistent rooms + realtime multiplayer
+python3 scripts/init-env.py      # Generate ignored local database credentials
+docker compose up -d --build    # Web :7777, FastAPI :8000, PostgreSQL :55432
+# Stop npm run dev first if port 7777 is already occupied.
+
 npm run build                    # Typecheck and create dist/
 npm run preview -- --port 7778   # Inspect the production build
 ```
 
-## 🗺️ Ten worlds. Ten shapes.
+For backend development, run `docker compose up -d db`, then `uv sync --directory backend` and `uv run --directory backend uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload` alongside `npm run dev`. Vite proxies HTTP and WebSocket traffic under `/api`. The generated `.env` must stay private. PostgreSQL data lives in a named Docker volume.
+
+## 👥 Bring your party
+
+Choose **Play together**, enter your name, and create a room or join a six-character code. **1–8 online players** each claim a unique hero, mark ready, and let the host begin. Character claims are enforced by a PostgreSQL constraint and transactional server rules. Every browser sees the same die roll, movement, active player, journal, and points.
+
+Classic races end at the finish. Score expeditions finish the current round, then rank players by points. The server awards progress, treasure, clues, challenge rewards, and a finish bonus. Six skill challenges currently include riddles, counting, memory, patterns, balance, and rhythm. Rematches return the party to the lobby.
+
+Room progress persists in PostgreSQL. Browser sessions reconnect to an authoritative snapshot; commands use revision checks and idempotency keys to prevent duplicate rolls. Turns and encounters have server deadlines. Room sessions last 12 hours. **Local 1–4 player pass-and-play remains available without the backend.**
+
+## 🗺️ Thirty worlds. Thirty shapes.
 
 **These are screenshots of the real 3D maps**, refreshed from the same scene builders used by the game. Click any image to inspect it. Use **Worlds** in the game for a live preview before replacing your expedition.
 
 <!-- WORLD_GALLERY_START -->
 
-| 🌿 The Verdant Crown | 🐉 Dragonkind |
+| **The Verdant Crown** | **Dragonkind** |
 |---|---|
 | [![The Verdant Crown](public/previews/verdant.webp)](public/previews/verdant.webp) | [![Dragonkind](public/previews/dragonkind.webp)](public/previews/dragonkind.webp) |
-| An irregular woodland island. Lantern-lit homes, enchanted trees, and Crownfall Castle. | Jagged dragonwing crags. A Fourth Wing inspired rider academy, parapet, gauntlet, choosing, and signet mysteries. |
-| ❄️ **The Frostbound Passage** | ☀️ **Sands of the Oracle** |
+| Wildwood island · 4 floors<br>Where the wild remembers | Dragonwing crags · 7 floors<br>Brave the parapet. Earn your wings. |
+
+| **The Frostbound Passage** | **Sands of the Oracle** |
+|---|---|
 | [![The Frostbound Passage](public/previews/frost.webp)](public/previews/frost.webp) | [![Sands of the Oracle](public/previews/desert.webp)](public/previews/desert.webp) |
-| A hexagonal ice floe. Snow, silver pines, crystal ice, and Winterglass Palace. | A diamond-shaped desert. Palms, turquoise water, obelisks, and a stepped sun temple. |
-| 🌸 **Moonblossom Reach** | 🌋 **Emberfall Caldera** |
+| Hexagonal ice floe · 5 floors<br>A secret beneath the snow | Diamond of the dunes · 3 floors<br>Every grain holds a story |
+
+| **Moonblossom Reach** | **Emberfall Caldera** |
+|---|---|
 | [![Moonblossom Reach](public/previews/sakura.webp)](public/previews/sakura.webp) | [![Emberfall Caldera](public/previews/ember.webp)](public/previews/ember.webp) |
-| A five-petal island. Blossom groves, falling petals, a vermilion gate, and a mountain pagoda. | A volcanic ring. A molten caldera, obsidian cliffs, ember trees, and a circling phoenix. |
-| 🌊 **The Tideglass Isles** | 🍄 **The Mycelium Hollow** |
+| Five-petal blossom · 6 floors<br>Follow the falling petals | Volcanic caldera · 8 floors<br>A journey forged in fire |
+
+| **The Tideglass Isles** | **The Mycelium Hollow** |
+|---|---|
 | [![The Tideglass Isles](public/previews/tide.webp)](public/previews/tide.webp) | [![The Mycelium Hollow](public/previews/mycelium.webp)](public/previews/mycelium.webp) |
-| A floating archipelago. Linked islands, palms, waterfalls, a lighthouse, and a swimming sky whale. | A three-lobed hollow. Giant mushrooms, luminous plants, spores, and a fungal citadel. |
-| ✨ **The Astral Observatory** | ⚙️ **The Clockwork Citadel** |
+| Floating archipelago · 4 floors<br>Beyond the last horizon | Three-lobed hollow · 5 floors<br>A world beneath the world |
+
+| **The Astral Observatory** | **The Clockwork Citadel** |
+|---|---|
 | [![The Astral Observatory](public/previews/astral.webp)](public/previews/astral.webp) | [![The Clockwork Citadel](public/previews/clockwork.webp)](public/previews/clockwork.webp) |
-| A celestial crescent. Floating route stones, armillary spheres, violet stardust, and an observatory. | A toothed clockwork island. Copper gardens, canals, a turning gear, and a monumental clock tower. |
+| Celestial crescent · 6 floors<br>Walk between the stars | Clockwork cog · 7 floors<br>An adventure out of time |
+
+| **Stormreach Bastion** | **The Amberwood Harvest** |
+|---|---|
+| [![Stormreach Bastion](public/previews/stormreach.webp)](public/previews/stormreach.webp) | [![The Amberwood Harvest](public/previews/autumn.webp)](public/previews/autumn.webp) |
+| Forked lightning ridge · 9 floors<br>Climb where the thunder sleeps | Falling maple leaf · 4 floors<br>Every falling leaf is a promise |
+
+| **The Jade Lotus** | **The Pale Necropolis** |
+|---|---|
+| [![The Jade Lotus](public/previews/jade.webp)](public/previews/jade.webp) | [![The Pale Necropolis](public/previews/necropolis.webp)](public/previews/necropolis.webp) |
+| Eight-petal lotus · 7 floors<br>Find the stillness at the center | Ancient stone cross · 5 floors<br>Some stories refuse to rest |
+
+| **Cloudwake Skyharbor** | **The Coral Spiral** |
+|---|---|
+| [![Cloudwake Skyharbor](public/previews/skyharbor.webp)](public/previews/skyharbor.webp) | [![The Coral Spiral](public/previews/coral.webp)](public/previews/coral.webp) |
+| Twin cloud banks · 6 floors<br>The sky is only the beginning | Coral spiral · 3 floors<br>Follow the tide inward |
+
+| **The Honeyglass Expanse** | **The Obsidian Forge** |
+|---|---|
+| [![The Honeyglass Expanse](public/previews/amber.webp)](public/previews/amber.webp) | [![The Obsidian Forge](public/previews/obsidian.webp)](public/previews/obsidian.webp) |
+| Golden honeycomb · 4 floors<br>A kingdom built one golden cell at a time | The mountain anvil · 8 floors<br>Let the mountain shape your legend |
+
+| **The Prism Sanctuary** | **The Serpent Canopy** |
+|---|---|
+| [![The Prism Sanctuary](public/previews/crystal.webp)](public/previews/crystal.webp) | [![The Serpent Canopy](public/previews/jungle.webp)](public/previews/jungle.webp) |
+| Six-point crystal star · 6 floors<br>Every color remembers the light | Serpent’s spine · 7 floors<br>The oldest paths are still alive |
+
+| **The Roseheart Court** | **The Twin Moon Enclave** |
+|---|---|
+| [![The Roseheart Court](public/previews/rose.webp)](public/previews/rose.webp) | [![The Twin Moon Enclave](public/previews/lunar.webp)](public/previews/lunar.webp) |
+| Heart of the garden · 4 floors<br>Courage is a kind of kindness | Twin lunar crescents · 5 floors<br>Two moons. One forgotten promise. |
+
+| **The Brass Hourglass** | **The Manta Lagoon** |
+|---|---|
+| [![The Brass Hourglass](public/previews/brass.webp)](public/previews/brass.webp) | [![The Manta Lagoon](public/previews/pearl.webp)](public/previews/pearl.webp) |
+| Sands of the hourglass · 8 floors<br>Borrow a moment from forever | Manta-ray lagoon · 3 floors<br>Sail on the wings of the tide |
+
+| **The Verdigris Engine** | **Snowspire Ascent** |
+|---|---|
+| [![The Verdigris Engine](public/previews/verdigris.webp)](public/previews/verdigris.webp) | [![Snowspire Ascent](public/previews/snowspire.webp)](public/previews/snowspire.webp) |
+| Eight-spoke wheel · 6 floors<br>Find the heart inside the machine | Triangular mountain · 9 floors<br>The summit is a promise you keep |
+
+| **The Sunken Atoll** | **The Dreamer’s Labyrinth** |
+|---|---|
+| [![The Sunken Atoll](public/previews/sunken.webp)](public/previews/sunken.webp) | [![The Dreamer’s Labyrinth](public/previews/dream.webp)](public/previews/dream.webp) |
+| Broken atoll · 3 floors<br>What the sea keeps, the tide reveals | Dreamer’s labyrinth · 7 floors<br>Turn a corner. Change the dream. |
+
+| **The Lantern Night Market** | **The Aurora Ribbon** |
+|---|---|
+| [![The Lantern Night Market](public/previews/nightmarket.webp)](public/previews/nightmarket.webp) | [![The Aurora Ribbon](public/previews/aurora.webp)](public/previews/aurora.webp) |
+| Four-lantern pavilion · 5 floors<br>A thousand lights. A thousand stories. | Aurora ribbon · 8 floors<br>Walk where the northern lights fall |
 
 <!-- WORLD_GALLERY_END -->
 
@@ -167,8 +242,11 @@ The board fills the viewport below the slim header. Details live in drawers and 
 flowchart LR
     UI[Controls · previews · journal] --> Rules[Pure game rules]
     Rules --> State[Validated local save]
+    UI --> Socket[WebSocket room client]
+    Socket --> API[FastAPI authoritative rules]
+    API --> DB[(PostgreSQL rooms · events · commands)]
     Rules --> Movement[Tile-by-tile movement]
-    Maps[10 themes · shape fields] --> Terrain[Sculpted terrain · protected tiles]
+    Maps[30 worlds · shape fields] --> Terrain[Sculpted terrain · protected tiles]
     Assets[Cached GLB models] --> World[Scenery · NPCs · creatures]
     Terrain --> Render[Three.js WebGL + post-processing]
     World --> Render
@@ -180,7 +258,9 @@ flowchart LR
 
 | Source | Responsibility |
 |---|---|
-| [`src/game/`](src/game/) | Roster, deterministic route, ten themes, rules, turns, mysteries, victory, saves |
+| [`backend/`](backend/) | FastAPI, PostgreSQL transactions, room sessions, authoritative turns, points, challenges and WebSocket broadcasts |
+| [`src/network/`](src/network/) | Room lobby, reconnecting client, unique hero claims and mini-game panels |
+| [`src/game/`](src/game/) | Roster, deterministic route, thirty themes, rules, turns, mysteries, victory, saves |
 | [`shapes.ts`](src/world/shapes.ts) · [`terrain.ts`](src/world/terrain.ts) | Unique physical silhouettes, cutouts, islands, protected tile and landmark foundations, sculpted cliffs |
 | [`world.ts`](src/world/world.ts) · [`landmarks.ts`](src/world/landmarks.ts) | Board integration, village, windmill, portal, rivers, bridges and themed destinations |
 | [`environment.ts`](src/world/environment.ts) | Optimized imported plants, buildings, NPCs and animated creatures |
@@ -197,12 +277,14 @@ Static props are batched, tiles are instanced, symbols share an atlas, imported 
 ## 🧪 Tested on the trail
 
 ```bash
+uv run --directory backend pytest # Domain and real PostgreSQL integration tests
+uv run --directory backend ruff check app tests
 npm test                        # Pure rules, complete routes, world and preference validation
 npm run test:e2e                 # Chromium/WebGL gameplay, previews, animation bounds and audio
 npm run build                   # Strict TypeScript and production bundle
 ```
 
-The browser suite exercises character selection and movement, save restoration, all ten themes, mobile layout, live map previews, animation bounds, and nonzero Web Audio output. It uses software WebGL in headless Chromium; install the browser with `npx playwright install chromium` if needed. Low-quality smoke checks and normal-quality visual renders serve different validation purposes.
+The browser suite exercises character selection and movement, save restoration, all thirty themes, mobile layout, live map previews, animation bounds, and nonzero Web Audio output. It uses software WebGL in headless Chromium; install the browser with `npx playwright install chromium` if needed. Low-quality smoke checks and normal-quality visual renders serve different validation purposes.
 
 ## 🎨 Art status & credits
 
@@ -212,11 +294,11 @@ The roster uses **eight adapted character models and four explicit prototype fig
 
 The included environmental assets are resized, simplified, merged where practical, and compressed. Do not assume the code and all third-party art have the same license. Original music and sound effects are synthesized by the application.
 
-- [Character asset integration](docs/ASSETS.md)
+- [Asset attribution](public/ASSET-CREDITS.md)
 - [Terrain design brief](map-terrain.md)
 - [Character design brief](characters.md)
 - [Lighting design brief](lighting.md)
-- [Implementation coverage](docs/IMPLEMENTATION.md)
+- [Current runtime and deployment](docs/runtime/README.md)
 
 ## 📸 Keeping the gallery current
 

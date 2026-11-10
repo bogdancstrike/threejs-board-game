@@ -1,3 +1,5 @@
+import { skyOffset } from "./layers";
+import { geography } from "./geography";
 export type TileKind =
   | "path"
   | "mystery"
@@ -245,14 +247,18 @@ export function seededRandom(seed = 4759) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-export function groundHeight(z: number) {
+export function groundHeight(z: number, map = "verdant") {
+  const profile = geography(map);
   let height = 0.8;
-  for (const edge of [6, -1, -8]) {
-    const t = Math.max(0, Math.min(1, (edge + 1.3 - z) / 2.6));
-    height += t * t * (3 - 2 * t) * 1.08;
+  for (let i = 1; i < profile.floors; i++) {
+    const edge = 11 - i * (25 / profile.floors),
+      blend = Math.min(1.3, 4.8 / profile.floors),
+      t = Math.max(0, Math.min(1, (edge + blend - z) / (blend * 2)));
+    height += t * t * (3 - 2 * t) * profile.rise;
   }
   return height;
 }
+
 export interface Tile {
   id: number;
   x: number;
@@ -452,7 +458,7 @@ export function getTiles(map = "verdant"): Tile[] {
       ...t,
       x,
       z,
-      y: groundHeight(z) + 0.04,
+      y: groundHeight(z, map) + 0.04 + skyOffset(map, t.id),
       rotation: Math.sin(t.id * 2.4 + phase) * 0.07,
     };
   });

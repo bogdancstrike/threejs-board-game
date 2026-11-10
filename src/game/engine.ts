@@ -7,6 +7,11 @@ import {
   type Mystery,
 } from "./data";
 export interface Player {
+  id?: string;
+  points?: number;
+  completed?: number;
+  ready?: boolean;
+  connected?: boolean;
   name: string;
   character: string;
   position: number;
@@ -24,7 +29,7 @@ export interface GameState {
   players: Player[];
   active: number;
   turn: number;
-  phase: "ready" | "event" | "won";
+  phase: "ready" | "event" | "won" | "challenge";
   mystery: number | null;
   dice: number;
   journal: JournalEntry[];
@@ -223,4 +228,10 @@ export function parseSave(raw: string | null): GameState | null {
   } catch {
     return null;
   }
+}
+
+export function playerScore(player: Player) {
+  return (
+    player.points ?? player.position + player.gold * 10 + player.clues * 20
+  );
 }

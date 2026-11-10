@@ -1,0 +1,32 @@
+name: wilder
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-wilder}
+      POSTGRES_DB: ${POSTGRES_DB:-wilder}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python3 scripts/init-env.py first}
+    ports: ["127.0.0.1:55432:5432"]
+    volumes: ["wilder_db:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-wilder}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-wilder}
+      ALLOWED_ORIGINS: '["http://localhost:7777","http://127.0.0.1:7777","http://localhost:7778"]'
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      db: {condition: service_healthy}
+    restart: unless-stopped
+  web:
+    build: {context: ., dockerfile: deploy/Dockerfile.web}
+    ports: ["7777:80"]
+    depends_on: [api]
+    restart: unless-stopped
+volumes:
+  wilder_db:

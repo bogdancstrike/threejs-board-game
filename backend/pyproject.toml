@@ -1,0 +1,15 @@
+[project]
+name = "wilder-server"
+version = "0.2.0"
+description = "Authoritative FastAPI / PostgreSQL / WebSocket server for Wilder"
+requires-python = ">=3.12"
+dependencies = ["fastapi>=0.115,<1", "uvicorn[standard]>=0.34,<1", "asyncpg>=0.30,<1", "pydantic-settings>=2.7,<3"]
+[dependency-groups]
+dev = ["pytest>=8,<10", "pytest-asyncio>=0.25,<2", "httpx>=0.28,<1", "ruff>=0.11,<1", "pytest-cov>=6,<8", "websockets>=14,<17"]
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["."]
+testpaths = ["tests"]
+[tool.ruff]
+line-length = 100

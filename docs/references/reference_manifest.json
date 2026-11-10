@@ -1,0 +1,47 @@
+[
+  {
+    "file": "references/user-provided/asset_01_floating_landscape.jpg",
+    "origin": "Screenshot from 2026-11-10 19-42-47(2).png",
+    "kind": "user-supplied or prior in-chat visual reference"
+  },
+  {
+    "file": "references/user-provided/asset_02_buildings.jpg",
+    "origin": "Screenshot from 2026-11-10 19-43-11.png",
+    "kind": "user-supplied or prior in-chat visual reference"
+  },
+  {
+    "file": "references/user-provided/asset_03_structures.jpg",
+    "origin": "Screenshot from 2026-11-10 19-43-50(2).png",
+    "kind": "user-supplied or prior in-chat visual reference"
+  },
+  {
+    "file": "references/user-provided/asset_04_environment.jpg",
+    "origin": "Screenshot from 2026-11-10 19-44-05.png",
+    "kind": "user-supplied or prior in-chat visual reference"
+  },
+  {
+    "file": "references/user-provided/asset_05_fantasy.jpg",
+    "origin": "Screenshot from 2026-11-10 19-44-17.png",
+    "kind": "user-supplied or prior in-chat visual reference"
+  },
+  {
+    "file": "references/user-provided/asset_06_stylized.jpg",
+    "origin": "Screenshot from 2026-11-10 19-44-38.png",
+    "kind": "user-supplied or prior in-chat visual reference"
+  },
+  {
+    "file": "references/user-provided/existing_ui_original.jpg",
+    "origin": "Screenshot from 2026-11-10 19-47-21.png",
+    "kind": "user-supplied or prior in-chat visual reference"
+  },
+  {
+    "file": "references/user-provided/target_ui_map_only.jpg",
+    "origin": "a_wide_screenshot_of_the_same_dark_elegant_ui_lay.png",
+    "kind": "user-supplied or prior in-chat visual reference"
+  },
+  {
+    "file": "references/user-provided/target_fantasy_diorama.jpg",
+    "origin": "realmwalkers_floating_fantasy_board_game.png",
+    "kind": "user-supplied or prior in-chat visual reference"
+  }
+]

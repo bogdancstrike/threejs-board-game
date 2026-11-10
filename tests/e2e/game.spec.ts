@@ -1,3 +1,4 @@
+import { MAPS } from "../../src/game/maps";
 import { test, expect } from "@playwright/test";
 test("full-screen board, character preview, movement and save restoration", async ({
   page,
@@ -59,7 +60,7 @@ test("full-screen board, character preview, movement and save restoration", asyn
   ).toBe("seraphine");
   expect(errors).toEqual([]);
 });
-test("all ten themes render and mobile controls fit the viewport", async ({
+test("all thirty themes render and mobile controls fit the viewport", async ({
   page,
 }) => {
   const errors: string[] = [];
@@ -73,19 +74,10 @@ test("all ten themes render and mobile controls fit the viewport", async ({
   await page.goto("/");
   await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
   await page.locator('[data-action="maps"]').first().click();
-  expect(await page.locator("[data-map]").count()).toBe(10);
+  expect(await page.locator("[data-map]").count()).toBe(30);
   await page.locator('[data-action="close-modal"]').click();
-  for (const id of [
-    "dragonkind",
-    "frost",
-    "desert",
-    "sakura",
-    "ember",
-    "tide",
-    "mycelium",
-    "astral",
-    "clockwork",
-  ]) {
+  test.setTimeout(300000);
+  for (const id of MAPS.slice(1).map((m) => m.id)) {
     await page.locator('[data-action="maps"]').first().click();
     await page.locator(`[data-map="${id}"]`).click();
     await page.locator(`[data-start-map="${id}"]`).click();
@@ -201,7 +193,7 @@ test("map preview is interactive and does not replace the current saved expediti
   await page.goto("/");
   await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
   await page.locator('[data-action="maps"]').first().click();
-  await expect(page.locator(".map-thumbnail")).toHaveCount(10);
+  await expect(page.locator(".map-thumbnail")).toHaveCount(30);
   await page.locator('[data-map="dragonkind"]').click();
   await expect(page.locator("#map-preview-loading")).toBeHidden({
     timeout: 45000,

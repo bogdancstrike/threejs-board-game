@@ -1,0 +1,8 @@
+{
+  "type": "ROLL_DIE",
+  "room_id": "room-demo",
+  "actor_id": "p1",
+  "expected_version": 7,
+  "idempotency_key": "4b5a8380-85bb-4f35-bc4e-38f851dcd3ec",
+  "payload": {}
+}

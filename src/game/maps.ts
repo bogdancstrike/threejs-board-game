@@ -1,3 +1,4 @@
+import { EXTRA_MAPS } from "./extra-maps";
 import type { Mystery } from "./data";
 export interface MapTheme {
   id: string;
@@ -407,6 +408,7 @@ export const MAPS: MapTheme[] = [
     ],
   },
 ];
+MAPS.push(...EXTRA_MAPS);
 export function getMap(id: string) {
   return MAPS.find((m) => m.id === id) || MAPS[0];
 }

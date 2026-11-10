@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "characters": [
+    {
+      "id": "lyra",
+      "display_name": "Lyra",
+      "class": "enchantress",
+      "gender": "female",
+      "minimum_age": 21,
+      "portrait": "/assets/characters/lyra/portrait.webp",
+      "model_lod0": "/assets/characters/lyra/preview.glb",
+      "model_board": "/assets/characters/lyra/board.glb",
+      "animations": [
+        "idle",
+        "move",
+        "select"
+      ]
+    },
+    {
+      "id": "seraphine",
+      "display_name": "Seraphine",
+      "class": "knight",
+      "gender": "female",
+      "minimum_age": 21,
+      "portrait": "/assets/characters/seraphine/portrait.webp",
+      "model_lod0": "/assets/characters/seraphine/preview.glb",
+      "model_board": "/assets/characters/seraphine/board.glb",
+      "animations": [
+        "idle",
+        "move",
+        "select"
+      ]
+    },
+    {
+      "id": "rhea",
+      "display_name": "Rhea",
+      "class": "rogue",
+      "gender": "female",
+      "minimum_age": 21,
+      "portrait": "/assets/characters/rhea/portrait.webp",
+      "model_lod0": "/assets/characters/rhea/preview.glb",
+      "model_board": "/assets/characters/rhea/board.glb",
+      "animations": [
+        "idle",
+        "move",
+        "select"
+      ]
+    },
+    {
+      "id": "elowen",
+      "display_name": "Elowen",
+      "class": "priestess",
+      "gender": "female",
+      "minimum_age": 21,
+      "portrait": "/assets/characters/elowen/portrait.webp",
+      "model_lod0": "/assets/characters/elowen/preview.glb",
+      "model_board": "/assets/characters/elowen/board.glb",
+      "animations": [
+        "idle",
+        "move",
+        "select"
+      ]
+    },
+    {
+      "id": "akari",
+      "display_name": "Akari",
+      "class": "kitsune mage",
+      "gender": "female",
+      "minimum_age": 21,
+      "portrait": "/assets/characters/akari/portrait.webp",
+      "model_lod0": "/assets/characters/akari/preview.glb",
+      "model_board": "/assets/characters/akari/board.glb",
+      "animations": [
+        "idle",
+        "move",
+        "select"
+      ]
+    },
+    {
+      "id": "nyx",
+      "display_name": "Nyx",
+      "class": "assassin",
+      "gender": "female",
+      "minimum_age": 21,
+      "portrait": "/assets/characters/nyx/portrait.webp",
+      "model_lod0": "/assets/characters/nyx/preview.glb",
+      "model_board": "/assets/characters/nyx/board.glb",
+      "animations": [
+        "idle",
+        "move",
+        "select"
+      ]
+    },
+    {
+      "id": "aurelia",
+      "display_name": "Aurelia",
+      "class": "valkyrie",
+      "gender": "female",
+      "minimum_age": 21,
+      "portrait": "/assets/characters/aurelia/portrait.webp",
+      "model_lod0": "/assets/characters/aurelia/preview.glb",
+      "model_board": "/assets/characters/aurelia/board.glb",
+      "animations": [
+        "idle",
+        "move",
+        "select"
+      ]
+    },
+    {
+      "id": "selene",
+      "display_name": "Selene",
+      "class": "frost witch",
+      "gender": "female",
+      "minimum_age": 21,
+      "portrait": "/assets/characters/selene/portrait.webp",
+      "model_lod0": "/assets/characters/selene/preview.glb",
+      "model_board": "/assets/characters/selene/board.glb",
+      "animations": [
+        "idle",
+        "move",
+        "select"
+      ]
+    },
+    {
+      "id": "vesper",
+      "display_name": "Vesper",
+      "class": "demoness",
+      "gender": "female",
+      "minimum_age": 21,
+      "portrait": "/assets/characters/vesper/portrait.webp",
+      "model_lod0": "/assets/characters/vesper/preview.glb",
+      "model_board": "/assets/characters/vesper/board.glb",
+      "animations": [
+        "idle",
+        "move",
+        "select"
+      ]
+    },
+    {
+      "id": "alaric",
+      "display_name": "Alaric",
+      "class": "paladin",
+      "gender": "male",
+      "minimum_age": 21,
+      "portrait": "/assets/characters/alaric/portrait.webp",
+      "model_lod0": "/assets/characters/alaric/preview.glb",
+      "model_board": "/assets/characters/alaric/board.glb",
+      "animations": [
+        "idle",
+        "move",
+        "select"
+      ]
+    },
+    {
+      "id": "kael",
+      "display_name": "Kael",
+      "class": "swordsman",
+      "gender": "male",
+      "minimum_age": 21,
+      "portrait": "/assets/characters/kael/portrait.webp",
+      "model_lod0": "/assets/characters/kael/preview.glb",
+      "model_board": "/assets/characters/kael/board.glb",
+      "animations": [
+        "idle",
+        "move",
+        "select"
+      ]
+    },
+    {
+      "id": "orion",
+      "display_name": "Orion",
+      "class": "scholar",
+      "gender": "male",
+      "minimum_age": 21,
+      "portrait": "/assets/characters/orion/portrait.webp",
+      "model_lod0": "/assets/characters/orion/preview.glb",
+      "model_board": "/assets/characters/orion/board.glb",
+      "animations": [
+        "idle",
+        "move",
+        "select"
+      ]
+    }
+  ]
+}

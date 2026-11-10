@@ -1,4 +1,7 @@
 import "./style.css";
+import { RealtimeClient, type RoomUpdate } from "./network/client";
+import { ChallengePanel } from "./network/challenge-panel";
+import { RoomPanels } from "./network/panels";
 import { GameAudio, type SoundEffect } from "./audio/audio";
 import {
   createIcons,
@@ -49,9 +52,11 @@ import {
   CheckCheck,
 } from "lucide";
 import { CHARACTERS, getTiles, TILE_INFO } from "./game/data";
+import { SKY_ROUTES, layerName } from "./game/layers";
 import { MAP_SHAPES } from "./world/shapes";
 import { MAPS, getMap } from "./game/maps";
 import {
+  playerScore,
   newGame,
   roll,
   choose,
@@ -157,13 +162,13 @@ const safe = (s: string) =>
       ]!,
   );
 app.innerHTML = `
-<header class="topbar"><a class="brand" href="/" aria-label="Wilder home"><span class="brand-mark"><img src="/brand/wilder-mark.svg" alt=""/></span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> A little courage. A little magic. <span class="tiny-star">✧</span></div><nav><button class="nav-link" data-action="journey" aria-label="Toggle journey details">${icon("book-open")}<span>Journey</span></button><button class="nav-link" data-action="characters" aria-label="Choose character">${icon("users")}<span>Adventurer</span></button><button class="nav-link" data-action="maps">${icon("map")}<span>Worlds</span><span class="count-badge">10</span></button><button class="nav-link" data-action="help">${icon("circle-help")}<span>How to play</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="Enable sound">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="Game settings">${icon("settings-2")}</button></nav></header>
+<header class="topbar"><a class="brand" href="/" aria-label="Wilder home"><span class="brand-mark"><img src="/brand/wilder-mark.svg" alt=""/></span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> A little courage. A little magic. <span class="tiny-star">✧</span></div><nav><button class="nav-link online-nav" data-action="rooms">${icon("users")}<span id="room-nav-label">Play together</span></button><button class="nav-link" data-action="journey" aria-label="Toggle journey details">${icon("book-open")}<span>Journey</span></button><button class="nav-link" data-action="characters" aria-label="Choose character">${icon("users")}<span>Adventurer</span></button><button class="nav-link" data-action="maps">${icon("map")}<span>Worlds</span><span class="count-badge">${MAPS.length}</span></button><button class="nav-link" data-action="help">${icon("circle-help")}<span>How to play</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="Enable sound">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="Game settings">${icon("settings-2")}</button></nav></header>
 <main class="game-shell"><aside class="sidebar"><div class="expedition-intro"><div class="eyebrow">AN ADVENTURE AWAITS</div><h1 id="map-title"></h1><p class="intro-copy">Follow the path.<br>Find your own story.</p><button class="map-link" data-action="maps">${icon("map")}<span>Explore another world</span>${icon("arrow-up-right")}</button></div>
 <div class="sidebar-rule"></div><div class="section-label">YOUR ADVENTURER<button data-action="characters">Change ${icon("chevron-right")}</button></div><button class="hero-card" data-action="characters"><div id="hero-avatar" class="hero-avatar">${icon("wand-sparkles")}</div><div><strong id="hero-name"></strong><span id="hero-class"></span></div><span class="hero-online"></span></button>
 <div class="journey"><div class="section-label"><span>THE JOURNEY</span><span class="tile-counter"><b id="tile-current">01</b> / 93</span></div><div class="progress-track"><div id="progress-fill"></div></div><div id="region-list" class="region-list"></div></div>
-<div class="inventory"><div>${icon("gem")}<strong id="gold">0</strong><span>Gold found</span></div><div>${icon("sparkles")}<strong id="clues">0</strong><span>Clues collected</span></div></div>
+<div class="inventory"><div>${icon("gem")}<strong id="gold">0</strong><span>Gold found</span></div><div>${icon("sparkles")}<strong id="clues">0</strong><span>Clues collected</span></div><div>${icon("crown")}<strong id="points">0</strong><span>Points</span></div></div>
 <div class="journal-section"><div class="section-label">TRAVELER’S JOURNAL<button data-action="journal">View all ${icon("arrow-up-right")}</button></div><div id="journal"></div></div><div class="sidebar-footer"><span class="save-dot"></span> Your journey is saved automatically</div></aside>
-<section class="world-area" aria-label="Game board"><div class="sky-stars"></div><div class="world-grain"></div><div id="viewport"></div><div class="world-heading"><span class="eyebrow" id="chapter">CHAPTER I</span><h2 id="region-name">Hearthwick Village</h2><p id="region-subtitle">Every great tale begins with a small step.</p></div><div class="world-meta"><span class="live-dot"></span><span id="player-count">SOLO EXPEDITION</span><span class="meta-divider"></span><span id="turn-label">TURN 01</span></div><div class="world-label castle-label" id="destination-label">${icon("flag")}<span>CROWNFALL CASTLE</span></div><div id="tile-tooltip" class="tile-tooltip" hidden></div><div class="compass-rose"><span>N</span><div>✧</div></div><div class="camera-controls"><button data-action="focus" aria-label="Focus active character" title="Focus character (F)">${icon("crosshair")}</button><span></span><button data-action="zoom-in" aria-label="Zoom in">${icon("plus")}</button><button data-action="zoom-out" aria-label="Zoom out">${icon("minus")}</button><span></span><button data-action="reset-camera" aria-label="Reset camera" title="Reset camera (R)">${icon("scan")}</button></div><div class="camera-hint">${icon("orbit")} Drag to explore <span>·</span> Scroll to zoom</div>
+<section class="world-area" aria-label="Game board"><div class="sky-stars"></div><div class="world-grain"></div><div id="viewport"></div><div id="party-panel" class="party-overlay" hidden></div><div class="world-heading"><span class="eyebrow" id="chapter">CHAPTER I</span><h2 id="region-name">Hearthwick Village</h2><p id="region-subtitle">Every great tale begins with a small step.</p></div><div class="world-meta"><span class="live-dot"></span><span id="player-count">SOLO EXPEDITION</span><span class="meta-divider"></span><span id="turn-label">TURN 01</span></div><div class="world-label castle-label" id="destination-label">${icon("flag")}<span>CROWNFALL CASTLE</span></div><div id="tile-tooltip" class="tile-tooltip" hidden></div><div class="compass-rose"><span>N</span><div>✧</div></div><div class="camera-controls"><button data-action="focus" aria-label="Focus active character" title="Focus character (F)">${icon("crosshair")}</button><span></span><button data-action="zoom-in" aria-label="Zoom in">${icon("plus")}</button><button data-action="zoom-out" aria-label="Zoom out">${icon("minus")}</button><span></span><button data-action="reset-camera" aria-label="Reset camera" title="Reset camera (R)">${icon("scan")}</button></div><div class="camera-hint">${icon("orbit")} Drag to explore <span>·</span> Scroll to zoom</div>
 <div class="turn-panel"><div class="turn-icon">${icon("sparkles")}</div><div class="turn-copy"><span class="eyebrow" id="turn-eyebrow">YOUR STORY STARTS HERE</span><h3 id="turn-title">The first step is yours.</h3><p id="turn-description">Roll the dice. See where the path takes you.</p></div><div class="dice-separator"></div><div id="dice" class="dice-face" aria-label="Dice"><span class="dice-pip"></span></div><button id="roll-button" class="primary-button" data-action="roll">${icon("dices")}<span>Roll the dice</span><kbd>SPACE</kbd></button></div>
 <div class="board-legend"><span><i style="--dot:#b4a0dc"></i>Mystery</span><span><i style="--dot:#edbf67"></i>Treasure</span><span><i style="--dot:#83cbb4"></i>Fortune</span><span><i style="--dot:#82c9dd"></i>Portal</span></div><div class="scene-loading" id="scene-loading"><span class="loading-orbit"></span>Unfolding your world…</div></section></main>
 <dialog id="modal" class="modal"><div id="modal-content"></div></dialog><div id="toast" class="toast" role="status"></div>`;
@@ -171,6 +176,40 @@ const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
   document.getElementById(id) as T;
 const dialog = $<HTMLDialogElement>("modal");
 let toastTimer: ReturnType<typeof setTimeout>;
+let roomQueue = Promise.resolve(),
+  visualRoomId = "",
+  shownNetworkEncounter = "",
+  visualRoomPhase = "";
+let challengePanel: ChallengePanel | null = null;
+const realtime = new RealtimeClient(
+  (message) => {
+    roomQueue = roomQueue
+      .then(() => receiveRoom(message))
+      .catch((error) => {
+        busy = false;
+        toast(
+          error instanceof Error ? error.message : "Could not update the room.",
+        );
+        update();
+      });
+  },
+  () => {
+    if (scene) {
+      update();
+      if (modalType === "lobby") roomPanels.lobby();
+    }
+  },
+  (message) => toast(message),
+);
+function ownPlayerIndex() {
+  return realtime.session
+    ? Math.max(
+        0,
+        state.players.findIndex((p) => p.id === realtime.session!.playerId),
+      )
+    : state.active;
+}
+
 function toast(text: string) {
   $("toast").textContent = text;
   $("toast").classList.add("visible");
@@ -178,7 +217,7 @@ function toast(text: string) {
   toastTimer = setTimeout(() => $("toast").classList.remove("visible"), 3500);
 }
 function persist() {
-  saveGame(state);
+  if (!realtime.session) saveGame(state);
 }
 function update() {
   const player = state.players[state.active],
@@ -199,6 +238,7 @@ function update() {
   $("progress-fill").style.width = `${(player.position / 92) * 100}%`;
   $("gold").textContent = String(player.gold);
   $("clues").textContent = String(player.clues);
+  $("points").textContent = String(playerScore(player));
   $("region-list").innerHTML = theme.regions
     .map(
       (r, i) =>
@@ -208,12 +248,16 @@ function update() {
   $("chapter").textContent =
     `CHAPTER ${["I", "II", "III", "IV"][tile.region]} · ${theme.tagline.toUpperCase()}`;
   $("region-name").textContent = theme.regions[tile.region];
-  $("region-subtitle").textContent = [
-    "Every great tale begins with a small step.",
-    "There’s more to this place than meets the eye.",
-    "Old magic waits beneath the stone.",
-    "One final climb. A thousand untold stories.",
-  ][tile.region];
+  $("region-subtitle").textContent =
+    [
+      "Every great tale begins with a small step.",
+      "There’s more to this place than meets the eye.",
+      "Old magic waits beneath the stone.",
+      "One final climb. A thousand untold stories.",
+    ][tile.region] +
+    (SKY_ROUTES[theme.id]?.length
+      ? ` · ${layerName(theme.id, player.position)}`
+      : "");
   $("destination-label").innerHTML =
     icon("flag") + `<span>${theme.regions[3].toUpperCase()}</span>`;
   $("player-count").textContent =
@@ -229,7 +273,12 @@ function update() {
     )
     .join("");
   const button = $<HTMLButtonElement>("roll-button");
-  button.disabled = busy || state.phase !== "ready";
+  button.disabled =
+    busy ||
+    state.phase !== "ready" ||
+    Boolean(
+      realtime.session && (!realtime.myTurn || realtime.status !== "online"),
+    );
   button.innerHTML =
     icon(busy ? "footprints" : state.phase === "won" ? "crown" : "dices") +
     `<span>${busy ? "On the path…" : state.phase === "event" ? "A mystery awaits" : state.phase === "won" ? "Journey complete" : "Roll the dice"}</span>${!busy && state.phase === "ready" ? "<kbd>SPACE</kbd>" : ""}`;
@@ -257,6 +306,28 @@ function update() {
       : busy
         ? "A little courage goes a long way."
         : "Roll the dice. See where the path takes you.";
+  if (realtime.session) {
+    $("room-nav-label").textContent = "Room " + (realtime.room?.code || "");
+    if (realtime.room?.phase === "lobby") {
+      button.innerHTML = icon("users") + "<span>Gather your party</span>";
+      $("turn-title").textContent = "Your party is getting ready.";
+      $("turn-description").textContent =
+        "Choose a unique hero, mark ready, and let the host begin.";
+    } else if (!realtime.myTurn && state.phase !== "won") {
+      button.innerHTML =
+        icon("moon") + "<span>Waiting for " + safe(player.name) + "</span>";
+      $("turn-title").textContent = player.name + "’s turn";
+      $("turn-description").textContent =
+        realtime.status === "online"
+          ? "The whole party sees every roll and discovery."
+          : "Reconnecting to your expedition…";
+    } else if (realtime.myTurn && !busy && state.phase === "ready") {
+      $("turn-title").textContent = "Your turn, " + player.name + ".";
+      $("turn-description").textContent =
+        "The server rolls the die. You choose the adventure.";
+    }
+  } else $("room-nav-label").textContent = "Play together";
+  renderParty();
   if (scene) {
     scene.active = state.active;
     if (!busy) scene.positionPlayers(state.players);
@@ -305,6 +376,20 @@ function randomInt(max: number) {
 }
 async function doRoll() {
   if (busy || state.phase !== "ready" || dialog.open) return;
+  if (realtime.session) {
+    if (!realtime.myTurn) return;
+    busy = true;
+    update();
+    try {
+      sound("roll");
+      await realtime.command("ROLL_DIE");
+    } catch (error) {
+      busy = false;
+      toast(error instanceof Error ? error.message : "Could not roll.");
+      update();
+    }
+    return;
+  }
   busy = true;
   update();
   $("dice").classList.add("rolling");
@@ -332,6 +417,11 @@ async function doRoll() {
     scene.impact(player, "portal");
   else if (state.journal[0]?.text.includes("gold"))
     scene.impact(player, "treasure");
+  if (
+    (state.phase as string) !== "ready" ||
+    state.journal[0]?.text.includes("gold")
+  )
+    await delay(450);
   busy = false;
   persist();
   update();
@@ -346,7 +436,13 @@ async function doRoll() {
   }
 }
 function closeModal() {
-  if (modalType === "encounter" || modalType === "victory") return;
+  if (
+    modalType === "encounter" ||
+    modalType === "victory" ||
+    modalType === "challenge"
+  )
+    return;
+  challengePanel?.stop();
   preview?.dispose();
   preview = null;
   mapPreview?.dispose();
@@ -355,6 +451,7 @@ function closeModal() {
   modalType = "";
 }
 function openModal(type: string, html: string, wide = false) {
+  challengePanel?.stop();
   preview?.dispose();
   preview = null;
   mapPreview?.dispose();
@@ -368,10 +465,36 @@ function openModal(type: string, html: string, wide = false) {
 }
 const modalHeader = (eyebrow: string, title: string, close = true) =>
   `<div class="modal-header"><div><span class="eyebrow">${eyebrow}</span><h2>${title}</h2></div>${close ? `<button class="icon-button" data-action="close-modal" aria-label="Close dialog">${icon("x")}</button>` : ""}</div>`;
+const roomPanels = new RoomPanels(
+  realtime,
+  {
+    icon,
+    escape: safe,
+    open: openModal,
+    header: modalHeader,
+    toast,
+    characters: showCharacters,
+    leave: leaveOnline,
+    map: () => state.map,
+  },
+  app,
+);
+challengePanel = new ChallengePanel(
+  realtime,
+  {
+    icon,
+    escape: safe,
+    open: openModal,
+    header: modalHeader,
+    toast,
+    sound: () => sound("step"),
+  },
+  app,
+);
 function showCharacters() {
   if (busy) return;
   selected = CHARACTERS.findIndex(
-    (c) => c.id === state.players[state.active].character,
+    (c) => c.id === state.players[ownPlayerIndex()].character,
   );
   previewTint = undefined;
   openModal(
@@ -415,22 +538,37 @@ function updateCharacter() {
       ),
     );
   const taken = state.players.some(
-    (p, i) => i !== state.active && p.character === c.id,
+    (p, i) => i !== ownPlayerIndex() && p.character === c.id,
   );
   const b = $<HTMLButtonElement>("select-character");
-  b.disabled = taken;
+  const locked = Boolean(realtime.session && realtime.room?.phase !== "lobby");
+  b.disabled = taken || locked;
   b.innerHTML =
     icon(taken ? "users" : "check") +
-    `<span>${taken ? "Traveling with another player" : `Select ${c.name}`}</span>`;
-  void preview?.show(c, previewTint || state.players[state.active].tint);
+    `<span>${taken ? "Claimed by another player" : locked ? "Heroes are locked during the expedition" : `Select ${c.name}`}</span>`;
+  document.querySelectorAll<HTMLElement>("[data-character]").forEach((card) => {
+    const hero = CHARACTERS[Number(card.dataset.character)],
+      owner = state.players.find(
+        (p, i) => i !== ownPlayerIndex() && p.character === hero.id,
+      );
+    card.classList.toggle("is-taken", Boolean(owner));
+    const label = card.querySelector("small");
+    if (label)
+      label.textContent = owner
+        ? "Claimed · " + owner.name
+        : MODEL_PATHS[hero.id]
+          ? "3D model"
+          : "Prototype";
+  });
+  void preview?.show(c, previewTint || state.players[ownPlayerIndex()].tint);
   refreshIcons();
 }
 function showMaps() {
   if (busy) return;
   openModal(
     "maps",
-    modalHeader("TEN WORLDS. COUNTLESS STORIES.", "Where will you wander?") +
-      `<p class="modal-intro">A new landscape. A new mystery. The same adventurous spirit.</p><div class="maps-grid">${MAPS.map((m, i) => `<button class="map-card ${m.id === theme.id ? "selected" : ""}" data-map="${m.id}" style="--map-sky:${m.sky};--map-ground:${m.terrain[2]};--map-accent:${m.accent}"><div class="map-art"><img class="map-thumbnail" src="/previews/${m.id}.webp" alt="3D preview of ${m.name}" loading="lazy" onerror="this.style.display='none'"/><div class="map-art-moon"></div><div class="map-art-mountain back"></div><div class="map-art-mountain"></div><div class="map-art-island"></div><span class="map-art-icon">${icon(m.icon)}</span><span class="map-number">${String(i + 1).padStart(2, "0")}</span>${m.id === theme.id ? '<span class="map-current">CURRENT WORLD</span>' : ""}</div><div class="map-card-copy"><h3>${m.name}</h3><p>${MAP_SHAPES[m.id].name}</p><span>${m.id === "dragonkind" ? "Dragon rider academy" : "93 tiles · 4 chapters"} ${icon("arrow-up-right")}</span></div></button>`).join("")}</div><p class="modal-note">Choosing another world starts a fresh expedition. Your current journey is saved until you confirm.</p>`,
+    modalHeader("THIRTY WORLDS. COUNTLESS STORIES.", "Where will you wander?") +
+      `<p class="modal-intro">Thirty silhouettes. Three to nine floors. Find a new kind of adventure.</p><div class="world-gallery-toolbar"><label>${icon("compass")}<input id="world-search" type="search" placeholder="Find a world, shape, or theme…" aria-label="Search worlds"/></label><span id="world-result-count">${MAPS.length} worlds</span></div><div class="maps-grid">${MAPS.map((m, i) => `<button class="map-card ${m.id === theme.id ? "selected" : ""}" data-map="${m.id}" style="--map-sky:${m.sky};--map-ground:${m.terrain[2]};--map-accent:${m.accent}"><div class="map-art"><img class="map-thumbnail" src="/previews/${m.id}.webp" alt="3D preview of ${m.name}" loading="lazy" onerror="this.style.display='none'"/><div class="map-art-moon"></div><div class="map-art-mountain back"></div><div class="map-art-mountain"></div><div class="map-art-island"></div><span class="map-art-icon">${icon(m.icon)}</span><span class="map-number">${String(i + 1).padStart(2, "0")}</span>${m.id === theme.id ? '<span class="map-current">CURRENT WORLD</span>' : ""}</div><div class="map-card-copy"><h3>${m.name}</h3><p>${MAP_SHAPES[m.id].name} · ${MAP_SHAPES[m.id].floors} floors</p><span>${m.id === "dragonkind" ? "Dragon rider academy" : "93 tiles · 4 chapters"} ${icon("arrow-up-right")}</span></div></button>`).join("")}</div><p class="modal-note">Choosing another world starts a fresh expedition. Your current journey is saved until you confirm.</p>`,
     true,
   );
 }
@@ -442,24 +580,35 @@ function confirmMap(id: string) {
     "new-world",
     modalHeader("EXPLORE YOUR NEXT WORLD", m.name) +
       `
-  <div class="map-preview-layout"><div class="map-preview-stage"><div id="map-preview-canvas"></div><span class="map-preview-badge">${icon(m.icon)} LIVE 3D PREVIEW</span><div id="map-preview-loading" class="map-preview-loading"><span class="loading-orbit"></span>Bringing this world to life…</div><div class="map-preview-tools"><button data-action="preview-map-reset" aria-label="Reset preview">${icon("scan")}</button><button data-action="preview-map-in" aria-label="Zoom preview in">${icon("plus")}</button><button data-action="preview-map-out" aria-label="Zoom preview out">${icon("minus")}</button></div><div class="map-preview-hint">${icon("orbit")} Drag to rotate · Scroll to explore</div></div><div class="map-preview-copy"><div class="character-index"><span>WORLD ${String(index + 1).padStart(2, "0")} / 10</span><div><button class="icon-button" data-preview-map="${MAPS[(index + 9) % 10].id}" aria-label="Previous map">${icon("chevron-left")}</button><button class="icon-button" data-preview-map="${MAPS[(index + 1) % 10].id}" aria-label="Next map">${icon("chevron-right")}</button></div></div><h3>${m.tagline}</h3><p class="modal-intro">${m.description}</p><div class="map-preview-chapters">${m.regions.map((region, i) => `<div><span>${String(i + 1).padStart(2, "0")}</span>${region}</div>`).join("")}</div><div class="map-preview-stats"><span>${icon("footprints")} 93 tiles</span><span>${icon("map")} ${MAP_SHAPES[m.id].name}</span><span>${icon("sparkles")} Unique mysteries</span></div><p class="modal-note">${current ? "You are exploring this world. Your journey is waiting." : "Start at tile 1 with your current party. This replaces the saved expedition."}</p><button class="primary-button full-width" ${current ? 'data-action="close-modal"' : `data-start-map="${m.id}"`}>${icon("compass")}${current ? "Return to my expedition" : "Begin this journey"}</button><button class="text-button" data-action="maps">See all worlds</button></div></div>`,
+  <div class="map-preview-layout"><div class="map-preview-stage"><div id="map-preview-canvas"></div><span class="map-preview-badge">${icon(m.icon)} LIVE 3D PREVIEW</span><div id="map-preview-loading" class="map-preview-loading"><span class="loading-orbit"></span>Bringing this world to life…</div><div class="map-preview-tools"><button data-action="preview-map-reset" aria-label="Reset preview">${icon("scan")}</button><button data-action="preview-map-in" aria-label="Zoom preview in">${icon("plus")}</button><button data-action="preview-map-out" aria-label="Zoom preview out">${icon("minus")}</button></div><div class="map-preview-hint">${icon("orbit")} Drag to rotate · Scroll to explore</div></div><div class="map-preview-copy"><div class="character-index"><span>WORLD ${String(index + 1).padStart(2, "0")} / ${MAPS.length}</span><div><button class="icon-button" data-preview-map="${MAPS[(index + MAPS.length - 1) % MAPS.length].id}" aria-label="Previous map">${icon("chevron-left")}</button><button class="icon-button" data-preview-map="${MAPS[(index + 1) % MAPS.length].id}" aria-label="Next map">${icon("chevron-right")}</button></div></div><h3>${m.tagline}</h3><p class="modal-intro">${m.description}</p><div class="map-preview-chapters">${m.regions.map((region, i) => `<div><span>${String(i + 1).padStart(2, "0")}</span>${region}</div>`).join("")}</div><div class="map-preview-stats"><span>${icon("footprints")} 93 tiles</span><span>${icon("map")} ${MAP_SHAPES[m.id].name}</span><span>${icon("mountain")} ${MAP_SHAPES[m.id].floors} terraces · ${MAP_SHAPES[m.id].size}</span><span>${icon("wind")} ${SKY_ROUTES[m.id]?.length ? `Ground + ${SKY_ROUTES[m.id].length} sky route${SKY_ROUTES[m.id].length > 1 ? "s" : ""}` : "Ground realm"}</span><span>${icon("sparkles")} Unique mysteries</span></div><p class="modal-note">${current ? "You are exploring this world. Your journey is waiting." : "Start at tile 1 with your current party. This replaces the saved expedition."}</p><button class="primary-button full-width" ${current ? 'data-action="close-modal"' : `data-start-map="${m.id}"`}>${icon("compass")}${current ? "Return to my expedition" : "Begin this journey"}</button><button class="text-button" data-action="maps">See all worlds</button></div></div>`,
     true,
   );
   mapPreview = new GameScene($("map-preview-canvas"), m, graphicsQuality);
   mapPreview.controls.autoRotate = true;
   mapPreview.controls.autoRotateSpeed = 0.3;
-  mapPreview.camera.position.set(32, 37, 43);
+
   const currentPreview = mapPreview;
   void mapPreview.ready.then(() => {
     if (mapPreview === currentPreview) $("map-preview-loading").hidden = true;
   });
 }
 async function startMap(id: string, count = state.players.length) {
+  if (realtime.session) {
+    if (realtime.room?.phase !== "lobby" || !realtime.isHost) {
+      toast("Only the host can choose a new world in the lobby.");
+      return;
+    }
+    await realtime.command("SET_WORLD", { map: id });
+    closeModal();
+    roomPanels.lobby();
+    return;
+  }
   const char = state.players[state.active].character;
   state = newGame(count, char, id);
   persist();
   dialog.close();
   modalType = "";
+  challengePanel?.stop();
   preview?.dispose();
   preview = null;
   mapPreview?.dispose();
@@ -493,11 +642,24 @@ function showEncounter() {
       event.title,
       false,
     ) +
-      `<div class="encounter-art">${icon(event.icon)}<span>✧</span><span>✦</span></div><p class="encounter-text">${event.text}</p><div class="encounter-choices">${event.choices.map((c, i) => `<button data-choice="${i}" ${state.players[state.active].gold + c.gold < 0 ? "disabled" : ""}><div><strong>${c.label}</strong><span>${c.detail}</span></div>${icon("arrow-up-right")}</button>`).join("")}</div><p class="modal-note">${icon("sparkles")} Your choices make the journey.</p>`,
+      `<div class="encounter-art">${icon(event.icon)}<span>✧</span><span>✦</span></div><p class="encounter-text">${event.text}</p><div class="encounter-choices">${event.choices.map((c, i) => `<button data-choice="${i}" ${state.players[state.active].gold + c.gold < 0 || (realtime.session && !realtime.myTurn) ? "disabled" : ""}><div><strong>${c.label}</strong><span>${c.detail}</span></div>${icon("arrow-up-right")}</button>`).join("")}</div><p class="modal-note">${icon("sparkles")} Your choices make the journey.</p>`,
   );
 }
 async function resolveChoice(index: number) {
   if (busy) return;
+  if (realtime.session) {
+    if (!realtime.myTurn) return;
+    try {
+      await realtime.command("CHOOSE", { index });
+    } catch (error) {
+      toast(
+        error instanceof Error
+          ? error.message
+          : "Could not resolve the choice.",
+      );
+    }
+    return;
+  }
   const player = state.active,
     route = choose(state, index);
   dialog.close();
@@ -522,13 +684,22 @@ async function resolveChoice(index: number) {
 function showVictory() {
   const winner = state.players[state.winner!],
     c = CHARACTERS.find((c) => c.id === winner.character)!;
+  const online = Boolean(realtime.session);
+  const standings = [...state.players].sort(
+    (a, b) => playerScore(b) - playerScore(a),
+  );
   sound("victory");
   openModal(
     "victory",
-    modalHeader("YOUR LEGEND BEGINS", `${c.name} has arrived.`, false) +
-      `<div class="victory-art">${icon("crown")}<span>✧</span><span>✧</span></div><p class="encounter-text">Through every twist, every mystery, and every leap of faith, you found your way to ${theme.regions[3]}.</p><div class="victory-stats"><div><strong>${state.turn}</strong><span>Turns traveled</span></div><div><strong>${winner.gold}</strong><span>Gold found</span></div><div><strong>${winner.clues}</strong><span>Clues collected</span></div></div><button class="primary-button" data-action="victory-maps">${icon("map")}Find your next adventure</button><button class="text-button" data-action="view-board">Stay a little longer</button>`,
+    modalHeader(
+      "YOUR LEGEND BEGINS",
+      `${online ? safe(winner.name) : c.name} wins the expedition.`,
+      false,
+    ) +
+      `<div class="victory-art">${icon("crown")}<span>✧</span><span>✧</span></div><p class="encounter-text">Through every twist, every mystery, and every leap of faith, your party found its way to ${theme.regions[3]}.</p><div class="victory-stats"><div><strong>${state.turn}</strong><span>Turns traveled</span></div><div><strong>${winner.gold}</strong><span>Gold found</span></div><div><strong>${winner.clues}</strong><span>Clues collected</span></div><div><strong>${playerScore(winner)}</strong><span>Winning points</span></div></div><div class="victory-standings">${standings.map((p, i) => `<div><span>${i + 1}. ${safe(p.name)} · ${CHARACTERS.find((c) => c.id === p.character)!.name}</span><strong>${playerScore(p)} pts</strong></div>`).join("")}</div>${online ? `<button class="primary-button" data-action="rooms">${icon("users")}Return to the party · ${realtime.isHost ? "Play again" : "Wait for a rematch"}</button>` : `<button class="primary-button" data-action="victory-maps">${icon("map")}Find your next adventure</button>`}<button class="text-button" data-action="view-board">Stay a little longer</button>`,
   );
 }
+
 function showSettings() {
   openModal(
     "settings",
@@ -554,7 +725,7 @@ function showHelp() {
       "A SMALL GUIDE TO A BIG ADVENTURE",
       "Let curiosity lead the way.",
     ) +
-      `<div class="help-steps"><div><span>01</span><div><h3>Choose your wanderer</h3><p>Open your character card to meet the 12 adventurers. Rotate the preview, try their actions, and select your favorite.</p></div></div><div><span>02</span><div><h3>Follow the path</h3><p>Roll a six-sided die and travel along 93 tiles through four rising regions. Reach the final tile to win; an exact roll is not required.</p></div></div><div><span>03</span><div><h3>Expect the unexpected</h3><p>Mysteries offer choices. Treasure gives 3 gold. Fortune gives 2 gold and a clue. Portals move you 3 extra tiles. Extra movement ends safely without triggering another encounter.</p></div></div><div><span>04</span><div><h3>Make it your adventure</h3><p>Explore ten worlds, or set up 2–4 local players in settings. Take turns on this device. The first to the destination wins. Gold and clues record the stories you discover.</p></div></div></div><div class="keyboard-guide"><span><kbd>SPACE</kbd> Roll</span><span><kbd>F</kbd> Find hero</span><span><kbd>R</kbd> Reset view</span><span><kbd>ESC</kbd> Close</span></div><p class="modal-note">Drag the world to orbit. Scroll or pinch to zoom. Right-drag to pan. Sound is optional. <a href="/ASSET-CREDITS.md" target="_blank" rel="noopener">3D asset credits</a>.</p>`,
+      `<div class="help-steps"><div><span>01</span><div><h3>Choose your wanderer</h3><p>Open your character card to meet the 12 adventurers. Rotate the preview, try their actions, and select your favorite.</p></div></div><div><span>02</span><div><h3>Follow the path</h3><p>Roll a six-sided die and travel along 93 tiles through four rising regions. Reach the final tile to win; an exact roll is not required.</p></div></div><div><span>03</span><div><h3>Expect the unexpected</h3><p>Mysteries offer choices. Treasure gives 3 gold. Fortune gives 2 gold and a clue. Portals move you 3 extra tiles. Extra movement ends safely without triggering another encounter.</p></div></div><div><span>04</span><div><h3>Make it your adventure</h3><p>Explore thirty worlds, or set up 2–4 local players in settings. Take turns on this device. The first to the destination wins. Gold and clues record the stories you discover.</p></div></div></div><div class="keyboard-guide"><span><kbd>SPACE</kbd> Roll</span><span><kbd>F</kbd> Find hero</span><span><kbd>R</kbd> Reset view</span><span><kbd>ESC</kbd> Close</span></div><p class="modal-note">Drag the world to orbit. Scroll or pinch to zoom. Right-drag to pan. Sound is optional. <a href="/ASSET-CREDITS.md" target="_blank" rel="noopener">3D asset credits</a>.</p>`,
   );
 }
 function showJournal() {
@@ -569,6 +740,7 @@ function showJournal() {
 }
 function attachScene() {
   scene.onStep = () => sound("step");
+  scene.onLand = () => sound("land");
   scene.onTile = (id) => {
     const tip = $("tile-tooltip");
     if (id === null || busy) {
@@ -585,7 +757,9 @@ app.addEventListener("click", async (e) => {
   if (!el || el.hasAttribute("disabled")) return;
   const action = el.dataset.action;
   if (action !== "sound") sound("ui");
-  if (action === "journey") {
+  if (action === "rooms") {
+    roomPanels.open();
+  } else if (action === "journey") {
     document.querySelector(".game-shell")!.classList.toggle("journey-open");
   } else if (action === "roll") void doRoll();
   else if (action === "characters") showCharacters();
@@ -612,6 +786,23 @@ app.addEventListener("click", async (e) => {
     selected = (selected + (action === "next-character" ? 1 : 11)) % 12;
     updateCharacter();
   } else if (action === "select-character") {
+    if (realtime.session) {
+      try {
+        await realtime.command("SELECT_CHARACTER", {
+          character: CHARACTERS[selected].id,
+          ...(previewTint ? { tint: previewTint } : {}),
+        });
+        closeModal();
+        roomPanels.lobby();
+      } catch (error) {
+        toast(
+          error instanceof Error
+            ? error.message
+            : "That character could not be selected.",
+        );
+      }
+      return;
+    }
     state.players[state.active].character = CHARACTERS[selected].id;
     if (previewTint) state.players[state.active].tint = previewTint;
     persist();
@@ -623,6 +814,11 @@ app.addEventListener("click", async (e) => {
     update();
     toast(`${CHARACTERS[selected].name} is ready for the journey.`);
   } else if (action === "confirm-restart") {
+    if (realtime.session) {
+      roomPanels.open();
+      return;
+    }
+
     const count = Number($<HTMLSelectElement>("party-setting").value);
     openModal(
       "restart",
@@ -688,7 +884,12 @@ dialog.addEventListener("close", () => {
   if (scene) scene.paused = false;
 });
 dialog.addEventListener("cancel", (e) => {
-  if (modalType === "encounter" || modalType === "victory") e.preventDefault();
+  if (
+    modalType === "encounter" ||
+    modalType === "victory" ||
+    modalType === "challenge"
+  )
+    e.preventDefault();
   else {
     preview?.dispose();
     preview = null;
@@ -724,6 +925,15 @@ window.addEventListener("keydown", (e) => {
 });
 app.addEventListener("input", (e) => {
   const el = e.target as HTMLInputElement;
+  if (el.id === "world-search") {
+    const q = el.value.toLowerCase().trim();
+    let shown = 0;
+    document.querySelectorAll<HTMLElement>(".map-card").forEach((card) => {
+      card.hidden = !card.textContent?.toLowerCase().includes(q);
+      if (!card.hidden) shown++;
+    });
+    $("world-result-count").textContent = shown + " worlds";
+  }
   if (el.dataset.audioVolume) {
     const channel = el.dataset.audioVolume as "music" | "ambience" | "effects";
     gameAudio.setVolume(channel, Number(el.value) / 100);
@@ -746,8 +956,155 @@ try {
   });
   if (state.dice) showDice(state.dice);
   if (state.phase === "event") showEncounter();
+  void realtime.restore();
 } catch (err) {
   console.error(err);
   $("scene-loading").innerHTML =
     `<div><h2>Your browser couldn’t open the 3D world.</h2><p>Enable WebGL and hardware acceleration, then refresh to continue.</p><button class="secondary-button" onclick="location.reload()">Try again</button></div>`;
+}
+
+function renderParty() {
+  const panel = $("party-panel");
+  panel.hidden = state.players.length === 1 && !realtime.session;
+  if (panel.hidden) return;
+  panel.innerHTML = `<div class="party-title"><span>${realtime.session ? "LIVE EXPEDITION" : "TURN ORDER"}</span><button class="icon-button" data-action="rooms" aria-label="Open room">${icon("users")}</button></div>${state.players.map((p, i) => `<div class="party-score-row ${i === state.active ? "active" : ""}"><span class="party-player-dot" style="--player:${p.tint}">${i === state.active ? "✧" : String(i + 1)}</span><div><strong>${safe(p.name)}${p.id === realtime.session?.playerId ? " <small>YOU</small>" : ""}</strong><span>${CHARACTERS.find((c) => c.id === p.character)!.name} · Tile ${p.position + 1}</span></div><b>${playerScore(p)}<small>PTS</small></b></div>`).join("")}<div class="party-footer">${realtime.session ? `${realtime.room?.mode === "score" ? "Score expedition" : "Classic race"} · Room ${realtime.room?.code}` : "Pass-and-play on this device"}</div>`;
+}
+async function leaveOnline() {
+  challengePanel?.stop();
+  dialog.close();
+  modalType = "";
+  visualRoomId = "";
+  visualRoomPhase = "";
+  shownNetworkEncounter = "";
+  try {
+    state =
+      parseSave(localStorage.getItem("wilder-expedition-v1")) || newGame();
+  } catch {
+    state = newGame();
+  }
+  theme = getMap(state.map);
+  scene.dispose();
+  scene = new GameScene($("viewport"), theme, graphicsQuality);
+  attachScene();
+  await scene.setPlayers(state.players, state.active);
+  busy = false;
+  update();
+  toast(
+    "You returned to your local expedition. The room is saved on the server.",
+  );
+}
+async function receiveRoom(message: RoomUpdate) {
+  if (!realtime.session || message.room.id !== realtime.session.roomId) return;
+  const room = message.room,
+    previous = state,
+    initial = visualRoomId !== room.id,
+    partyChanged =
+      initial ||
+      previous.players.map((p) => p.id + ":" + p.character).join("|") !==
+        room.game.players.map((p) => p.id + ":" + p.character).join("|"),
+    mapChanged = state.map !== room.game.map,
+    wasLobby = visualRoomPhase === "lobby";
+  visualRoomId = room.id;
+  visualRoomPhase = room.phase;
+  state = room.game;
+  if (mapChanged) {
+    theme = getMap(state.map);
+    gameAudio.setTheme(theme);
+    scene.dispose();
+    scene = new GameScene($("viewport"), theme, graphicsQuality);
+    attachScene();
+    $("scene-loading").hidden = false;
+    document
+      .querySelector<HTMLElement>(".world-area")!
+      .style.setProperty("--world-bg", theme.sky);
+  }
+  if (partyChanged || mapChanged) {
+    busy = true;
+    await scene.setPlayers(state.players, state.active);
+    $("scene-loading").hidden = true;
+    busy = false;
+  }
+  const payload = message.event?.payload;
+  if (payload?.route?.length && !initial && !partyChanged && !mapChanged) {
+    if (dialog.open) {
+      dialog.close();
+      modalType = "";
+      challengePanel?.stop();
+    }
+    busy = true;
+    update();
+    if (payload.dice) {
+      showDice(payload.dice);
+      sound("roll");
+    }
+    await scene.move(
+      payload.playerIndex ?? previous.active,
+      payload.route,
+      runMovement,
+    );
+    if (room.game.phase === "won") {
+      scene.react(payload.playerIndex ?? previous.active, "celebrate");
+      scene.impact(payload.playerIndex ?? previous.active, "victory");
+      sound("victory");
+    } else if (room.game.phase === "event" || room.game.phase === "challenge") {
+      scene.react(payload.playerIndex ?? previous.active, "magic");
+      scene.impact(payload.playerIndex ?? previous.active, "mystery");
+    } else if (room.game.journal[0]?.text.includes("gold")) {
+      scene.impact(payload.playerIndex ?? previous.active, "treasure");
+      sound("treasure");
+    }
+    await delay(room.game.phase === "ready" ? 50 : 350);
+  }
+  busy = false;
+  if (room.phase === "playing" && wasLobby && dialog.open) {
+    dialog.close();
+    modalType = "";
+    preview?.dispose();
+    preview = null;
+  }
+  update();
+  if (room.phase === "lobby") {
+    shownNetworkEncounter = "";
+    if (modalType === "characters") updateCharacter();
+    else if (
+      modalType === "lobby" ||
+      modalType === "rooms" ||
+      initial ||
+      !dialog.open
+    )
+      roomPanels.lobby();
+    return;
+  }
+  const encounterKey =
+    room.id +
+    ":" +
+    state.turn +
+    ":" +
+    state.phase +
+    ":" +
+    (room.game.challenge?.id || state.mystery || "");
+  if (
+    (state.phase === "event" ||
+      state.phase === "challenge" ||
+      state.phase === "won") &&
+    shownNetworkEncounter !== encounterKey
+  ) {
+    shownNetworkEncounter = encounterKey;
+    if (state.phase === "event") showEncounter();
+    else if (state.phase === "challenge") challengePanel?.open();
+    else showVictory();
+  } else if (
+    state.phase === "ready" &&
+    ["encounter", "challenge"].includes(modalType)
+  ) {
+    challengePanel?.stop();
+    dialog.close();
+    modalType = "";
+  }
+  if (payload?.success !== undefined)
+    toast(
+      payload.success
+        ? "Challenge complete! +50 points and 2 gold."
+        : "The challenge is passed. Your adventure continues.",
+    );
 }

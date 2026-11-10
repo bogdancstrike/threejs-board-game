@@ -1,5 +1,10 @@
 import * as THREE from "three";
-import { groundHeight, seededRandom, getTiles, TILE_INFO } from "../game/data";
+import {
+  groundHeight as baseGroundHeight,
+  seededRandom,
+  getTiles,
+  TILE_INFO,
+} from "../game/data";
 import type { MapTheme } from "../game/maps";
 export interface Atmosphere {
   group: THREE.Group;
@@ -8,6 +13,7 @@ export interface Atmosphere {
   dispose: () => void;
 }
 export function atmosphere(theme: MapTheme): Atmosphere {
+  const groundHeight = (z: number) => baseGroundHeight(z, theme.id);
   const group = new THREE.Group(),
     rng = seededRandom(918),
     disposables: { dispose: () => void }[] = [],

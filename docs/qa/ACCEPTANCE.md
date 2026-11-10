@@ -1,0 +1,18 @@
+# Acceptance checklist
+- [ ] The main app layout and typography outside canvas matches existing UI.
+- [ ] 93 IDs exist or actual repository-configured count is reconciled; no missing/duplicate IDs.
+- [ ] Every tile has supported 3D world transform and clearance.
+- [ ] Four visually distinct elevation regions and interconnected path.
+- [ ] Buildings: forge, windmill, houses, castle, portal and ruins integrated cohesively.
+- [ ] Water: river routing, bridges and at least three visible waterfall effects.
+- [ ] Vegetation: pines, blossoms, shrubs, glowing mushrooms with occlusion-safe placement.
+- [ ] Light: moonlit cool key, warm windows, emissive magic, soft shadows, balanced bloom.
+- [ ] 4 production-ready adult anime characters with selection/preview/animation, 12 defined roster slots.
+- [ ] Room, turn, roll, tile resolver, challenge, finish, rematch work server-authoritatively.
+- [ ] Duplicate actions / retries do not create duplicate rolls or rewards.
+- [ ] Game reconnect reconstructs same position, score and turn state.
+- [ ] Works on target browsers at measured FPS/1% low; perf baseline retained.
+- [ ] Inputs are accessible, sound muting and reduced motion provided.
+- [ ] Content is consent-safe, with alcohol-free alternatives and skips.
+- [ ] Every external model/texture/audio item has checked commercial usage rights.
+- [ ] README, runbook, migrations and rollback procedure updated.

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
-import { groundHeight, getTiles } from "../game/data";
+import { groundHeight as baseGroundHeight, getTiles } from "../game/data";
 import type { MapTheme } from "../game/maps";
 import { MAP_SHAPES, shapeField, islandCenter } from "./shapes";
 interface Point {
@@ -10,6 +10,7 @@ interface Point {
 }
 /** Clip a regular mesh against a signed landscape field, preserving the protected tile footprints. */
 export function sculptTerrain(theme: MapTheme) {
+  const groundHeight = (z: number) => baseGroundHeight(z, theme.id);
   const group = new THREE.Group(),
     extent = MAP_SHAPES[theme.id].extent,
     step = 0.65,

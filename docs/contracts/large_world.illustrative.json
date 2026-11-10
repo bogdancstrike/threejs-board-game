@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 2,
+  "featureFlag": "ENABLE_LARGE_WORLD",
+  "worldId": "verdant",
+  "worldBounds": {
+    "xMin": -35,
+    "xMax": 35,
+    "zMin": -40,
+    "zMax": 40
+  },
+  "tileCount": 93,
+  "tileIndexStart": 0,
+  "tileIndexEnd": 92,
+  "visualTerrain": {
+    "seed": 1729,
+    "heightRegions": [
+      {
+        "name": "Village",
+        "tileRange": [
+          0,
+          22
+        ],
+        "targetHeight": 0.0
+      },
+      {
+        "name": "Forest",
+        "tileRange": [
+          23,
+          47
+        ],
+        "targetHeight": 1.4
+      },
+      {
+        "name": "Highlands",
+        "tileRange": [
+          48,
+          71
+        ],
+        "targetHeight": 3.2
+      },
+      {
+        "name": "Castle",
+        "tileRange": [
+          72,
+          92
+        ],
+        "targetHeight": 5.4
+      }
+    ],
+    "cliffUndersideDepth": 9.0,
+    "minTileClearance": 1.1
+  },
+  "landmarks": [
+    {
+      "id": "village",
+      "region": "Village",
+      "type": "settlement"
+    },
+    {
+      "id": "forge",
+      "region": "Village",
+      "type": "blacksmith"
+    },
+    {
+      "id": "windmill",
+      "region": "Forest",
+      "type": "windmill"
+    },
+    {
+      "id": "arcane_portal",
+      "region": "Highlands",
+      "type": "portal"
+    },
+    {
+      "id": "castle",
+      "region": "Castle",
+      "type": "castle"
+    }
+  ],
+  "notes": "Illustrative config. No world-unit or height values verified against runtime; measure actual path footprint first."
+}
