@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { clone } from "three/addons/utils/SkeletonUtils.js";
 import { groundHeight, getTiles, seededRandom } from "../game/data";
 import type { MapTheme } from "../game/maps";
+import { shapeField } from "./shapes";
 import { loadModel } from "./assets";
 export const ENVIRONMENT_RESERVES = [
   { x: 3.8, z: 13.2, r: 2.1 },
@@ -191,6 +192,25 @@ export function addEnvironmentAssets(theme: MapTheme): EnvironmentAssets {
       footprint: 5,
       floating: true,
     });
+  for (const p of placements) {
+    if (p.floating) continue;
+    const r = p.footprint * 0.5;
+    const clear = (x: number, z: number) =>
+      shapeField(theme.id, x, z) > r + 0.1 &&
+      Math.min(...tiles.map((t) => Math.hypot(t.x - x, t.z - z))) >
+        Math.min(r + 0.7, 1.6);
+    if (clear(p.x, p.z)) continue;
+    const options: { x: number; z: number; d: number }[] = [];
+    for (let dx = -2.5; dx <= 2.5; dx += 0.5)
+      for (let dz = -2.5; dz <= 2.5; dz += 0.5)
+        if (clear(p.x + dx, p.z + dz))
+          options.push({ x: p.x + dx, z: p.z + dz, d: Math.hypot(dx, dz) });
+    options.sort((a, b) => a.d - b.d);
+    if (options[0]) {
+      p.x = options[0].x;
+      p.z = options[0].z;
+    }
+  }
   const tasks = placements.map(async (p) => {
     try {
       const gltf = await loadModel(`/models/environment/${p.id}.glb`);

@@ -63,6 +63,19 @@ export function rigStaticModel(
   source.traverse((node) => {
     if (!(node instanceof THREE.Mesh)) return;
     const geometry = node.geometry.clone();
+    // Meshopt may expose normalized integer positions. Bake world transforms
+    // into floats, so vertices above one unit are not clamped during conversion.
+    const original = geometry.getAttribute("position"),
+      positions = new Float32Array(original.count * 3);
+    for (let i = 0; i < original.count; i++) {
+      positions[i * 3] = original.getX(i);
+      positions[i * 3 + 1] = original.getY(i);
+      positions[i * 3 + 2] = original.getZ(i);
+    }
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(positions, 3),
+    );
     geometry.applyMatrix4(transform.clone().multiply(node.matrixWorld));
     const pos = geometry.getAttribute("position");
     const skinIndices = new Uint16Array(pos.count * 4),

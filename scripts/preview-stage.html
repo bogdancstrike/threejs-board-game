@@ -1,7 +1,8 @@
 <!doctype html><html><head><meta charset="UTF-8"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#192b36}#stage{width:100vw;height:100vh;position:relative}canvas{display:block}</style></head><body><div id="stage"></div><script type="module">
 import {GameScene} from '/src/world/scene.ts';
+import {MAP_SHAPES} from '/src/world/shapes.ts';
 import {getMap,MAPS} from '/src/game/maps.ts';
 let scene;
-window.mapIds=MAPS.map(m=>m.id);
+window.mapIds=MAPS.map(m=>m.id);window.mapDefinitions=MAPS.map(m=>({id:m.id,name:m.name,tagline:m.tagline,shape:MAP_SHAPES[m.id].name,floors:MAP_SHAPES[m.id].floors||4}));
 window.renderMap=async(id)=>{scene?.dispose();scene=new GameScene(document.querySelector('#stage'),getMap(id));scene.camera.position.set(29,36,41);scene.controls.target.set(0,0,0);await scene.ready;scene.controls.update();scene.world.animated.forEach(f=>f(14));scene.environment.update(14,.016);scene.atmosphere.update(14);scene.lighting.update(14);scene.composer.render();scene.paused=true;return {calls:scene.renderer.info.render.calls,triangles:scene.renderer.info.render.triangles};};
 </script></body></html>

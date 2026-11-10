@@ -1,6 +1,74 @@
-import * as THREE from 'three';
-import type {Character} from '../game/data';
-const orb=new THREE.IcosahedronGeometry(.032,1),shard=new THREE.OctahedronGeometry(.06),materials=new Map<string,THREE.MeshBasicMaterial>();
-function effectMaterial(color:string){if(!materials.has(color))materials.set(color,new THREE.MeshBasicMaterial({color:new THREE.Color(color).multiplyScalar(2),transparent:true,opacity:.7,depthWrite:false,blending:THREE.AdditiveBlending}));return materials.get(color)!;}
-export function characterEffects(root:THREE.Object3D,character:Character){const group=new THREE.Group();root.add(group);const particles:THREE.Mesh[]=[];for(let i=0;i<8;i++){const mesh=new THREE.Mesh(['frost','valkyrie','knight'].includes(character.role)?shard:orb,effectMaterial(character.color));group.add(mesh);particles.push(mesh);}root.userData.characterEffects={group,particles,role:character.role};}
-export function updateCharacterEffects(root:THREE.Object3D,t:number,action:string){const effects=root.userData.characterEffects;if(!effects)return;const magic=action==='magic'||action==='celebrate';const moving=action==='walk'||action==='run';const role=effects.role as Character['role'];effects.particles.forEach((particle:THREE.Mesh,i:number)=>{const a=t*(magic?1.3:.4)+i*Math.PI/4;const radius=magic?.43:.32;particle.visible=magic||moving||i%2===0;particle.scale.setScalar(magic?1.2:moving?.5:.55);if(moving){particle.position.set(Math.sin(i*2.7)*.15,.16+((t*1.4+i*.17)%1)*.12,-.2-i*.06);particle.scale.multiplyScalar(1-((t*1.4+i*.17)%1));}else{const y=magic?1+Math.sin(a*1.3)*.25:.4+Math.sin(a)*.12;particle.position.set(Math.cos(a)*radius,y,Math.sin(a)*radius);if(role==='fox')particle.position.y=.9+Math.sin(a*2)*.15;if(role==='frost'){particle.rotation.y=t;particle.rotation.z=t*.5;}if(role==='valkyrie'&&magic){particle.position.set((i%2?1:-1)*(.2+Math.floor(i/2)*.11),1.1+Math.sin(i*.5)*.35,-.1);particle.scale.set(1,2.5,.5);}}});}
+import * as THREE from "three";
+import type { Character } from "../game/data";
+const orb = new THREE.IcosahedronGeometry(0.032, 1),
+  shard = new THREE.OctahedronGeometry(0.06),
+  materials = new Map<string, THREE.MeshBasicMaterial>();
+function effectMaterial(color: string) {
+  if (!materials.has(color))
+    materials.set(
+      color,
+      new THREE.MeshBasicMaterial({
+        color: new THREE.Color(color).multiplyScalar(2),
+        transparent: true,
+        opacity: 0.7,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    );
+  return materials.get(color)!;
+}
+export function characterEffects(root: THREE.Object3D, character: Character) {
+  const group = new THREE.Group();
+  root.add(group);
+  const particles: THREE.Mesh[] = [];
+  for (let i = 0; i < 8; i++) {
+    const mesh = new THREE.Mesh(
+      ["frost", "valkyrie", "knight"].includes(character.role) ? shard : orb,
+      effectMaterial(character.color),
+    );
+    group.add(mesh);
+    particles.push(mesh);
+  }
+  root.userData.characterEffects = { group, particles, role: character.role };
+}
+export function updateCharacterEffects(
+  root: THREE.Object3D,
+  t: number,
+  action: string,
+) {
+  const effects = root.userData.characterEffects;
+  if (!effects) return;
+  const magic = action === "magic" || action === "celebrate";
+  const moving = action === "walk" || action === "run";
+  const role = effects.role as Character["role"];
+  effects.particles.forEach((particle: THREE.Mesh, i: number) => {
+    const a = t * (magic ? 1.3 : 0.4) + (i * Math.PI) / 4;
+    const radius = magic ? 0.43 : 0.32;
+    particle.visible = magic || moving || i % 2 === 0;
+    particle.scale.setScalar(magic ? 1.2 : moving ? 0.5 : 0.55);
+    if (moving) {
+      particle.position.set(
+        Math.sin(i * 2.7) * 0.15,
+        0.16 + ((t * 1.4 + i * 0.17) % 1) * 0.12,
+        -0.2 - i * 0.06,
+      );
+      particle.scale.multiplyScalar(1 - ((t * 1.4 + i * 0.17) % 1));
+    } else {
+      const y = magic ? 1 + Math.sin(a * 1.3) * 0.25 : 0.4 + Math.sin(a) * 0.12;
+      particle.position.set(Math.cos(a) * radius, y, Math.sin(a) * radius);
+      if (role === "fox") particle.position.y = 0.9 + Math.sin(a * 2) * 0.15;
+      if (role === "frost") {
+        particle.rotation.y = t;
+        particle.rotation.z = t * 0.5;
+      }
+      if (role === "valkyrie" && magic) {
+        particle.position.set(
+          (i % 2 ? 1 : -1) * (0.2 + Math.floor(i / 2) * 0.11),
+          1.1 + Math.sin(i * 0.5) * 0.35,
+          -0.1,
+        );
+        particle.scale.set(1, 2.5, 0.5);
+      }
+    }
+  });
+}

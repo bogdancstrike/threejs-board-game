@@ -319,7 +319,8 @@ export function prototypeCharacter(c: Character, tint = c.color) {
     }
   }
   g.userData.limbs = limbs;
-  g.userData.body = body;characterEffects(g,c);
+  g.userData.body = body;
+  characterEffects(g, c);
   return g;
 }
 export const MODEL_PATHS: Record<string, string> = {
@@ -332,7 +333,8 @@ export const MODEL_PATHS: Record<string, string> = {
   elowen: "/models/environment/archer.glb",
   vesper: "/models/environment/demon-queen.glb",
 };
-const loader = new GLTFLoader();loader.setMeshoptDecoder(MeshoptDecoder);
+const loader = new GLTFLoader();
+loader.setMeshoptDecoder(MeshoptDecoder);
 const cache = new Map<string, Promise<GLTF>>();
 export async function loadModel(url: string) {
   if (!cache.has(url)) cache.set(url, loader.loadAsync(url));

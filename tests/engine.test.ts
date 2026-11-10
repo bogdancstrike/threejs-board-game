@@ -127,3 +127,31 @@ describe("the ten worlds", () => {
     expect(s.players[0].clues).toBe(1);
   });
 });
+
+import { shapeField, rawShapeField, MAP_SHAPES } from "../src/world/shapes";
+describe("distinct physical landscapes", () => {
+  it("has ten different silhouettes while supporting every tile corner", () => {
+    const fingerprints = new Set();
+    for (const map of MAPS) {
+      expect(MAP_SHAPES[map.id]).toBeDefined();
+      let signature = "";
+      for (let z = -23; z <= 23; z += 2)
+        for (let x = -23; x <= 23; x += 2)
+          signature += rawShapeField(map.id, x, z) >= 0 ? "1" : "0";
+      fingerprints.add(signature);
+      for (const tile of getTiles(map.id))
+        for (const dx of [-0.64, 0, 0.64])
+          for (const dz of [-0.64, 0, 0.64])
+            expect(
+              shapeField(map.id, tile.x + dx, tile.z + dz),
+              `${map.id} supports tile ${tile.id}`,
+            ).toBeGreaterThan(0);
+    }
+    expect(fingerprints.size).toBe(10);
+  });
+  it("keeps an open crater, crescent cutout, and archipelago channels", () => {
+    expect(rawShapeField("ember", 0, -2.25)).toBeLessThan(0);
+    expect(rawShapeField("astral", 9, 1)).toBeLessThan(0);
+    expect(rawShapeField("tide", 0, 8.25)).toBeLessThan(0);
+  });
+});

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import {updateCharacterEffects} from "./character-effects";
+import { updateCharacterEffects } from "./character-effects";
 export type Action = "idle" | "walk" | "run" | "rest" | "magic" | "celebrate";
 export function setAction(root: THREE.Object3D, action: Action) {
   root.userData.action = action;
@@ -9,7 +9,7 @@ export function animateCharacter(root: THREE.Object3D, t: number, dt: number) {
   const action: Action = root.userData.action || "idle",
     body = root.userData.body as THREE.Object3D | undefined;
   if (!body) return;
-  updateCharacterEffects(root,t,action);
+  updateCharacterEffects(root, t, action);
   const phase = root.userData.phase || 0;
   const speed = action === "run" ? 13 : 7;
   const moving = action === "walk" || action === "run";

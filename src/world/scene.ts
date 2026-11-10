@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { WorldVFX, type WorldEffect } from "./vfx";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -37,6 +38,7 @@ export class GameScene {
   environment: EnvironmentAssets;
   lighting: LightingRig;
   ready: Promise<void>;
+  vfx = new WorldVFX();
   world: World;
   pawns: THREE.Group[] = [];
   frame = 0;
@@ -47,6 +49,7 @@ export class GameScene {
   paused = false;
   onTile: (id: number | null) => void = () => {};
   onReady: () => void = () => {};
+  onStep: () => void = () => {};
   private observer: ResizeObserver;
   private raycaster = new THREE.Raycaster();
   private pointer = new THREE.Vector2();
@@ -61,6 +64,7 @@ export class GameScene {
   constructor(
     public container: HTMLElement,
     public theme: MapTheme,
+    initialQuality: Quality = "medium",
   ) {
     this.tiles = getTiles(theme.id);
     this.renderer = new THREE.WebGLRenderer({
@@ -96,7 +100,7 @@ export class GameScene {
     this.lighting = createLighting(this.scene, theme);
     this.light = this.lighting.key;
     this.world = buildWorld(theme);
-    this.scene.add(this.world.group);
+    this.scene.add(this.world.group, this.vfx.group);
     this.atmosphere = atmosphere(theme);
     this.scene.add(this.atmosphere.group);
     this.environment = addEnvironmentAssets(theme);
@@ -149,6 +153,7 @@ export class GameScene {
     this.renderer.domElement.addEventListener("pointerleave", () =>
       this.onTile(null),
     );
+    this.setQuality(initialQuality);
     this.resize();
     this.animate();
   }
@@ -187,8 +192,9 @@ export class GameScene {
     this.lighting.update(t);
     this.atmosphere.update(t);
     this.environment.update(t, dt);
+    this.vfx.update(t);
     this.pawns.forEach((p, i) => {
-      if (!this.moving && !(p.userData.reactionUntil>t)) {
+      if (!this.moving && !(p.userData.reactionUntil > t)) {
         const cycle = (t + i * 3) % 19;
         const action: Action =
           cycle > 14 ? "rest" : cycle > 10 ? "magic" : "idle";
@@ -266,6 +272,7 @@ export class GameScene {
     this.moving = true;
     setAction(pawn, running ? "run" : "walk");
     for (const id of route) {
+      this.onStep();
       const from = pawn.position.clone(),
         tile = this.tiles[id],
         to = new THREE.Vector3(tile.x, tile.y + 0.095, tile.z);
@@ -286,9 +293,19 @@ export class GameScene {
       });
     }
     setAction(pawn, "idle");
+    this.vfx.burst(pawn.position, "landing", this.clock.elapsedTime);
     this.moving = false;
   }
-  react(player:number,action:Action){const pawn=this.pawns[player];if(!pawn)return;pawn.userData.reactionUntil=this.clock.elapsedTime+2.1;setAction(pawn,action);}
+  impact(player: number, effect: WorldEffect) {
+    const pawn = this.pawns[player];
+    if (pawn) this.vfx.burst(pawn.position, effect, this.clock.elapsedTime);
+  }
+  react(player: number, action: Action) {
+    const pawn = this.pawns[player];
+    if (!pawn) return;
+    pawn.userData.reactionUntil = this.clock.elapsedTime + 2.1;
+    setAction(pawn, action);
+  }
   focusPlayer() {
     const p = this.pawns[this.active];
     if (p)
@@ -328,20 +345,21 @@ export class GameScene {
     this.resize();
   }
   dispose() {
-    cancelAnimationFrame(this.frame);
+    cancelAnimationFrame(this.frame);this.generation++;
     this.observer.disconnect();
     this.controls.dispose();
     this.world.dispose();
     this.ao.dispose();
     this.bloom.dispose();
     this.composer.dispose();
+    this.vfx.dispose();
     this.atmosphere.dispose();
     this.environment.dispose();
     this.lighting.dispose();
     this.ring.geometry.dispose();
     (this.ring.material as THREE.Material).dispose();
     this.light.shadow.map?.dispose();
-    this.renderer.dispose();
+    this.renderer.dispose();this.renderer.forceContextLoss();
     this.renderer.domElement.remove();
   }
 }
@@ -356,7 +374,13 @@ export class CharacterPreview {
   clock = new THREE.Clock();
   observer: ResizeObserver;
   action: Action = "idle";
-  private viewTween:{position:THREE.Vector3;target:THREE.Vector3;from:THREE.Vector3;fromTarget:THREE.Vector3;start:number}|null=null;
+  private viewTween: {
+    position: THREE.Vector3;
+    target: THREE.Vector3;
+    from: THREE.Vector3;
+    fromTarget: THREE.Vector3;
+    start: number;
+  } | null = null;
   constructor(public container: HTMLElement) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
@@ -405,12 +429,46 @@ export class CharacterPreview {
     this.action = action;
     if (this.model) setAction(this.model, action);
   }
-  setView(view:string){const distance=view==='face'?1.1:view==='upper'?2.1:view==='equipment'?2.2:3.8;const target=new THREE.Vector3(view==='equipment'?.25:0,view==='face'?1.35:view==='upper'?1:.8,0);const position=new THREE.Vector3(view==='equipment'?.6:0,view==='face'?1.3:1,distance);this.controls.autoRotate=view==='full';this.viewTween={position,target,from:this.camera.position.clone(),fromTarget:this.controls.target.clone(),start:performance.now()};}
+  setView(view: string) {
+    const distance =
+      view === "face"
+        ? 1.1
+        : view === "upper"
+          ? 2.1
+          : view === "equipment"
+            ? 2.2
+            : 3.8;
+    const target = new THREE.Vector3(
+      view === "equipment" ? 0.25 : 0,
+      view === "face" ? 1.35 : view === "upper" ? 1 : 0.8,
+      0,
+    );
+    const position = new THREE.Vector3(
+      view === "equipment" ? 0.6 : 0,
+      view === "face" ? 1.3 : 1,
+      distance,
+    );
+    this.controls.autoRotate = view === "full";
+    this.viewTween = {
+      position,
+      target,
+      from: this.camera.position.clone(),
+      fromTarget: this.controls.target.clone(),
+      start: performance.now(),
+    };
+  }
   private animate = () => {
     this.frame = requestAnimationFrame(this.animate);
     const dt = Math.min(this.clock.getDelta(), 0.05);
     if (this.model) animateCharacter(this.model, this.clock.elapsedTime, dt);
-    if(this.viewTween){const f=this.viewTween,u=Math.min(1,(performance.now()-f.start)/600),ease=u*u*(3-2*u);this.camera.position.lerpVectors(f.from,f.position,ease);this.controls.target.lerpVectors(f.fromTarget,f.target,ease);if(u===1)this.viewTween=null;}
+    if (this.viewTween) {
+      const f = this.viewTween,
+        u = Math.min(1, (performance.now() - f.start) / 600),
+        ease = u * u * (3 - 2 * u);
+      this.camera.position.lerpVectors(f.from, f.position, ease);
+      this.controls.target.lerpVectors(f.fromTarget, f.target, ease);
+      if (u === 1) this.viewTween = null;
+    }
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   };
@@ -419,7 +477,7 @@ export class CharacterPreview {
     this.generation++;
     this.controls.dispose();
     this.observer.disconnect();
-    this.renderer.dispose();
+    this.renderer.dispose();this.renderer.forceContextLoss();
     this.renderer.domElement.remove();
   }
 }

@@ -1,4 +1,5 @@
 import "./style.css";
+import { GameAudio, type SoundEffect } from "./audio/audio";
 import {
   createIcons,
   Compass,
@@ -48,6 +49,7 @@ import {
   CheckCheck,
 } from "lucide";
 import { CHARACTERS, getTiles, TILE_INFO } from "./game/data";
+import { MAP_SHAPES } from "./world/shapes";
 import { MAPS, getMap } from "./game/maps";
 import {
   newGame,
@@ -129,6 +131,23 @@ let theme = getMap(state.map),
 let scene: GameScene;
 let mapPreview: GameScene | null = null;
 let modalType = "";
+let graphicsQuality: Quality = "medium";
+try {
+  const prefs = JSON.parse(localStorage.getItem("wilder-display-v1") || "{}");
+  if (["low", "medium", "ultra"].includes(prefs.quality))
+    graphicsQuality = prefs.quality;
+  runMovement = prefs.run === true;
+} catch {}
+function saveDisplayPreferences() {
+  try {
+    localStorage.setItem(
+      "wilder-display-v1",
+      JSON.stringify({ quality: graphicsQuality, run: runMovement }),
+    );
+  } catch {}
+}
+const gameAudio = new GameAudio(theme);
+muted = !gameAudio.preferences.enabled;
 const safe = (s: string) =>
   s.replace(
     /[&<>"']/g,
@@ -138,7 +157,7 @@ const safe = (s: string) =>
       ]!,
   );
 app.innerHTML = `
-<header class="topbar"><a class="brand" href="/" aria-label="Wilder home"><span class="brand-mark">${icon("compass")}</span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> A little courage. A little magic. <span class="tiny-star">✧</span></div><nav><button class="nav-link" data-action="journey" aria-label="Toggle journey details">${icon("book-open")}<span>Journey</span></button><button class="nav-link" data-action="characters" aria-label="Choose character">${icon("users")}<span>Adventurer</span></button><button class="nav-link" data-action="maps">${icon("map")}<span>Worlds</span><span class="count-badge">10</span></button><button class="nav-link" data-action="help">${icon("circle-help")}<span>How to play</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="Enable sound">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="Game settings">${icon("settings-2")}</button></nav></header>
+<header class="topbar"><a class="brand" href="/" aria-label="Wilder home"><span class="brand-mark"><img src="/brand/wilder-mark.svg" alt=""/></span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> A little courage. A little magic. <span class="tiny-star">✧</span></div><nav><button class="nav-link" data-action="journey" aria-label="Toggle journey details">${icon("book-open")}<span>Journey</span></button><button class="nav-link" data-action="characters" aria-label="Choose character">${icon("users")}<span>Adventurer</span></button><button class="nav-link" data-action="maps">${icon("map")}<span>Worlds</span><span class="count-badge">10</span></button><button class="nav-link" data-action="help">${icon("circle-help")}<span>How to play</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="Enable sound">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="Game settings">${icon("settings-2")}</button></nav></header>
 <main class="game-shell"><aside class="sidebar"><div class="expedition-intro"><div class="eyebrow">AN ADVENTURE AWAITS</div><h1 id="map-title"></h1><p class="intro-copy">Follow the path.<br>Find your own story.</p><button class="map-link" data-action="maps">${icon("map")}<span>Explore another world</span>${icon("arrow-up-right")}</button></div>
 <div class="sidebar-rule"></div><div class="section-label">YOUR ADVENTURER<button data-action="characters">Change ${icon("chevron-right")}</button></div><button class="hero-card" data-action="characters"><div id="hero-avatar" class="hero-avatar">${icon("wand-sparkles")}</div><div><strong id="hero-name"></strong><span id="hero-class"></span></div><span class="hero-online"></span></button>
 <div class="journey"><div class="section-label"><span>THE JOURNEY</span><span class="tile-counter"><b id="tile-current">01</b> / 93</span></div><div class="progress-track"><div id="progress-fill"></div></div><div id="region-list" class="region-list"></div></div>
@@ -260,34 +279,22 @@ function showDice(n: number) {
   ).join("");
   $("dice").setAttribute("aria-label", `Rolled ${n}`);
 }
-let audio: AudioContext | null = null;
-function sound(type: "roll" | "step" | "magic") {
-  if (muted) return;
-  try {
-    audio ??= new AudioContext();
-    void audio.resume();
-    const now = audio.currentTime;
-    const notes =
-      type === "magic"
-        ? [440, 554, 659, 880]
-        : type === "roll"
-          ? [220, 280, 180]
-          : [260];
-    notes.forEach((freq, i) => {
-      const osc = audio!.createOscillator(),
-        gain = audio!.createGain();
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.0001, now + i * 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.045, now + i * 0.08 + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + 0.24);
-      osc.connect(gain);
-      gain.connect(audio!.destination);
-      osc.start(now + i * 0.08);
-      osc.stop(now + i * 0.08 + 0.26);
-    });
-  } catch {}
+function sound(type: SoundEffect) {
+  gameAudio.play(type);
 }
+function syncSoundButton() {
+  const el = document.querySelector<HTMLButtonElement>(".sound-button")!;
+  el.innerHTML = icon(muted ? "volume-x" : "volume-2");
+  el.setAttribute("aria-label", muted ? "Enable sound" : "Mute sound");
+  refreshIcons();
+}
+window.addEventListener(
+  "pointerdown",
+  () => {
+    void gameAudio.unlock();
+  },
+  { once: true },
+);
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 function randomInt(max: number) {
   const a = new Uint32Array(1);
@@ -312,7 +319,19 @@ async function doRoll() {
   const player = state.active;
   const route = roll(state, n, randomInt(1000));
   await scene.move(player, route, runMovement);
-  if((state.phase as string)==='won')scene.react(player,'celebrate');else if((state.phase as string)==='event'||state.journal[0]?.text.includes('gold'))scene.react(player,'magic');
+  if ((state.phase as string) === "won") {
+    scene.react(player, "celebrate");
+    scene.impact(player, "victory");
+  } else if (
+    (state.phase as string) === "event" ||
+    state.journal[0]?.text.includes("gold")
+  )
+    scene.react(player, "magic");
+  if ((state.phase as string) === "event") scene.impact(player, "mystery");
+  else if (state.journal[0]?.text.includes("portal"))
+    scene.impact(player, "portal");
+  else if (state.journal[0]?.text.includes("gold"))
+    scene.impact(player, "treasure");
   busy = false;
   persist();
   update();
@@ -322,7 +341,7 @@ async function doRoll() {
     state.journal[0].text.includes("gold") ||
     state.journal[0].text.includes("portal")
   ) {
-    sound("magic");
+    sound(state.journal[0].text.includes("portal") ? "portal" : "treasure");
     toast(state.journal[0].text);
   }
 }
@@ -411,7 +430,7 @@ function showMaps() {
   openModal(
     "maps",
     modalHeader("TEN WORLDS. COUNTLESS STORIES.", "Where will you wander?") +
-      `<p class="modal-intro">A new landscape. A new mystery. The same adventurous spirit.</p><div class="maps-grid">${MAPS.map((m, i) => `<button class="map-card ${m.id === theme.id ? "selected" : ""}" data-map="${m.id}" style="--map-sky:${m.sky};--map-ground:${m.terrain[2]};--map-accent:${m.accent}"><div class="map-art"><img class="map-thumbnail" src="/previews/${m.id}.webp" alt="3D preview of ${m.name}" loading="lazy" onerror="this.style.display='none'"/><div class="map-art-moon"></div><div class="map-art-mountain back"></div><div class="map-art-mountain"></div><div class="map-art-island"></div><span class="map-art-icon">${icon(m.icon)}</span><span class="map-number">${String(i + 1).padStart(2, "0")}</span>${m.id === theme.id ? '<span class="map-current">CURRENT WORLD</span>' : ""}</div><div class="map-card-copy"><h3>${m.name}</h3><p>${m.tagline}</p><span>${m.id === "dragonkind" ? "Dragon rider academy" : "93 tiles · 4 chapters"} ${icon("arrow-up-right")}</span></div></button>`).join("")}</div><p class="modal-note">Choosing another world starts a fresh expedition. Your current journey is saved until you confirm.</p>`,
+      `<p class="modal-intro">A new landscape. A new mystery. The same adventurous spirit.</p><div class="maps-grid">${MAPS.map((m, i) => `<button class="map-card ${m.id === theme.id ? "selected" : ""}" data-map="${m.id}" style="--map-sky:${m.sky};--map-ground:${m.terrain[2]};--map-accent:${m.accent}"><div class="map-art"><img class="map-thumbnail" src="/previews/${m.id}.webp" alt="3D preview of ${m.name}" loading="lazy" onerror="this.style.display='none'"/><div class="map-art-moon"></div><div class="map-art-mountain back"></div><div class="map-art-mountain"></div><div class="map-art-island"></div><span class="map-art-icon">${icon(m.icon)}</span><span class="map-number">${String(i + 1).padStart(2, "0")}</span>${m.id === theme.id ? '<span class="map-current">CURRENT WORLD</span>' : ""}</div><div class="map-card-copy"><h3>${m.name}</h3><p>${MAP_SHAPES[m.id].name}</p><span>${m.id === "dragonkind" ? "Dragon rider academy" : "93 tiles · 4 chapters"} ${icon("arrow-up-right")}</span></div></button>`).join("")}</div><p class="modal-note">Choosing another world starts a fresh expedition. Your current journey is saved until you confirm.</p>`,
     true,
   );
 }
@@ -423,10 +442,10 @@ function confirmMap(id: string) {
     "new-world",
     modalHeader("EXPLORE YOUR NEXT WORLD", m.name) +
       `
-  <div class="map-preview-layout"><div class="map-preview-stage"><div id="map-preview-canvas"></div><span class="map-preview-badge">${icon(m.icon)} LIVE 3D PREVIEW</span><div id="map-preview-loading" class="map-preview-loading"><span class="loading-orbit"></span>Bringing this world to life…</div><div class="map-preview-tools"><button data-action="preview-map-reset" aria-label="Reset preview">${icon("scan")}</button><button data-action="preview-map-in" aria-label="Zoom preview in">${icon("plus")}</button><button data-action="preview-map-out" aria-label="Zoom preview out">${icon("minus")}</button></div><div class="map-preview-hint">${icon("orbit")} Drag to rotate · Scroll to explore</div></div><div class="map-preview-copy"><div class="character-index"><span>WORLD ${String(index + 1).padStart(2, "0")} / 10</span><div><button class="icon-button" data-preview-map="${MAPS[(index + 9) % 10].id}" aria-label="Previous map">${icon("chevron-left")}</button><button class="icon-button" data-preview-map="${MAPS[(index + 1) % 10].id}" aria-label="Next map">${icon("chevron-right")}</button></div></div><h3>${m.tagline}</h3><p class="modal-intro">${m.description}</p><div class="map-preview-chapters">${m.regions.map((region, i) => `<div><span>${String(i + 1).padStart(2, "0")}</span>${region}</div>`).join("")}</div><div class="map-preview-stats"><span>${icon("footprints")} 93 tiles</span><span>${icon("sparkles")} Unique mysteries</span></div><p class="modal-note">${current ? "You are exploring this world. Your journey is waiting." : "Start at tile 1 with your current party. This replaces the saved expedition."}</p><button class="primary-button full-width" ${current ? 'data-action="close-modal"' : `data-start-map="${m.id}"`}>${icon("compass")}${current ? "Return to my expedition" : "Begin this journey"}</button><button class="text-button" data-action="maps">See all worlds</button></div></div>`,
+  <div class="map-preview-layout"><div class="map-preview-stage"><div id="map-preview-canvas"></div><span class="map-preview-badge">${icon(m.icon)} LIVE 3D PREVIEW</span><div id="map-preview-loading" class="map-preview-loading"><span class="loading-orbit"></span>Bringing this world to life…</div><div class="map-preview-tools"><button data-action="preview-map-reset" aria-label="Reset preview">${icon("scan")}</button><button data-action="preview-map-in" aria-label="Zoom preview in">${icon("plus")}</button><button data-action="preview-map-out" aria-label="Zoom preview out">${icon("minus")}</button></div><div class="map-preview-hint">${icon("orbit")} Drag to rotate · Scroll to explore</div></div><div class="map-preview-copy"><div class="character-index"><span>WORLD ${String(index + 1).padStart(2, "0")} / 10</span><div><button class="icon-button" data-preview-map="${MAPS[(index + 9) % 10].id}" aria-label="Previous map">${icon("chevron-left")}</button><button class="icon-button" data-preview-map="${MAPS[(index + 1) % 10].id}" aria-label="Next map">${icon("chevron-right")}</button></div></div><h3>${m.tagline}</h3><p class="modal-intro">${m.description}</p><div class="map-preview-chapters">${m.regions.map((region, i) => `<div><span>${String(i + 1).padStart(2, "0")}</span>${region}</div>`).join("")}</div><div class="map-preview-stats"><span>${icon("footprints")} 93 tiles</span><span>${icon("map")} ${MAP_SHAPES[m.id].name}</span><span>${icon("sparkles")} Unique mysteries</span></div><p class="modal-note">${current ? "You are exploring this world. Your journey is waiting." : "Start at tile 1 with your current party. This replaces the saved expedition."}</p><button class="primary-button full-width" ${current ? 'data-action="close-modal"' : `data-start-map="${m.id}"`}>${icon("compass")}${current ? "Return to my expedition" : "Begin this journey"}</button><button class="text-button" data-action="maps">See all worlds</button></div></div>`,
     true,
   );
-  mapPreview = new GameScene($("map-preview-canvas"), m);
+  mapPreview = new GameScene($("map-preview-canvas"), m, graphicsQuality);
   mapPreview.controls.autoRotate = true;
   mapPreview.controls.autoRotateSpeed = 0.3;
   mapPreview.camera.position.set(32, 37, 43);
@@ -447,19 +466,20 @@ async function startMap(id: string, count = state.players.length) {
   mapPreview = null;
   scene.dispose();
   theme = getMap(id);
+  gameAudio.setTheme(theme);
   $("viewport").style.background = "";
   document
     .querySelector<HTMLElement>(".world-area")!
     .style.setProperty("--world-bg", theme.sky);
   $("scene-loading").hidden = false;
   await delay(20);
-  scene = new GameScene($("viewport"), theme);
+  scene = new GameScene($("viewport"), theme, graphicsQuality);
   attachScene();
   await scene.setPlayers(state.players, 0);
   $("scene-loading").hidden = true;
   showDice(1);
   update();
-  sound("magic");
+  sound("transition");
   toast(`Welcome to ${theme.name}. Your story starts here.`);
 }
 function showEncounter() {
@@ -485,7 +505,14 @@ async function resolveChoice(index: number) {
   busy = true;
   update();
   await scene.move(player, route, runMovement);
-  if((state.phase as string)==='won')scene.react(player,'celebrate');else if((state.phase as string)==='event'||state.journal[0]?.text.includes('gold'))scene.react(player,'magic');
+  if ((state.phase as string) === "won") {
+    scene.react(player, "celebrate");
+    scene.impact(player, "victory");
+  } else if (
+    (state.phase as string) === "event" ||
+    state.journal[0]?.text.includes("gold")
+  )
+    scene.react(player, "magic");
   busy = false;
   persist();
   update();
@@ -495,7 +522,7 @@ async function resolveChoice(index: number) {
 function showVictory() {
   const winner = state.players[state.winner!],
     c = CHARACTERS.find((c) => c.id === winner.character)!;
-  sound("magic");
+  sound("victory");
   openModal(
     "victory",
     modalHeader("YOUR LEGEND BEGINS", `${c.name} has arrived.`, false) +
@@ -506,7 +533,18 @@ function showSettings() {
   openModal(
     "settings",
     modalHeader("MAKE YOURSELF AT HOME", "Expedition settings") +
-      `<label class="settings-label">Graphics quality<select id="quality-setting"><option value="low" ${scene.quality === "low" ? "selected" : ""}>Low · lighter rendering</option><option value="medium" ${scene.quality === "medium" ? "selected" : ""}>Medium · balanced</option><option value="ultra" ${scene.quality === "ultra" ? "selected" : ""}>Ultra · cinematic</option></select></label><label class="toggle-setting"><span><strong>Run between tiles</strong><small>A quicker pace for your adventure</small></span><input type="checkbox" id="run-setting" ${runMovement ? "checked" : ""}></label><div class="sidebar-rule"></div><label class="settings-label">Traveling party<select id="party-setting">${[1, 2, 3, 4].map((n) => `<option value="${n}" ${state.players.length === n ? "selected" : ""}>${n === 1 ? "Solo expedition" : `${n} players · local pass-and-play`}</option>`).join("")}</select></label><p class="modal-note">Party size applies when you start a new expedition. Each player can choose a different character on their turn.</p><button class="secondary-button full-width" data-action="confirm-restart">${icon("rotate-ccw")}Start a new expedition</button><p class="modal-note">Your current game is saved on this browser automatically.</p>`,
+      `<div class="audio-settings"><div class="section-label">THE SOUND OF YOUR JOURNEY</div><label class="toggle-setting"><span><strong>Enable sound</strong><small>Original generative music and themed soundscapes</small></span><input type="checkbox" id="audio-enabled" ${gameAudio.preferences.enabled ? "checked" : ""}></label>${[
+        ["music", "Ambient music"],
+        ["ambience", "World ambience"],
+        ["effects", "Game effects"],
+      ]
+        .map(
+          ([id, label]) =>
+            `<label class="audio-range"><span>${label}</span><input aria-label="${label} volume" type="range" min="0" max="100" value="${Math.round(gameAudio.preferences[id as "music" | "ambience" | "effects"] * 100)}" data-audio-volume="${id}"/><output id="volume-${id}">${Math.round(gameAudio.preferences[id as "music" | "ambience" | "effects"] * 100)}%</output></label>`,
+        )
+        .join(
+          "",
+        )}</div><div class="sidebar-rule"></div><label class="settings-label">Graphics quality<select id="quality-setting"><option value="low" ${scene.quality === "low" ? "selected" : ""}>Low · lighter rendering</option><option value="medium" ${scene.quality === "medium" ? "selected" : ""}>Medium · balanced</option><option value="ultra" ${scene.quality === "ultra" ? "selected" : ""}>Ultra · cinematic</option></select></label><label class="toggle-setting"><span><strong>Run between tiles</strong><small>A quicker pace for your adventure</small></span><input type="checkbox" id="run-setting" ${runMovement ? "checked" : ""}></label><div class="sidebar-rule"></div><label class="settings-label">Traveling party<select id="party-setting">${[1, 2, 3, 4].map((n) => `<option value="${n}" ${state.players.length === n ? "selected" : ""}>${n === 1 ? "Solo expedition" : `${n} players · local pass-and-play`}</option>`).join("")}</select></label><p class="modal-note">Party size applies when you start a new expedition. Each player can choose a different character on their turn.</p><button class="secondary-button full-width" data-action="confirm-restart">${icon("rotate-ccw")}Start a new expedition</button><p class="modal-note">Your current game is saved on this browser automatically.</p>`,
   );
 }
 function showHelp() {
@@ -530,6 +568,7 @@ function showJournal() {
   );
 }
 function attachScene() {
+  scene.onStep = () => sound("step");
   scene.onTile = (id) => {
     const tip = $("tile-tooltip");
     if (id === null || busy) {
@@ -545,6 +584,7 @@ app.addEventListener("click", async (e) => {
   const el = (e.target as HTMLElement).closest<HTMLElement>("button");
   if (!el || el.hasAttribute("disabled")) return;
   const action = el.dataset.action;
+  if (action !== "sound") sound("ui");
   if (action === "journey") {
     document.querySelector(".game-shell")!.classList.toggle("journey-open");
   } else if (action === "roll") void doRoll();
@@ -560,14 +600,13 @@ app.addEventListener("click", async (e) => {
   else if (action === "reset-camera") scene.resetCamera();
   else if (action === "sound") {
     muted = !muted;
-    el.innerHTML = icon(muted ? "volume-x" : "volume-2");
-    el.setAttribute("aria-label", muted ? "Enable sound" : "Mute sound");
+    await gameAudio.setEnabled(!muted);
+    syncSoundButton();
     sound("magic");
-    refreshIcons();
     toast(
       muted
         ? "Sound is off. A quieter kind of adventure."
-        : "Sound is on. Let the magic ring.",
+        : "Sound is on. Music and ambience follow your world.",
     );
   } else if (action === "prev-character" || action === "next-character") {
     selected = (selected + (action === "next-character" ? 1 : 11)) % 12;
@@ -616,7 +655,11 @@ app.addEventListener("click", async (e) => {
       .querySelectorAll("[data-tint]")
       .forEach((b) => b.classList.toggle("active", b === el));
     updateCharacter();
-  } else if (el.dataset.map) confirmMap(el.dataset.map);
+  } else if (action === "preview-map-reset") mapPreview?.resetCamera();
+  else if (action === "preview-map-in") mapPreview?.zoom(0.85);
+  else if (action === "preview-map-out") mapPreview?.zoom(1.18);
+  else if (el.dataset.previewMap) confirmMap(el.dataset.previewMap);
+  else if (el.dataset.map) confirmMap(el.dataset.map);
   else if (el.dataset.startMap) void startMap(el.dataset.startMap);
   else if (el.dataset.choice !== undefined)
     void resolveChoice(Number(el.dataset.choice));
@@ -626,10 +669,20 @@ app.addEventListener("click", async (e) => {
 app.addEventListener("change", (e) => {
   const el = e.target as HTMLInputElement;
   if (el.id === "quality-setting") {
-    scene.setQuality(el.value as Quality);
+    graphicsQuality = el.value as Quality;
+    scene.setQuality(graphicsQuality);
+    saveDisplayPreferences();
     toast(`Graphics set to ${el.value}.`);
   }
-  if (el.id === "run-setting") runMovement = el.checked;
+  if (el.id === "run-setting") {
+    runMovement = el.checked;
+    saveDisplayPreferences();
+  }
+  if (el.id === "audio-enabled") {
+    muted = !el.checked;
+    void gameAudio.setEnabled(el.checked);
+    syncSoundButton();
+  }
 });
 dialog.addEventListener("close", () => {
   if (scene) scene.paused = false;
@@ -669,14 +722,23 @@ window.addEventListener("keydown", (e) => {
   if (e.key.toLowerCase() === "f") scene.focusPlayer();
   if (e.key.toLowerCase() === "r") scene.resetCamera();
 });
+app.addEventListener("input", (e) => {
+  const el = e.target as HTMLInputElement;
+  if (el.dataset.audioVolume) {
+    const channel = el.dataset.audioVolume as "music" | "ambience" | "effects";
+    gameAudio.setVolume(channel, Number(el.value) / 100);
+    $("volume-" + channel).textContent = el.value + "%";
+  }
+});
 window.addEventListener("beforeunload", persist);
 update();
 refreshIcons();
+syncSoundButton();
 document
   .querySelector<HTMLElement>(".world-area")!
   .style.setProperty("--world-bg", theme.sky);
 try {
-  scene = new GameScene($("viewport"), theme);
+  scene = new GameScene($("viewport"), theme, graphicsQuality);
   attachScene();
   update();
   void scene.setPlayers(state.players, state.active).then(() => {

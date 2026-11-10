@@ -4,6 +4,8 @@ import { groundHeight, seededRandom, getTiles, TILE_INFO } from "../game/data";
 import type { MapTheme } from "../game/maps";
 import { waterMaterial } from "./water";
 import { ENVIRONMENT_RESERVES } from "./environment";
+import { sculptTerrain } from "./terrain";
+import { shapeField, rawShapeField } from "./shapes";
 import { destination } from "./landmarks";
 import {
   box,
@@ -25,131 +27,6 @@ export interface World {
   tiles: THREE.InstancedMesh;
   animated: ((t: number) => void)[];
   dispose: () => void;
-}
-function surface(theme: MapTheme, rng: () => number) {
-  const verts: number[] = [],
-    colors: number[] = [],
-    indices: number[] = [];
-  const rings = 14,
-    segs = 96;
-  for (let r = 0; r <= rings; r++)
-    for (let i = 0; i < segs; i++) {
-      const a = (i / segs) * Math.PI * 2,
-        rr = r / rings;
-      const edge = 1 + 0.045 * Math.sin(a * 7) + 0.025 * Math.cos(a * 11);
-      const x =
-        Math.sign(Math.cos(a)) *
-        Math.pow(Math.abs(Math.cos(a)), 0.72) *
-        15.2 *
-        rr *
-        edge;
-      const z =
-        Math.sign(Math.sin(a)) *
-        Math.pow(Math.abs(Math.sin(a)), 0.72) *
-        17.1 *
-        rr *
-        edge;
-      const near = Math.min(
-        ...getTiles(theme.id).map((t) => Math.hypot(t.x - x, t.z - z)),
-      );
-      const mound =
-        Math.max(0, Math.min(1, (near - 0.9) / 1.5)) *
-        (0.12 + 0.18 * Math.sin(x * 0.6 + z * 0.35));
-      const y = groundHeight(z) + mound + (r > 0 ? (rng() - 0.5) * 0.07 : 0);
-      verts.push(x, y, z);
-      const c = new THREE.Color(
-        theme.terrain[Math.max(0, Math.min(3, Math.floor((11 - z) / 7)))],
-      );
-      c.multiplyScalar(0.94 + rng() * 0.12);
-      colors.push(c.r, c.g, c.b);
-      if (r < rings) {
-        const n = (i + 1) % segs;
-        const a0 = r * segs + i,
-          b = r * segs + n,
-          c0 = (r + 1) * segs + i,
-          d = (r + 1) * segs + n;
-        indices.push(a0, b, c0, b, d, c0);
-      }
-    }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3));
-  geo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-  geo.setIndex(indices);
-  geo.computeVertexNormals();
-  const m = new THREE.Mesh(
-    geo,
-    new THREE.MeshStandardMaterial({
-      vertexColors: true,
-      roughness: 1,
-      flatShading: true,
-      side: THREE.DoubleSide,
-    }),
-  );
-  m.receiveShadow = true;
-  return m;
-}
-function cliffs(theme: MapTheme, rng: () => number) {
-  const g = new THREE.Group(),
-    verts: number[] = [],
-    cols: number[] = [],
-    inds: number[] = [];
-  const seg = 96,
-    levels = 6;
-  for (let l = 0; l < levels; l++)
-    for (let i = 0; i < seg; i++) {
-      const a = (i / seg) * Math.PI * 2;
-      const edge = 1 + 0.045 * Math.sin(a * 7) + 0.025 * Math.cos(a * 11),
-        scale = [1, 0.99, 0.95, 0.8, 0.55, 0.23][l];
-      const x =
-        Math.sign(Math.cos(a)) *
-        Math.pow(Math.abs(Math.cos(a)), 0.72) *
-        15.2 *
-        edge *
-        scale;
-      const z =
-        Math.sign(Math.sin(a)) *
-        Math.pow(Math.abs(Math.sin(a)), 0.72) *
-        17.1 *
-        edge *
-        scale;
-      verts.push(
-        x,
-        l === 0 ? groundHeight(z) : -0.6 - l * 1.05 + (rng() - 0.5) * 0.9,
-        z,
-      );
-      const c = new THREE.Color(theme.rock).multiplyScalar(
-        0.7 + rng() * 0.45 + (l === 0 ? 0.12 : 0),
-      );
-      cols.push(c.r, c.g, c.b);
-      if (l < levels - 1) {
-        const n = (i + 1) % seg;
-        inds.push(
-          l * seg + i,
-          l * seg + n,
-          (l + 1) * seg + i,
-          l * seg + n,
-          (l + 1) * seg + n,
-          (l + 1) * seg + i,
-        );
-      }
-    }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3));
-  geo.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3));
-  geo.setIndex(inds);
-  geo.computeVertexNormals();
-  g.add(
-    new THREE.Mesh(
-      geo,
-      new THREE.MeshStandardMaterial({
-        vertexColors: true,
-        roughness: 1,
-        flatShading: true,
-        side: THREE.DoubleSide,
-      }),
-    ),
-  );
-  return g;
 }
 function roundedTile() {
   const s = new THREE.Shape();
@@ -262,7 +139,7 @@ export function buildWorld(theme: MapTheme): World {
     props = new THREE.Group(),
     animated: ((t: number) => void)[] = [],
     rng = seededRandom(4759 + theme.id.length);
-  group.add(surface(theme, rng), cliffs(theme, rng));
+  group.add(sculptTerrain(theme));
   const tiles = new THREE.InstancedMesh(
     roundedTile(),
     new THREE.MeshStandardMaterial({ roughness: 0.8, metalness: 0.04 }),
@@ -360,15 +237,22 @@ export function buildWorld(theme: MapTheme): World {
   const riverX = (z: number) => -3.5 + Math.sin(z * 0.3) * 1.8;
   const riverVerts: number[] = [],
     riverIds: number[] = [];
-  for (let i = 0; i <= 110; i++) {
-    const z = -16 + i * 0.3,
+  const riverSamples = Array.from({ length: 149 }, (_, i) => {
+    const z = -20 + i * 0.3;
+    return { z, inside: shapeField(theme.id, riverX(z), z) > 0.25 };
+  });
+  const riverEdges: number[] = [];
+  for (let i = 0; i < riverSamples.length; i++) {
+    const { z, inside } = riverSamples[i],
       x = riverX(z);
     for (const d of [-0.62, 0.62])
       riverVerts.push(x + d, groundHeight(z) + 0.035, z);
-    if (i < 110) {
+    if (i < riverSamples.length - 1 && inside && riverSamples[i + 1].inside) {
       const n = i * 2;
       riverIds.push(n, n + 2, n + 1, n + 1, n + 2, n + 3);
     }
+    if (i < riverSamples.length - 1 && inside && !riverSamples[i + 1].inside)
+      riverEdges.push(z);
   }
   const rg = new THREE.BufferGeometry();
   rg.setAttribute("position", new THREE.Float32BufferAttribute(riverVerts, 3));
@@ -381,10 +265,14 @@ export function buildWorld(theme: MapTheme): World {
   );
   group.add(new THREE.Mesh(rg, riverFlow.material));
   animated.push(riverFlow.update);
-  for (const z of [15.7, 4.7, -5.8]) {
+  const waterfallPositions = [
+    ...riverEdges.slice(-3),
+    ...[6, -1, -8].filter((z) => shapeField(theme.id, riverX(z), z) > 0.2),
+  ].slice(0, 4);
+  for (const z of waterfallPositions) {
     const x = riverX(z),
       top = groundHeight(z),
-      height = z > 15 ? 6.4 : 1.1;
+      height = riverEdges.includes(z) ? groundHeight(z) + 3.7 : 1.1;
     const waterfallFlow = waterMaterial(
       theme.water,
       true,
@@ -633,6 +521,7 @@ export function buildWorld(theme: MapTheme): World {
     const x = (rng() - 0.5) * 27,
       z = (rng() - 0.5) * 29;
     if (
+      shapeField(theme.id, x, z) < 0.6 ||
       ENVIRONMENT_RESERVES.some((p) => Math.hypot(x - p.x, z - p.z) < p.r) ||
       distance(x, z) < 1.55 ||
       Math.abs(x - riverX(z)) < 1.1 ||
@@ -647,7 +536,12 @@ export function buildWorld(theme: MapTheme): World {
   for (let i = 0; i < 200; i++) {
     const x = (rng() - 0.5) * 28,
       z = (rng() - 0.5) * 30;
-    if (distance(x, z) < 1 || Math.abs(x - riverX(z)) < 0.8) continue;
+    if (
+      shapeField(theme.id, x, z) < 0.35 ||
+      distance(x, z) < 1 ||
+      Math.abs(x - riverX(z)) < 0.8
+    )
+      continue;
     const y = groundHeight(z);
     if (i % 6 === 0)
       sphere(props, theme.rock, x, y + 0.13, z, 0.22 + rng() * 0.2, 0.2, 0.22);
@@ -824,6 +718,48 @@ export function buildWorld(theme: MapTheme): World {
         addWind(o.material);
     }
   });
+  if (theme.id === "ember") {
+    const basin = cyl(group, "#f08b42", 0, -0.3, -2.25, 4.2, 0.06, 1.1);
+    basin.scale.z = 0.9;
+    animated.push((t) => {
+      (basin.material as THREE.MeshStandardMaterial).emissiveIntensity =
+        1 + Math.sin(t * 0.9) * 0.18;
+    });
+  }
+  for (let i = 1; i < TILES.length; i++) {
+    const a = TILES[i - 1],
+      b = TILES[i],
+      x = (a.x + b.x) / 2,
+      z = (a.z + b.z) / 2;
+    if (rawShapeField(theme.id, x, z) >= 0) continue;
+    const length = Math.hypot(b.x - a.x, b.z - a.z),
+      angle = Math.atan2(b.x - a.x, b.z - a.z),
+      y = (a.y + b.y) / 2;
+    const bridge = box(
+      props,
+      theme.id === "astral" ? "#9b91bc" : "#a18c65",
+      x,
+      y - 0.1,
+      z,
+      1.05,
+      0.15,
+      length + 0.5,
+    );
+    bridge.rotation.y = angle;
+    for (const side of [-1, 1]) {
+      const rail = box(
+        props,
+        "#b8ad8c",
+        x + Math.cos(angle) * 0.62 * side,
+        y + 0.3,
+        z - Math.sin(angle) * 0.62 * side,
+        0.045,
+        0.055,
+        length + 0.4,
+      );
+      rail.rotation.y = angle;
+    }
+  }
   const batched = batch(props);
   group.add(batched);
   const cleanup: (() => void)[] = [];

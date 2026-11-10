@@ -11,9 +11,12 @@ The game keeps character identity, appearance, game state, model loading and ani
 | Rhea | `yanne_cos17halloween_kings_raid.glb` | Static source, procedural deformation rig |
 | Nyx | `pc___computer_-_action_taimanin_-_playable_chara.glb` | Original skeleton, procedural joint posing |
 | Selene | `lyfe_bestla_snowbreak.glb` | Static source, procedural deformation rig |
+| Elowen | `goblin_slayer_high_elf_archer.glb` | Optimized static source, procedural deformation rig |
+| Vesper | `dark_fantasy_demon_queen.glb` | Optimized static source, procedural deformation rig |
+| Alaric | `3drt_-_fantasy_warrior.glb` | Original skeleton, procedural posing |
 | Village bridge | `stylized_bridge_low_poly.glb` | Static environment model |
 
-Original author, source URL, embedded license metadata, and modifications are retained in `public/ASSET-CREDITS.md`, copied into production output and linked from game help. The seven other characters have individually colored and equipped articulated prototype figurines. No production anime-art quality is claimed for those prototypes.
+Original author, source URL, embedded license metadata, and modifications are retained in `public/ASSET-CREDITS.md`, copied into production output and linked from game help. The four other characters have individually colored and equipped articulated prototype figurines. No production anime-art quality is claimed for those prototypes.
 
 ## Replacing a character
 
@@ -24,7 +27,7 @@ Original author, source URL, embedded license metadata, and modifications are re
 5. Inspect all preview actions and the pawn at board distance. Runtime loading clones skeletons and normalizes bounds to approximately 1.5 world units above the base. Skinned bounds must be recalculated before scale normalization.
 6. Run `npm run build`, `npm test`, and `npm run test:e2e`. The animation browser check verifies that imported models stay in a sensible bounding volume while posing.
 
-Models and textures are loaded locally. Models do not depend on the original Downloads directory after copying. GLTFLoader caches successful loads; repeated players and previews share source asset data. Current models require no Draco/KTX2 decoders. Add compatible decoders if introducing compressed assets.
+Models and textures are loaded locally. Models do not depend on the original Downloads directory after copying. GLTFLoader caches successful loads; repeated players and previews share source asset data. Additional optimized models use the bundled Meshopt decoder and WebP textures; no Draco/KTX2 decoder is currently required. Add compatible decoders if introducing compressed assets.
 
 ## Production character-art requirements
 

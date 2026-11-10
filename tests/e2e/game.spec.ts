@@ -4,6 +4,12 @@ test("full-screen board, character preview, movement and save restoration", asyn
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "wilder-display-v1",
+      JSON.stringify({ quality: "low", run: true }),
+    ),
+  );
   await page.goto("/");
   await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
   const canvas = await page.locator("#viewport canvas").boundingBox();
@@ -58,6 +64,12 @@ test("all ten themes render and mobile controls fit the viewport", async ({
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "wilder-display-v1",
+      JSON.stringify({ quality: "low", run: true }),
+    ),
+  );
   await page.goto("/");
   await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
   await page.locator('[data-action="maps"]').first().click();
@@ -140,7 +152,78 @@ test("supplied characters remain centered in every action", async ({
   expect(bounds).toHaveLength(40);
   for (const b of bounds) {
     expect(b.maxY, `${b.id} ${b.action} height`).toBeLessThan(2.3);
-    expect(b.minY).toBeGreaterThan(-0.5);
-    expect(b.width).toBeLessThan(2.6);
+    expect(b.minY, `${b.id} ${b.action} feet`).toBeGreaterThan(-0.5);
+    expect(b.width, `${b.id} ${b.action} width`).toBeLessThan(2.6);
   }
+});
+test("audio controls persist and the sound engine produces an audible signal", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
+  await page.locator('[data-action="settings"]').click();
+  await page.locator("#audio-enabled").check();
+  await page.locator('[data-audio-volume="music"]').fill("25");
+  await page.locator('[data-audio-volume="effects"]').fill("70");
+  await expect(page.locator("#volume-music")).toHaveText("25%");
+  const prefs = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("wilder-audio-v1")!),
+  );
+  expect(prefs.enabled).toBe(true);
+  expect(prefs.music).toBe(0.25);
+  expect(prefs.effects).toBe(0.7);
+  const peak = await page.evaluate(async () => {
+    const path = "/src/audio/audio.ts",
+      mapPath = "/src/game/maps.ts";
+    const { GameAudio } = await import(path),
+      { MAPS } = await import(mapPath);
+    const engine = new GameAudio(MAPS[0]);
+    await engine.setEnabled(true);
+    engine.play("treasure");
+    const analyser = engine.context.createAnalyser();
+    engine.master.connect(analyser);
+    await new Promise((r) => setTimeout(r, 650));
+    const samples = new Float32Array(analyser.fftSize);
+    analyser.getFloatTimeDomainData(samples);
+    const peak = Math.max(...samples.map(Math.abs));
+    engine.dispose();
+    return peak;
+  });
+  expect(peak).toBeGreaterThan(0.0001);
+  expect(peak).toBeLessThan(1);
+  expect(errors).toEqual([]);
+});
+test("map preview is interactive and does not replace the current saved expedition", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
+  await page.locator('[data-action="maps"]').first().click();
+  await expect(page.locator(".map-thumbnail")).toHaveCount(10);
+  await page.locator('[data-map="dragonkind"]').click();
+  await expect(page.locator("#map-preview-loading")).toBeHidden({
+    timeout: 45000,
+  });
+  await expect(page.locator("#map-preview-canvas canvas")).toBeVisible();
+  await page.locator('[data-action="preview-map-in"]').click();
+  await page.locator('[data-action="preview-map-out"]').click();
+  await page.locator('[data-preview-map="frost"]').click();
+  await expect(page.locator("#map-preview-loading")).toBeHidden({
+    timeout: 45000,
+  });
+  await expect(page.locator(".modal-header h2")).toHaveText(
+    "The Frostbound Passage",
+  );
+  expect(
+    await page.evaluate(
+      () =>
+        JSON.parse(
+          localStorage.getItem("wilder-expedition-v1") || '{"map":"verdant"}',
+        ).map,
+    ),
+  ).toBe("verdant");
+  await page.locator('[data-action="close-modal"]').click();
+  await expect(page.locator("#roll-button")).toBeEnabled();
 });

@@ -2205,3 +2205,45 @@ a {
     width: 23px;
   }
 }
+.audio-settings .section-label {
+  margin: 7px 0 18px;
+}
+.audio-range {
+  display: grid;
+  grid-template-columns: 112px 1fr 35px;
+  gap: 12px;
+  align-items: center;
+  font-size: 10px;
+  color: #7d8c71;
+  margin: 16px 0;
+}
+.audio-range input {
+  width: 100%;
+  accent-color: #8b9f76;
+  height: 4px;
+  cursor: pointer;
+}
+.audio-range output {
+  text-align: right;
+  font-size: 9px;
+  color: #929d84;
+}
+.audio-settings .toggle-setting {
+  margin-bottom: 24px;
+}
+@media (max-width: 700px) {
+  .audio-range {
+    grid-template-columns: 90px 1fr 30px;
+    gap: 8px;
+    font-size: 9px;
+  }
+  .audio-settings .toggle-setting {
+    font-size: 11px;
+  }
+  .audio-settings .toggle-setting small {
+    font-size: 8px;
+    max-width: 230px;
+    line-height: 1.6;
+  }
+}
+.brand-mark img{width:38px;height:38px;display:block}.map-preview-stats{flex-wrap:wrap;gap:10px 15px}@media(max-width:700px){.brand-mark img{width:31px;height:31px}}
