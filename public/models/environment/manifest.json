@@ -1,0 +1,211 @@
+[
+  {
+    "id": "purple-tree",
+    "sourceFile": "fantasy_tree_-_purple_leaves.glb",
+    "url": "/models/environment/purple-tree.glb",
+    "author": "FerrisAttia (https://sketchfab.com/FerrisAttia)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/fantasy-tree-purple-leaves-b6d85e59d1714c7ab3cf40b77a46076f",
+    "title": "Fantasy Tree - Purple Leaves",
+    "bytes": 361888,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "mushrooms",
+    "sourceFile": "colourful_mushrooms.glb",
+    "url": "/models/environment/mushrooms.glb",
+    "author": "Paris Mutter (https://sketchfab.com/octrpus)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/colourful-mushrooms-e10da3869ab247c4a663b47ac416a731",
+    "title": "Colourful Mushrooms",
+    "bytes": 94528,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "light-plant",
+    "sourceFile": "fantasy_light_plant.glb",
+    "url": "/models/environment/light-plant.glb",
+    "author": "artikora (https://sketchfab.com/artikora978)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/fantasy-light-plant-55eb0ab1590f4de59ddd9c874ec90b67",
+    "title": "Fantasy Light Plant",
+    "bytes": 263336,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "fern",
+    "sourceFile": "fantasy_plant_2.glb",
+    "url": "/models/environment/fern.glb",
+    "author": "Mainul (https://sketchfab.com/mainuldesign)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/fantasy-plant-2-0ea642fda9f14e6c94296914b1dc11f5",
+    "title": "Fantasy Plant 2",
+    "bytes": 260104,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "flowers",
+    "sourceFile": "crimson_cup_plants.glb",
+    "url": "/models/environment/flowers.glb",
+    "author": "Varvara (https://sketchfab.com/krauchankavarvara)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/crimson-cup-plants-4d72aa5c082748d8a9ebf3b84369cfe5",
+    "title": "Crimson Cup Plants",
+    "bytes": 1001384,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "craftsman",
+    "sourceFile": "the_noble_craftsman.glb",
+    "url": "/models/environment/craftsman.glb",
+    "author": "olmopotums (https://sketchfab.com/olmopotums)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/the-noble-craftsman-0e8ff87ffaa24731b2474badebca870d",
+    "title": "The Noble Craftsman",
+    "bytes": 277804,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "warrior",
+    "sourceFile": "3drt_-_fantasy_warrior.glb",
+    "url": "/models/environment/warrior.glb",
+    "author": "3DRT.com (https://sketchfab.com/3DRT.com)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/3drt-fantasy-warrior-d39a0dee0f054c21b6751f7821aa7a8e",
+    "title": "3DRT - Fantasy Warrior",
+    "bytes": 414680,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "boutique",
+    "sourceFile": "dae_crib_-_fairys_magic_brew_boutique.glb",
+    "url": "/models/environment/boutique.glb",
+    "author": "Julija_Prysmantaite (https://sketchfab.com/Julija_Prysmantaite)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/dae-crib-fairys-magic-brew-boutique-e07ecacebd3f4a06a566139310162bf1",
+    "title": "DAE Crib - Fairy's Magic Brew Boutique",
+    "bytes": 362612,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "wizard-tower",
+    "sourceFile": "wizzard_tower.glb",
+    "url": "/models/environment/wizard-tower.glb",
+    "author": "juanjose34251 (https://sketchfab.com/juanjose34251)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/wizzard-tower-57220e6a497f4413b3aca13c0e90e019",
+    "title": "Wizzard Tower",
+    "bytes": 13445296,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "castle",
+    "sourceFile": "wip_fantasy_castle.glb",
+    "url": "/models/environment/castle.glb",
+    "author": "Thomas Andris (https://sketchfab.com/thomas005)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/wip-fantasy-castle-367debf3eef749d985109125c8c3da34",
+    "title": "WIP Fantasy Castle",
+    "bytes": 1744620,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "tavern",
+    "sourceFile": "medieval_fantasy_tavern.glb",
+    "url": "/models/environment/tavern.glb",
+    "author": "Rixael (https://sketchfab.com/rixael)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/medieval-fantasy-tavern-8fbec3f0adbc4376979214fbd46db2f0",
+    "title": "Medieval Fantasy Tavern",
+    "bytes": 1235444,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "hut",
+    "sourceFile": "baba_yagas_hut.glb",
+    "url": "/models/environment/hut.glb",
+    "author": "Inuciian (https://sketchfab.com/Inuciian)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/baba-yagas-hut-479b5f3c493349b18c59dbcbe354d98f",
+    "title": "Baba Yaga's hut",
+    "bytes": 1003904,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "whale",
+    "sourceFile": "whale_shark_fantasy.glb",
+    "url": "/models/environment/whale.glb",
+    "author": "Alenzo (https://sketchfab.com/alextkd2003)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/whale-shark-fantasy-451892c9c18c4d74bf893bea8b626b02",
+    "title": "Whale Shark Fantasy",
+    "bytes": 407856,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "phoenix",
+    "sourceFile": "phoenix_bird.glb",
+    "url": "/models/environment/phoenix.glb",
+    "author": "NORBERTO-3D (https://sketchfab.com/norberto3d)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/phoenix-bird-844ba0cf144a413ea92c779f18912042",
+    "title": "phoenix bird",
+    "bytes": 370164,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "butterfly",
+    "sourceFile": "fantasy_butterfly_animation.glb",
+    "url": "/models/environment/butterfly.glb",
+    "author": "lunequinox (https://sketchfab.com/lunequinox)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/fantasy-butterfly-animation-0f24b085e8654e4db09c2fe681a79e3f",
+    "title": "Fantasy Butterfly Animation",
+    "bytes": 218216,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "pet",
+    "sourceFile": "cute_fantasy_animal.glb",
+    "url": "/models/environment/pet.glb",
+    "author": "Yrme98 (https://sketchfab.com/Yrme98)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/cute-fantasy-animal-960f808c84114137a5244aba93e58f63",
+    "title": "Cute Fantasy Animal",
+    "bytes": 93136,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "archer",
+    "sourceFile": "goblin_slayer_high_elf_archer.glb",
+    "url": "/models/environment/archer.glb",
+    "author": "JeffAnderson1222 (https://sketchfab.com/JeffAnderson1222)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/goblin-slayer-high-elf-archer-816535e75d5d4bafb7a0f950acbc10d4",
+    "title": "Goblin Slayer High Elf Archer",
+    "bytes": 3127508,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "demon-queen",
+    "sourceFile": "dark_fantasy_demon_queen.glb",
+    "url": "/models/environment/demon-queen.glb",
+    "author": "ItsKrish7 (https://sketchfab.com/ItsKrish7)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/dark-fantasy-demon-queen-cf6d025aa12249c48eb6bd5058f8cfe7",
+    "title": "Dark Fantasy Demon Queen",
+    "bytes": 2902336,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  },
+  {
+    "id": "dragon",
+    "sourceFile": "wrath_of_the_dragon.glb",
+    "url": "/models/environment/dragon.glb",
+    "author": "Fabian Orrego (https://sketchfab.com/fabian_orrego)",
+    "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+    "source": "https://sketchfab.com/3d-models/wrath-of-the-dragon-bda2c373806747a28812c9d88bf55dfa",
+    "title": "Wrath of the Dragon",
+    "bytes": 1183640,
+    "changes": "Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation. Geometry compressed with Meshopt."
+  }
+]
