@@ -104,7 +104,7 @@ test("offline rules finish a full party; restored encounters, victory and restar
   await page.locator(".brand").click();
   await page.locator('[data-menu-action="continue"]').click();
   await page.locator('[data-action="victory-maps"]').click();
-  await expect(page.locator(".map-card")).toHaveCount(36);
+  await expect(page.locator(".map-card")).toHaveCount(37);
 });
 
 test("a complete server score expedition persists, declares a winner and rematches", async ({

@@ -2257,6 +2257,60 @@
           ]
         }
       ]
+    },
+    {
+      "id": "clouds",
+      "name": "Clouds",
+      "regions": [
+        "Cumulus Landing",
+        "The Drifting Isles",
+        "Nimbus Heights",
+        "The Sky Throne"
+      ],
+      "encounters": [
+        {
+          "title": "A cloud that will not hold still",
+          "text": "The next cloud drifts away each time you reach for it. A tiny weather sprite giggles from a rope bridge above.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Jump before it drifts",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Bargain with the weather sprite",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Sky Throne",
+          "text": "A sealed note bears the mark of The Sky Throne. “The old way through Nimbus Heights still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
     }
   ]
 }

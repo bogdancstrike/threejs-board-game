@@ -102,10 +102,10 @@ describe("game rules", () => {
 import { MAPS } from "../src/game/maps";
 import { getTiles } from "../src/game/data";
 import { currentMystery } from "../src/game/engine";
-describe("the thirty-six worlds", () => {
-  it("has thirty-six distinct themed worlds with complete routes", () => {
-    expect(MAPS).toHaveLength(36);
-    expect(new Set(MAPS.map((m) => m.id)).size).toBe(36);
+describe("the thirty-seven worlds", () => {
+  it("has thirty-seven distinct themed worlds with complete routes", () => {
+    expect(MAPS).toHaveLength(37);
+    expect(new Set(MAPS.map((m) => m.id)).size).toBe(37);
     for (const m of MAPS) {
       const tiles = getTiles(m.id);
       expect(tiles).toHaveLength(93);
@@ -137,7 +137,7 @@ describe("the thirty-six worlds", () => {
 
 import { shapeField, rawShapeField, MAP_SHAPES } from "../src/world/shapes";
 describe("distinct physical landscapes", () => {
-  it("has thirty-six different silhouettes while supporting every tile corner", () => {
+  it("has thirty-seven different silhouettes while supporting every tile corner", () => {
     const fingerprints = new Set();
     for (const map of MAPS) {
       expect(MAP_SHAPES[map.id]).toBeDefined();
@@ -154,7 +154,7 @@ describe("distinct physical landscapes", () => {
               `${map.id} supports tile ${tile.id}`,
             ).toBeGreaterThan(0);
     }
-    expect(fingerprints.size).toBe(36);
+    expect(fingerprints.size).toBe(37);
   });
   it("keeps an open crater, crescent cutout, and archipelago channels", () => {
     expect(rawShapeField("ember", 0, -2.25)).toBeLessThan(0);
@@ -166,7 +166,7 @@ describe("distinct physical landscapes", () => {
 import { GEOGRAPHY } from "../src/game/geography";
 import { groundHeight } from "../src/game/data";
 describe("varied floors and dimensions", () => {
-  it("uses independent three-to-nine-floor profiles for all thirty-six maps", () => {
+  it("uses independent three-to-nine-floor profiles for all thirty-seven maps", () => {
     const counts = new Set<number>(),
       sizes = new Set<string>();
     for (const m of MAPS) {
@@ -198,11 +198,16 @@ describe("ascending and descending sky routes", () => {
         expect(skyOffset(id, layer.start)).toBe(0);
         expect(skyOffset(id, layer.upEnd)).toBe(layer.height);
         expect(skyOffset(id, layer.end)).toBe(0);
+        // Clouds deliberately mixes low hops with high decks.
         expect(
           tiles[layer.upEnd].y - groundHeight(tiles[layer.upEnd].z, id),
-        ).toBeGreaterThan(6);
+        ).toBeGreaterThan(id === "clouds" ? 2 : 6);
         expect(skyOffset(id, layer.downStart + 1)).toBeLessThan(layer.height);
       }
     expect(SKY_ROUTES.dream).toHaveLength(2);
+    expect(SKY_ROUTES.clouds.length).toBeGreaterThanOrEqual(5);
+    expect(new Set(SKY_ROUTES.clouds.map((l) => l.height)).size).toBe(
+      SKY_ROUTES.clouds.length,
+    );
   });
 });

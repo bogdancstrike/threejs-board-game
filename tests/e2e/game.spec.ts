@@ -77,7 +77,7 @@ test("all thirty themes render and mobile controls fit the viewport", async ({
   await page.locator('[data-menu-action="classic"]').click();
   await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
   await page.locator('[data-action="maps"]').first().click();
-  expect(await page.locator("[data-map]").count()).toBe(36);
+  expect(await page.locator("[data-map]").count()).toBe(37);
   await page.locator('[data-action="close-modal"]').click();
   test.setTimeout(300000);
   for (const id of MAPS.slice(1).map((m) => m.id)) {
@@ -220,7 +220,7 @@ test("map preview is interactive and does not replace the current saved expediti
   await page.locator('[data-menu-action="classic"]').click();
   await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
   await page.locator('[data-action="maps"]').first().click();
-  await expect(page.locator(".map-thumbnail")).toHaveCount(36);
+  await expect(page.locator(".map-thumbnail")).toHaveCount(37);
   await page.locator('[data-map="dragonkind"]').click();
   await expect(page.locator("#map-preview-loading")).toBeHidden({
     timeout: 45000,

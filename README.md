@@ -6,7 +6,7 @@
 
 ### A path of mysteries
 
-**Twelve adventurers. Thirty-six worlds. One unforgettable journey.**
+**Twelve adventurers. Thirty-seven worlds. One unforgettable journey.**
 
 Roll the dice, follow a trail of weathered stones, and discover what waits beyond the next bend.<br>
 A browser fantasy board game built with Three.js, original ambient audio, and living miniature worlds.
@@ -16,11 +16,11 @@ A browser fantasy board game built with Three.js, original ambient audio, and li
 [![Vite](https://img.shields.io/badge/Vite-localhost%3A7777-697953?style=flat-square&logo=vite&logoColor=white)](#-quick-start)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?style=flat-square&logo=fastapi&logoColor=white)](backend/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169e1?style=flat-square&logo=postgresql&logoColor=white)](compose.yaml)
-[![Worlds](https://img.shields.io/badge/worlds-36-d0ad6e?style=flat-square)](#-thirty-six-worlds-thirty-six-shapes)
+[![Worlds](https://img.shields.io/badge/worlds-37-d0ad6e?style=flat-square)](#-thirty-seven-worlds-thirty-seven-shapes)
 [![Heroes](https://img.shields.io/badge/adventurers-12-9b87b7?style=flat-square)](#-meet-your-adventurer)
 [![Players](https://img.shields.io/badge/players-1–8_online-66968a?style=flat-square)](#-how-to-play)
 
-[Quick start](#-quick-start) · [World gallery](#-thirty-six-worlds-thirty-six-shapes) · [Characters](#-meet-your-adventurer) · [Audio & atmosphere](#-a-world-that-breathes) · [Architecture](#-under-the-island) · [Testing](#-tested-on-the-trail) · [Art status](#-art-status--credits)
+[Quick start](#-quick-start) · [World gallery](#-thirty-seven-worlds-thirty-seven-shapes) · [Characters](#-meet-your-adventurer) · [Audio & atmosphere](#-a-world-that-breathes) · [Architecture](#-under-the-island) · [Testing](#-tested-on-the-trail) · [Art status](#-art-status--credits)
 
 <img src="docs/screenshots/menu.webp" width="1080" alt="Wilder title screen: New game, Continue journey, settings, and a living 3D world" />
 
@@ -36,8 +36,8 @@ A little strategy. A little luck. A lot of curiosity.
 
 Wilder brings a tabletop adventure into an interactive 3D diorama. Your character follows **93 connected tiles** from a welcoming village through four chapters across three to nine floors to a final destination. Along the way, hidden treasure, ancient portals, and strange encounters ask what kind of traveler you want to be.
 
-- 🧭 **A real start menu:** New game, Continue, settings, how to play, and a carousel of thirty-six world previews over a living 3D island.
-- 🏝️ **Thirty-six distinct landscapes:** different physical island shapes, terrain palettes, destinations, regional names, and encounter decks.
+- 🧭 **A real start menu:** New game, Continue, settings, how to play, and a carousel of thirty-seven world previews over a living 3D island.
+- 🏝️ **Thirty-seven distinct landscapes:** different physical island shapes, terrain palettes, destinations, regional names, and encounter decks.
 - 🎲 **A complete game:** fair six-sided dice, animated movement, branching encounters, gold, clues, points, local turns, live online rooms, and victory.
 - 🧙 **Twelve adult adventurers:** next/previous selection, a rotating 3D preview, equipment and close-up views, action previews, and cosmetic aura colors.
 - 🌿 **A path in the landscape:** low weathered stones, moss, plants, bridges, and visible changes in elevation.
@@ -93,7 +93,7 @@ Classic races end at the finish. Score expeditions finish the current round, the
 
 Room progress persists in PostgreSQL. Browser sessions reconnect to an authoritative snapshot; commands use revision checks and idempotency keys to prevent duplicate rolls. Turns and encounters have server deadlines. Room sessions last 12 hours. **Local 1–4 player pass-and-play remains available without the backend.**
 
-## 🗺️ Thirty-six worlds. Thirty-six shapes.
+## 🗺️ Thirty-seven worlds. Thirty-seven shapes.
 
 **These are screenshots of the real 3D maps**, refreshed from the same scene builders used by the game. Click any image to inspect it. Use **Worlds** in the game for a live preview before replacing your expedition.
 
@@ -173,6 +173,27 @@ Room progress persists in PostgreSQL. Browser sessions reconnect to an authorita
 |---|---|
 | [![The Lantern Night Market](public/previews/nightmarket.webp)](public/previews/nightmarket.webp) | [![The Aurora Ribbon](public/previews/aurora.webp)](public/previews/aurora.webp) |
 | Four-lantern pavilion · 5 floors<br>A thousand lights. A thousand stories. | Aurora ribbon · 8 floors<br>Walk where the northern lights fall |
+
+
+| **The Shattered Glacier** | **Redstone Canyon** |
+|---|---|
+| [![The Shattered Glacier](public/previews/glacier.webp)](public/previews/glacier.webp) | [![Redstone Canyon](public/previews/canyon.webp)](public/previews/canyon.webp) |
+| Shattered glacier shards · 6 floors<br>Every crack hides a doorway | Twin mesa canyon · 5 floors<br>The echoes remember your name |
+
+| **The Lanternmire** | **The Starforge Ring** |
+|---|---|
+| [![The Lanternmire](public/previews/mire.webp)](public/previews/mire.webp) | [![The Starforge Ring](public/previews/starforge.webp)](public/previews/starforge.webp) |
+| Lily-pad marsh · 3 floors<br>Follow the lights, not the fog | Ringed atoll · 7 floors<br>Where fallen stars are reborn |
+
+| **The Saltglass Shoals** | **The Ember Foundry** |
+|---|---|
+| [![The Saltglass Shoals](public/previews/saltglass.webp)](public/previews/saltglass.webp) | [![The Ember Foundry](public/previews/foundry.webp)](public/previews/foundry.webp) |
+| Seahorse crescent · 4 floors<br>The tide always brings something back | Hammer-and-anvil forge · 8 floors<br>Strike while the iron is bright |
+
+| **Clouds** |
+|---|
+| [![Clouds](public/previews/clouds.webp)](public/previews/clouds.webp) |
+| Cloud archipelago · 3 floors<br>Walk from cloud to cloud |
 
 <!-- WORLD_GALLERY_END -->
 
@@ -263,7 +284,7 @@ flowchart LR
     Socket --> API[FastAPI authoritative rules]
     API --> DB[(PostgreSQL rooms · events · commands)]
     Rules --> Movement[Tile-by-tile movement]
-    Maps[36 worlds · shape fields] --> Terrain[Sculpted terrain · protected tiles]
+    Maps[37 worlds · shape fields] --> Terrain[Sculpted terrain · protected tiles]
     Assets[Cached GLB models] --> World[Scenery · NPCs · creatures]
     Terrain --> Render[Three.js WebGL + post-processing]
     World --> Render
@@ -277,7 +298,7 @@ flowchart LR
 |---|---|
 | [`backend/`](backend/) | FastAPI, PostgreSQL transactions, room sessions, authoritative turns, points, challenges and WebSocket broadcasts |
 | [`src/network/`](src/network/) | Room lobby, reconnecting client, unique hero claims and mini-game panels |
-| [`src/game/`](src/game/) | Roster, deterministic route, thirty-six themes, rules, turns, mysteries, victory, saves |
+| [`src/game/`](src/game/) | Roster, deterministic route, thirty-seven themes, rules, turns, mysteries, victory, saves |
 | [`shapes.ts`](src/world/shapes.ts) · [`terrain.ts`](src/world/terrain.ts) | Unique physical silhouettes, cutouts, islands, protected tile and landmark foundations, sculpted cliffs |
 | [`world.ts`](src/world/world.ts) · [`landmarks.ts`](src/world/landmarks.ts) | Board integration, village, windmill, portal, rivers, bridges and themed destinations |
 | [`environment.ts`](src/world/environment.ts) | Optimized imported plants, buildings, NPCs and animated creatures |
@@ -310,9 +331,9 @@ Coverage metrics are refreshed by `npm run test:release`.
 
 The frontend gate includes **every `src/**/*.ts` file**, including rendering, audio, UI and networking. It measures actual instrumented browser execution, separately from Vitest unit coverage; this avoids combining incompatible statement maps. The backend gate includes **every `backend/app` module**. Both require at least **90% line coverage**; branch coverage is reported separately. Reports are in `coverage/frontend/index.html`, `reports/frontend-coverage-summary.json`, and `reports/backend-coverage-summary.json`. Each release run deletes old browser counters first.
 
-Browser checks cover the title menu, all 36 maps, mobile layout, unique characters, animation bounds, live previews, audible Web Audio, offline saves and complete rules-engine games, same-device handoff, two independent online browsers, complete classic/score games via authenticated commands, finish screens and rematches. Transport tests inject connection loss, delayed ACKs, rejected/stale messages and expired sessions. Backend tests exercise all ten mini-games, road outcomes, concurrency, authorization, idempotency, persistence and the running deadline worker.
+Browser checks cover the title menu, all 37 maps, mobile layout, unique characters, animation bounds, live previews, audible Web Audio, offline saves and complete rules-engine games, same-device handoff, two independent online browsers, complete classic/score games via authenticated commands, finish screens and rematches. Transport tests inject connection loss, delayed ACKs, rejected/stale messages and expired sessions. Backend tests exercise all ten mini-games, road outcomes, concurrency, authorization, idempotency, persistence and the running deadline worker.
 
-Headless rendering uses Chromium software WebGL. These checks establish functional behavior; hardware FPS and broad-device soak measurements remain separate. [Recorded route metrics](reports/map_metrics.json) describe geometry for all 36 maps, not GPU performance.
+Headless rendering uses Chromium software WebGL. These checks establish functional behavior; hardware FPS and broad-device soak measurements remain separate. [Recorded route metrics](reports/map_metrics.json) describe geometry for all 37 maps, not GPU performance.
 
 ## 🎨 Art status & credits
 
@@ -334,7 +355,7 @@ With the development server running:
 
 ```bash
 npm run screenshots
-# Only menu/character/party UI changed? Refresh UI images without rerendering 36 maps:
+# Only menu/character/party UI changed? Refresh UI images without rerendering 37 maps:
 node scripts/render-previews.mjs --ui-only
 ```
 

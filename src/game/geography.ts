@@ -295,6 +295,14 @@ export const GEOGRAPHY: Record<string, Geography> = {
     shape: "Hammer-and-anvil forge",
     size: "Towering",
   },
+  clouds: {
+    floors: 3,
+    rise: 0.55,
+    width: 22,
+    depth: 23,
+    shape: "Cloud archipelago",
+    size: "Sky-high",
+  },
 };
 export function geography(id: string) {
   return GEOGRAPHY[id] || GEOGRAPHY.verdant;

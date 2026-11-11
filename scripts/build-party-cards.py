@@ -108,7 +108,7 @@ ADULT = {
 "spicy": [
 ("kiss","Neck kiss","Give {topic} a slow kiss on the neck."),
 ("kiss","Their choice","{Topic} chooses where you kiss them: hand, cheek, neck or shoulder."),
-("kiss","Spin the bottle","Spin a bottle and kiss whoever it points to on the cheek. If it lands on {topic}, make it the lips."),
+("game","Blind touch","Close your eyes. {Topic} guides your hand to three places on their arm, neck or face. Guess each one; miss and you owe them a kiss."),
 ("kiss","Who kissed me","Close your eyes. {Topic} or another player kisses your cheek. Guess who; guess wrong and they kiss you again."),
 ("kiss","Quick peck","Give {topic} a quick kiss on the lips."),
 ("close","Lap seat","Sit on the lap of {topic} until your next card."),
@@ -135,8 +135,8 @@ ADULT = {
 "hot": [
 ("kiss","Make-out","Kiss {topic} for ten seconds."),
 ("kiss","Kiss trail","Kiss {topic} three times: hand, neck, then lips, slower each time."),
-("kiss","Spin and kiss","Spin a bottle and kiss whoever it lands on. If it lands on you, kiss {topic}."),
-("kiss","Earlobe","Gently nibble the earlobe of {topic}."),
+("game","Truth or strip","{Topic} asks you one daring question. Answer it honestly or take off one item of clothing."),
+("game","Blindfold tasting","Close your eyes. {Topic} feeds you three things from the table. Every wrong guess costs you one item of clothing or a kiss."),
 ("kiss","Blindfold kiss","Close your eyes and let {topic} kiss you anywhere above the shoulders. Guess where for a bonus."),
 ("strip","Strip one","Take off one item of clothing. {Topic} chooses which."),
 ("strip","Teeth only","Remove a sock or accessory from {topic} using only your teeth."),

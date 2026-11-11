@@ -366,5 +366,22 @@ export function biomeDetails(theme: MapTheme) {
     for (const x of [-1.2, 1.2]) cyl(group, "#3d302a", x, 2.1, -0.6, 0.35, 3);
     animated.push((t) => melt.scale.set(1, 1 + Math.sin(t * 3) * 0.3, 1));
   }
+  if (id === "clouds") {
+    cyl(group, "#f3e2b0", 0, 0.6, 0, 1.3, 1.2);
+    box(group, "#fff4d0", 0, 1.6, 0, 1.2, 1.4, 0.4);
+    const sun = sphere(group, "#ffe28a", 0, 3.1, 0, 0.6, 0.6, 0.6, 1.6);
+    for (let i = 0; i < 7; i++)
+      sphere(
+        group,
+        "#ffffff",
+        Math.cos(i) * 1.8,
+        0.25,
+        Math.sin(i * 1.3) * 1.5,
+        0.9,
+        0.45,
+        0.8,
+      );
+    animated.push((t) => (sun.position.y = 3.1 + Math.sin(t) * 0.12));
+  }
   return { group, animated };
 }

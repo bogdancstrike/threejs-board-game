@@ -7,6 +7,48 @@ export interface SkyExcursion {
   name: string;
 }
 export const SKY_ROUTES: Record<string, SkyExcursion[]> = {
+  clouds: [
+    {
+      start: 7,
+      upEnd: 11,
+      downStart: 17,
+      end: 21,
+      height: 3.5,
+      name: "The Low Drift",
+    },
+    {
+      start: 24,
+      upEnd: 30,
+      downStart: 36,
+      end: 41,
+      height: 8,
+      name: "Nimbus Bridge",
+    },
+    {
+      start: 44,
+      upEnd: 47,
+      downStart: 51,
+      end: 54,
+      height: 2.5,
+      name: "Puffball Steps",
+    },
+    {
+      start: 57,
+      upEnd: 64,
+      downStart: 71,
+      end: 77,
+      height: 11,
+      name: "The High Cirrus",
+    },
+    {
+      start: 80,
+      upEnd: 84,
+      downStart: 87,
+      end: 90,
+      height: 5.5,
+      name: "Throne Approach",
+    },
+  ],
   starforge: [
     {
       start: 30,

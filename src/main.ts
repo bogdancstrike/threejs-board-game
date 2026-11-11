@@ -271,7 +271,7 @@ const safe = (s: string) =>
       ]!,
   );
 app.innerHTML = `
-<header class="topbar"><a class="brand" href="#" aria-label="Wilder main menu"><span class="brand-mark"><img src="/brand/wilder-mark.svg" alt=""/></span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> A little courage. A little magic. <span class="tiny-star">✧</span></div><nav><button class="nav-link exit-game-button" data-action="exit-game" aria-label="Exit game to main menu">${icon("chevron-left")}<span>Exit game</span></button><button class="icon-button" data-action="main-menu" aria-label="Open main menu">${icon("compass")}</button><button class="nav-link online-nav" data-action="rooms">${icon("users")}<span id="room-nav-label">Play · Solo & party</span></button><button class="nav-link" data-action="journey" aria-label="Toggle journey details">${icon("book-open")}<span>Journey</span></button><button class="nav-link" data-action="characters" aria-label="Choose character">${icon("users")}<span>Adventurer</span></button><button class="nav-link" data-action="maps">${icon("map")}<span>Worlds</span><span class="count-badge">${MAPS.length}</span></button><button class="nav-link" data-action="help">${icon("circle-help")}<span>How to play</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="Enable sound">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="Game settings">${icon("settings-2")}</button></nav></header>
+<header class="topbar"><a class="brand" href="#" aria-label="Wilder main menu"><span class="brand-mark"><img src="/brand/wilder-mark.svg" alt=""/></span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> A little courage. A little magic. <span class="tiny-star">✧</span></div><nav><button class="nav-link exit-game-button" data-action="exit-game" aria-label="Exit game to main menu">${icon("chevron-left")}<span>Exit game</span></button><button class="icon-button" data-action="main-menu" aria-label="Open main menu">${icon("compass")}</button><button class="nav-link online-nav" data-action="rooms" title="Play · Solo & party">${icon("users")}<span id="room-nav-label">Play · Solo & party</span></button><button class="nav-link" data-action="journey" aria-label="Toggle journey details">${icon("book-open")}<span>Journey</span></button><button class="nav-link" data-action="characters" aria-label="Choose character">${icon("users")}<span>Adventurer</span></button><button class="nav-link" data-action="maps" aria-label="Choose a world" title="Worlds">${icon("map")}<span>Worlds</span><span class="count-badge">${MAPS.length}</span></button><button class="nav-link" data-action="help" title="How to play">${icon("circle-help")}<span>How to play</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="Enable sound">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="Game settings">${icon("settings-2")}</button></nav></header>
 <main class="game-shell"><aside class="sidebar"><div class="expedition-intro"><div class="eyebrow">AN ADVENTURE AWAITS</div><h1 id="map-title"></h1><p class="intro-copy">Follow the path.<br>Find your own story.</p><button class="map-link" data-action="maps">${icon("map")}<span>Explore another world</span>${icon("arrow-up-right")}</button></div>
 <div class="sidebar-rule"></div><div class="section-label">YOUR ADVENTURER<button data-action="characters">Change ${icon("chevron-right")}</button></div><button class="hero-card" data-action="characters"><div id="hero-avatar" class="hero-avatar">${icon("wand-sparkles")}</div><div><strong id="hero-name"></strong><span id="hero-class"></span></div><span class="hero-online"></span></button>
 <div class="journey"><div class="section-label"><span>THE JOURNEY</span><span class="tile-counter"><b id="tile-current">01</b> / 93</span></div><div class="progress-track"><div id="progress-fill"></div></div><div id="region-list" class="region-list"></div></div>
@@ -724,7 +724,9 @@ titleMenu = new StartMenu(app, {
   world: confirmMap,
   icon,
   refreshIcons,
+  preview: (id) => previewMenuWorld(id),
   toggle: (open) => {
+    if (!open) restoreBoardWorld();
     if (scene) {
       scene.controls.autoRotate =
         open &&
@@ -738,6 +740,38 @@ titleMenu = new StartMenu(app, {
   },
 });
 
+let menuWorldTimer: ReturnType<typeof setTimeout> | undefined;
+/** Swap the living island behind the title screen to the featured world. */
+function previewMenuWorld(id: string) {
+  clearTimeout(menuWorldTimer);
+  menuWorldTimer = setTimeout(() => {
+    if (!titleMenu?.isOpen || busy || !scene || scene.theme.id === id) return;
+    const world = getMap(id);
+    scene.dispose();
+    scene = boardScene(world);
+    attachScene();
+    scene.controls.autoRotate = prefs.menuOrbit && !prefs.reduceMotion;
+    scene.controls.autoRotateSpeed = 0.15;
+    scene.controls.enabled = false;
+    document
+      .querySelector<HTMLElement>(".world-area")!
+      .style.setProperty("--world-bg", world.sky);
+    gameAudio.setTheme(world);
+  }, 300);
+}
+/** Leaving the title screen: bring back the saved expedition's world. */
+function restoreBoardWorld() {
+  clearTimeout(menuWorldTimer);
+  if (!scene || scene.theme.id === theme.id) return;
+  scene.dispose();
+  scene = boardScene();
+  attachScene();
+  document
+    .querySelector<HTMLElement>(".world-area")!
+    .style.setProperty("--world-bg", theme.sky);
+  gameAudio.setTheme(theme);
+  void scene.setPlayers(state.players, state.active);
+}
 function showCharacters(index?: number) {
   if (busy) return;
   hotseatSelection = realtime.room?.hotseat

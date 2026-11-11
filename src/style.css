@@ -4680,3 +4680,49 @@ dialog.modal-road:has(.party-card) .card-alternative p {
     transform: rotate(var(--turns));
   }
 }
+
+/* ── Tablets: compact, single-line top bar ─────────────────────── */
+@media (max-width: 1360px) {
+  .header-center {
+    display: none;
+  }
+}
+@media (min-width: 701px) and (max-width: 1240px) {
+  .topbar nav {
+    gap: 14px;
+  }
+  .topbar .nav-link > span:not(.count-badge) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+@media (min-width: 701px) and (max-width: 1240px) {
+  .topbar .nav-link svg {
+    width: 20px;
+    height: 20px;
+  }
+  .topbar .nav-link,
+  .topbar .icon-button {
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+  }
+}
+@media (min-width: 701px) and (max-width: 1100px) {
+  .modal-wide,
+  .modal-settings {
+    width: calc(100vw - 32px);
+  }
+  .party-card {
+    min-height: min(480px, calc(100dvh - 260px));
+  }
+}
+@media (hover: none) {
+  .camera-hint {
+    display: none;
+  }
+}

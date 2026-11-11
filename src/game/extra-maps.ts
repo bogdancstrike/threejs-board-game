@@ -713,4 +713,28 @@ export const EXTRA_MAPS: MapTheme[] = [
       "Study the smith’s notes",
     ],
   ),
+  make(
+    "clouds",
+    "Clouds",
+    "Walk from cloud to cloud",
+    "An archipelago of drifting clouds tied together by floating rope bridges. Some clouds share a level, others rise high above or sink below — hop between them to reach the Sky Throne.",
+    "astral",
+    "#eef3f8",
+    "#9fd3f5",
+    "#6fa6d8",
+    "#d9e8f2",
+    "#ffd77a",
+    [
+      "Cumulus Landing",
+      "The Drifting Isles",
+      "Nimbus Heights",
+      "The Sky Throne",
+    ],
+    [
+      "A cloud that will not hold still",
+      "The next cloud drifts away each time you reach for it. A tiny weather sprite giggles from a rope bridge above.",
+      "Jump before it drifts",
+      "Bargain with the weather sprite",
+    ],
+  ),
 ];

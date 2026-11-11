@@ -318,6 +318,29 @@ export function rawShapeField(id: string, x: number, z: number): number {
         )) *
       18
     );
+  if (id === "clouds") {
+    // Separate cloud islands; tiles and bridges span the gaps between them.
+    const blobs = [
+      [0, 0.85, 0.3],
+      [-0.55, 0.55, 0.26],
+      [0.5, 0.45, 0.27],
+      [-0.1, 0.15, 0.28],
+      [-0.65, -0.15, 0.24],
+      [0.6, -0.2, 0.25],
+      [0, -0.45, 0.25],
+      [-0.45, -0.8, 0.24],
+      [0.4, -0.8, 0.26],
+    ];
+    let field = -Infinity;
+    for (const [cx, cz, r] of blobs) {
+      const wobble =
+        1 +
+        0.08 *
+          Math.sin(Math.atan2(z - cz * g.depth, x - cx * g.width) * 5 + cx * 9);
+      field = Math.max(field, (r * wobble - Math.hypot(X - cx, Z - cz)) * 22);
+    }
+    return field;
+  }
   if (id === "glacier") {
     const shard = (
       cx: number,

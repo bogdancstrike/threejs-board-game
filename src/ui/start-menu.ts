@@ -14,6 +14,8 @@ interface MenuActions {
   help: () => void;
   world: (map: string) => void;
   toggle: (open: boolean) => void;
+  /** The carousel world changed: show it behind the menu. */
+  preview: (map: string) => void;
   icon: (name: string) => string;
   refreshIcons: () => void;
 }
@@ -95,6 +97,7 @@ export class StartMenu {
     const image =
       this.root.querySelector<HTMLImageElement>("#menu-world-image")!;
     image.src = `/previews/${map.id}.webp`;
+    this.actions.preview(map.id);
     image.alt = `Preview of ${map.name}`;
     this.root.querySelector("#menu-world-name")!.textContent = map.name;
     this.root.querySelector("#menu-world-shape")!.textContent =
