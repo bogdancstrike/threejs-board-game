@@ -1,5 +1,17 @@
 import * as THREE from "three";
-import { readGraphics, type GraphicsOptions } from "./graphics";
+import {
+  readGraphics,
+  pixelRatioFor,
+  frameDue,
+  governResolution,
+  QUALITY_PRESETS,
+  SHADOW_MAP_SIZE,
+  type GraphicsOptions,
+  type Quality,
+} from "./graphics";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
+import { FXAAShader } from "three/addons/shaders/FXAAShader.js";
+import { GradeShader } from "./grade";
 import { WorldVFX, type WorldEffect } from "./vfx";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
@@ -26,9 +38,10 @@ import {
   characterModel,
   prototypeCharacter,
   updateWorldMaterials,
+  setWindStrength,
 } from "./assets";
 import { animateCharacter, setAction, type Action } from "./animation";
-export type Quality = "low" | "medium" | "ultra";
+export type { Quality };
 export class GameScene {
   scene = new THREE.Scene();
   tiles: ReturnType<typeof getTiles>;
@@ -38,6 +51,16 @@ export class GameScene {
   composer: EffectComposer;
   bloom: UnrealBloomPass;
   ao: GTAOPass;
+  grade: ShaderPass;
+  fxaa: ShaderPass;
+  /** Smoothed frames per second, refreshed twice a second. */
+  fps = 0;
+  onFps: (fps: number, scale: number) => void = () => {};
+  private dynamicScale = 1;
+  private lastFrame = 0;
+  private fpsFrames = 0;
+  private fpsSince = 0;
+  private slowSum = 0;
   atmosphere: Atmosphere;
   environment: EnvironmentAssets;
   lighting: LightingRig;
@@ -51,6 +74,10 @@ export class GameScene {
   graphics = readGraphics();
   active = 0;
   moving = false;
+  /** Milliseconds per tile while walking or running. */
+  stepDuration = { walk: 300, run: 170 };
+  /** Camera follows the moving hero. */
+  follow = false;
   paused = false;
   onTile: (id: number | null) => void = () => {};
   onReady: () => void = () => {};
@@ -155,6 +182,11 @@ export class GameScene {
     );
     this.composer.addPass(this.bloom);
     this.composer.addPass(new OutputPass());
+    // Colour grading and anti-aliasing run in display space after tone mapping.
+    this.grade = new ShaderPass(GradeShader);
+    this.composer.addPass(this.grade);
+    this.fxaa = new ShaderPass(FXAAShader);
+    this.composer.addPass(this.fxaa);
     const ringGeo = new THREE.RingGeometry(0.64, 0.71, 48);
     ringGeo.rotateX(-Math.PI / 2);
     this.ring = new THREE.Mesh(
@@ -186,6 +218,11 @@ export class GameScene {
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
     this.composer.setSize(w, h);
+    const ratio = this.renderer.getPixelRatio();
+    this.fxaa.material.uniforms.resolution.value.set(
+      1 / (w * ratio),
+      1 / (h * ratio),
+    );
     const aoScale = this.quality === "ultra" ? 0.7 : 0.5;
     this.ao.setSize(
       Math.max(1, Math.floor(w * this.renderer.getPixelRatio() * aoScale)),
@@ -204,13 +241,19 @@ export class GameScene {
   };
   private animate = () => {
     this.frame = requestAnimationFrame(this.animate);
+    if (document.hidden || this.paused) return;
+    const now = performance.now();
+    if (!frameDue(now, this.lastFrame, this.graphics.fpsCap)) return;
+    const frameMs = this.lastFrame ? now - this.lastFrame : 16;
+    this.lastFrame = now;
+    this.trackPerformance(now, frameMs);
     const dt = Math.min(this.clock.getDelta(), 0.05),
       t = this.clock.elapsedTime;
-    if (document.hidden || this.paused) return;
     this.controls.update();
     this.world.animated.forEach((f) => f(t));
     updateWorldMaterials(t);
     this.lighting.update(t);
+    this.atmosphere.setSky(this.lighting.skyColor);
     this.atmosphere.update(t);
     this.environment.update(t, dt);
     this.vfx.update(t);
@@ -234,9 +277,43 @@ export class GameScene {
       this.controls.target.lerpVectors(f.from, f.to, u * u * (3 - 2 * u));
       if (u === 1) this.focusTween = null;
     }
-    if (this.quality === "low") this.renderer.render(this.scene, this.camera);
+    if (!QUALITY_PRESETS[this.quality].post)
+      this.renderer.render(this.scene, this.camera);
     else this.composer.render();
   };
+  private trackPerformance(now: number, frameMs: number) {
+    this.fpsFrames++;
+    this.slowSum += frameMs;
+    if (!this.fpsSince) this.fpsSince = now;
+    if (now - this.fpsSince < 500) return;
+    this.fps = Math.round((this.fpsFrames * 1000) / (now - this.fpsSince));
+    const average = this.slowSum / this.fpsFrames;
+    this.fpsFrames = 0;
+    this.slowSum = 0;
+    this.fpsSince = now;
+    if (this.graphics.dynamicResolution) {
+      const target = this.graphics.fpsCap
+        ? 1000 / this.graphics.fpsCap
+        : 1000 / 55;
+      const next = governResolution(this.dynamicScale, average, target);
+      if (Math.abs(next - this.dynamicScale) > 0.001) {
+        this.dynamicScale = next;
+        this.applyPixelRatio();
+      }
+    }
+    this.onFps(this.fps, this.renderer.getPixelRatio());
+  }
+  private applyPixelRatio() {
+    this.renderer.setPixelRatio(
+      pixelRatioFor(
+        this.quality,
+        this.graphics.renderScale,
+        devicePixelRatio,
+        this.graphics.dynamicResolution ? this.dynamicScale : 1,
+      ),
+    );
+    this.resize();
+  }
   async setPlayers(players: Player[], active: number) {
     const gen = ++this.generation;
     this.pawns.forEach((p) => p.removeFromParent());
@@ -299,9 +376,15 @@ export class GameScene {
         to = new THREE.Vector3(tile.x, tile.y + 0.095, tile.z);
       const angle = Math.atan2(to.x - from.x, to.z - from.z);
       pawn.rotation.y = angle;
+      if (this.follow)
+        this.focusTween = {
+          from: this.controls.target.clone(),
+          to: to.clone(),
+          start: performance.now(),
+        };
       await new Promise<void>((resolve) => {
         const start = performance.now(),
-          duration = running ? 170 : 300;
+          duration = running ? this.stepDuration.run : this.stepDuration.walk;
         const tick = () => {
           const t = Math.min(1, (performance.now() - start) / duration),
             e = t * t * (3 - 2 * t);
@@ -341,6 +424,20 @@ export class GameScene {
         start: performance.now(),
       };
   }
+  configureCamera(options: {
+    fov: number;
+    orbitSpeed: number;
+    zoomSpeed: number;
+    invertOrbit: boolean;
+    cameraFollow: boolean;
+  }) {
+    this.camera.fov = options.fov;
+    this.camera.updateProjectionMatrix();
+    this.controls.rotateSpeed =
+      options.orbitSpeed * (options.invertOrbit ? -1 : 1);
+    this.controls.zoomSpeed = options.zoomSpeed;
+    this.follow = options.cameraFollow;
+  }
   setRoadEncounters(enabled: boolean) {
     this.world.encounters.visible = enabled;
   }
@@ -359,34 +456,62 @@ export class GameScene {
   }
   setQuality(q: Quality) {
     this.quality = q;
-    this.renderer.setPixelRatio(
-      Math.min(devicePixelRatio, q === "ultra" ? 2 : q === "medium" ? 1.5 : 1),
-    );
-    this.renderer.shadowMap.enabled = q !== "low";
-    this.light.shadow.mapSize.setScalar(q === "ultra" ? 2048 : 1024);
-    this.light.shadow.map?.dispose();
-    this.light.shadow.map = null;
     this.atmosphere.setQuality(q);
     this.environment.setQuality(q);
-    this.ao.enabled = q !== "low" && this.graphics.ao;
     this.ao.blendIntensity = q === "ultra" ? 0.48 : 0.38;
-    this.ao.updateGtaoMaterial({ samples: q === "ultra" ? 16 : 8 });
+    this.ao.updateGtaoMaterial({
+      samples: Math.max(4, QUALITY_PRESETS[q].aoSamples),
+    });
     this.applyGraphics(this.graphics);
-    this.resize();
   }
   applyGraphics(options: GraphicsOptions) {
+    const previous = this.graphics;
     this.graphics = { ...options };
+    const post = QUALITY_PRESETS[this.quality].post;
     this.renderer.toneMappingExposure = options.exposure;
     this.renderer.shadowMap.enabled = options.shadows && this.quality !== "low";
+    const mapSize = Math.min(
+      SHADOW_MAP_SIZE[options.shadowQuality],
+      this.quality === "low" ? 1024 : 4096,
+    );
+    if (this.light.shadow.mapSize.x !== mapSize) {
+      this.light.shadow.mapSize.setScalar(mapSize);
+      this.light.shadow.map?.dispose();
+      this.light.shadow.map = null;
+    }
     this.bloom.strength = options.bloom;
     this.bloom.radius = 0.55;
     this.bloom.threshold = 0.9;
     this.bloom.enabled = options.bloom > 0;
-    this.ao.enabled = options.ao && this.quality !== "low";
+    this.ao.enabled = options.ao && post;
+    this.fxaa.enabled = options.antialias && post;
+    const grade = this.grade.material.uniforms;
+    grade.saturation.value = options.saturation;
+    grade.contrast.value = options.contrast;
+    grade.vignette.value = options.vignette;
+    this.grade.enabled =
+      post &&
+      (Math.abs(options.saturation - 1) > 0.01 ||
+        Math.abs(options.contrast - 1) > 0.01 ||
+        options.vignette > 0.01);
     (this.scene.fog as THREE.FogExp2).density = 0.007 * options.fog;
-    this.lighting.setStyle(options.lighting);
+    this.lighting.setStyle(options.lighting, options);
     this.atmosphere.configure(options.weather, options.fog);
     this.world.configureWater(options);
+    setWindStrength(options.wind);
+    if (!options.dynamicResolution) this.dynamicScale = 1;
+    if (
+      previous.renderScale !== options.renderScale ||
+      previous.dynamicResolution !== options.dynamicResolution ||
+      this.renderer.getPixelRatio() !==
+        pixelRatioFor(
+          this.quality,
+          options.renderScale,
+          devicePixelRatio,
+          options.dynamicResolution ? this.dynamicScale : 1,
+        )
+    )
+      this.applyPixelRatio();
   }
   dispose() {
     cancelAnimationFrame(this.frame);
@@ -396,6 +521,8 @@ export class GameScene {
     this.world.dispose();
     this.ao.dispose();
     this.bloom.dispose();
+    this.grade.dispose();
+    this.fxaa.dispose();
     this.composer.dispose();
     this.vfx.dispose();
     this.atmosphere.dispose();

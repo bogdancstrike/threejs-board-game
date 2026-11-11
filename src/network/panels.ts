@@ -2,6 +2,7 @@ import { difficultySettings, describeDifficulty } from "../ui/difficulty";
 import type { Difficulty } from "../game/decks";
 import { MAPS } from "../game/maps";
 import { CHARACTERS } from "../game/data";
+import { readProfile } from "../settings/preferences";
 import type { RealtimeClient } from "./client";
 interface UI {
   icon: (name: string) => string;
@@ -45,7 +46,8 @@ export class RoomPanels {
       return;
     }
     const i = this.ui.icon,
-      savedName = localStorage.getItem("wilder-player-name") || "",
+      profile = readProfile(),
+      savedName = profile.name,
       code = new URLSearchParams(location.search).get("room") || "";
     this.ui.open(
       "rooms",
@@ -53,10 +55,10 @@ export class RoomPanels {
         "BRING A LITTLE COMPANY",
         "An adventure is better together.",
       ) +
-        `<div class="room-intro">${i("users")}<p>Create a persistent room or join your friends. Each player brings a name, a unique hero, and a little courage.</p></div><label class="settings-label">Your player name<input id="online-player-name" class="text-input" maxlength="24" autocomplete="nickname" placeholder="What should the island call you?" value="${this.ui.escape(savedName)}"/></label><label class="settings-label">How will you play?<select id="room-play-style"><option value="hotseat">On this device · solo or pass-and-play</option><option value="online">Online · everyone on their own device</option></select></label><div id="hotseat-setup"><label class="settings-label">Players on this device<select id="hotseat-count">${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<option value="${n}">${n === 1 ? "Solo adventure" : n + " players · take turns"}</option>`).join("")}</select></label><div id="hotseat-names"></div></div><div class="room-form-grid"><section><h3>Create an expedition</h3><label class="settings-label">Choose your world<select id="room-world">${MAPS.map((m) => `<option value="${m.id}" ${m.id === (options?.map || this.ui.map()) ? "selected" : ""}>${m.name}</option>`).join("")}</select></label><button class="text-button" data-room-action="random-world">✧ Suggest another random world</button><div id="setup-world-preview" class="setup-world-preview"></div><label class="settings-label">Victory rules<select id="room-mode"><option value="classic">Classic race · first to finish</option><option value="score">Score expedition · highest points</option></select></label>${difficultySettings()}<label class="room-checkbox"><input type="checkbox" id="room-challenges" checked/> Road adventures · dangers, dares & mini-games</label><button class="primary-button full-width" data-room-action="create">${i("compass")}Create a room</button></section><section><h3>Join your friends</h3><p class="modal-note">Ask your host for the six-character room code. You can reconnect to your saved room from this browser.</p><label class="settings-label">Room code<input id="room-code" class="text-input room-code-input" maxlength="6" autocomplete="off" placeholder="ABC234" value="${this.ui.escape(code)}"/></label><button class="secondary-button full-width" data-room-action="join">${i("arrow-up-right")}Join expedition</button><div class="room-tech-note"><span class="live-dot"></span>Live turns · Shared scores · Saved progress</div></section></div><p id="room-error" class="room-error" role="alert"></p><p class="modal-note">1–8 players on one device or across browsers. This mode uses the running game server to save your party. Offline Classic is available directly on the board.</p>`,
+        `<div class="room-intro">${i("users")}<p>Create a persistent room or join your friends. Each player brings a name, a unique hero, and a little courage.</p></div><label class="settings-label">Your player name<input id="online-player-name" class="text-input" maxlength="24" autocomplete="nickname" placeholder="What should the island call you?" value="${this.ui.escape(savedName)}"/></label><label class="settings-label">How will you play?<select id="room-play-style"><option value="hotseat">On this device · solo or pass-and-play</option><option value="online">Online · everyone on their own device</option></select></label><div id="hotseat-setup"><label class="settings-label">Players on this device<select id="hotseat-count">${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<option value="${n}" ${n === profile.partySize ? "selected" : ""}>${n === 1 ? "Solo adventure" : n + " players · take turns"}</option>`).join("")}</select></label><div id="hotseat-names"></div></div><div class="room-form-grid"><section><h3>Create an expedition</h3><label class="settings-label">Choose your world<select id="room-world">${MAPS.map((m) => `<option value="${m.id}" ${m.id === (options?.map || this.ui.map()) ? "selected" : ""}>${m.name}</option>`).join("")}</select></label><button class="text-button" data-room-action="random-world">✧ Suggest another random world</button><div id="setup-world-preview" class="setup-world-preview"></div><label class="settings-label">Victory rules<select id="room-mode"><option value="classic">Classic race · first to finish</option><option value="score" ${profile.mode === "score" ? "selected" : ""}>Score expedition · highest points</option></select></label>${difficultySettings(profile.difficulty)}<label class="room-checkbox"><input type="checkbox" id="room-challenges" ${profile.challenges ? "checked" : ""}/> Road adventures · dangers, dares & mini-games</label><button class="primary-button full-width" data-room-action="create">${i("compass")}Create a room</button></section><section><h3>Join your friends</h3><p class="modal-note">Ask your host for the six-character room code. You can reconnect to your saved room from this browser.</p><label class="settings-label">Room code<input id="room-code" class="text-input room-code-input" maxlength="6" autocomplete="off" placeholder="ABC234" value="${this.ui.escape(code)}"/></label><button class="secondary-button full-width" data-room-action="join">${i("arrow-up-right")}Join expedition</button><div class="room-tech-note"><span class="live-dot"></span>Live turns · Shared scores · Saved progress</div></section></div><p id="room-error" class="room-error" role="alert"></p><p class="modal-note">1–8 players on one device or across browsers. This mode uses the running game server to save your party. Offline Classic is available directly on the board.</p>`,
       true,
     );
-    describeDifficulty("soft");
+    describeDifficulty(profile.difficulty);
     this.worldPreview();
     const style = document.getElementById(
       "room-play-style",
@@ -66,13 +68,15 @@ export class RoomPanels {
       document.getElementById("hotseat-setup")!.hidden =
         style.value !== "hotseat";
     };
-    count.onchange = () => {
+    const renderNames = () => {
       document.getElementById("hotseat-names")!.innerHTML = Array.from(
         { length: Number(count.value) - 1 },
         (_, i) =>
           `<label class="settings-label">Player ${i + 2}<input class="text-input hotseat-name" maxlength="24" value="Player ${i + 2}" aria-label="Player ${i + 2} name"/></label>`,
       ).join("");
     };
+    count.onchange = renderNames;
+    renderNames();
   }
   private worldPreview() {
     const select = document.getElementById(

@@ -396,23 +396,29 @@ export function isSharedMaterial(m: THREE.Material) {
   return [...mats.values()].includes(m as THREE.MeshStandardMaterial);
 }
 
-const foliageTime = { value: 0 };
+const foliageTime = { value: 0 },
+  foliageWind = { value: 1 };
+/** Global foliage sway strength (0 = still air). */
+export function setWindStrength(strength: number) {
+  foliageWind.value = strength;
+}
 export function addWind(mat: THREE.MeshStandardMaterial) {
   if (mat.userData.wind) return;
   mat.userData.wind = true;
   mat.onBeforeCompile = (shader) => {
     shader.uniforms.foliageTime = foliageTime;
+    shader.uniforms.foliageWind = foliageWind;
     shader.vertexShader = shader.vertexShader
       .replace(
         "#include <common>",
-        "#include <common>\nuniform float foliageTime;",
+        "#include <common>\nuniform float foliageTime;uniform float foliageWind;",
       )
       .replace(
         "#include <begin_vertex>",
-        "#include <begin_vertex>\ntransformed.x+=sin(foliageTime*1.1+position.x*.9+position.z*.5)*.035*clamp(position.y,0.,3.);transformed.z+=cos(foliageTime*.8+position.x*.6)*.02;",
+        "#include <begin_vertex>\ntransformed.x+=sin(foliageTime*1.1+position.x*.9+position.z*.5)*.035*foliageWind*clamp(position.y,0.,3.);transformed.z+=cos(foliageTime*.8+position.x*.6)*.02*foliageWind;",
       );
   };
-  mat.customProgramCacheKey = () => "foliage-wind-v1";
+  mat.customProgramCacheKey = () => "foliage-wind-v2";
 }
 export function updateWorldMaterials(t: number) {
   foliageTime.value = t;

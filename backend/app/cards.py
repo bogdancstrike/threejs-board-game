@@ -39,17 +39,17 @@ def begin(room, p, clock, stop=None, randbelow=secrets.randbelow):
                 {
                     "key": "dare",
                     "label": "Completed the card",
-                    "detail": "+25 points and +1 gold. Self-reported; only willing participants.",
+                    "detail": "+25 points and +1 gold.",
                 },
                 {
                     "key": "alternative",
                     "label": "Completed the neutral alternative",
-                    "detail": "+25 points and +1 gold. The same reward, with a creative board-game task.",
+                    "detail": "+25 points and +1 gold for the board-game version.",
                 },
                 {
                     "key": "leave",
                     "label": "Pass this card",
-                    "detail": "No penalty, no explanation needed.",
+                    "detail": "No reward.",
                 },
             ],
             "deadline": clock + card["seconds"] * 1000,

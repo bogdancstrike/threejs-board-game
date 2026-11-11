@@ -162,6 +162,84 @@ export function roadMarkers(theme: MapTheme) {
     }
     group.add(marker);
   }
+  group.add(cardDeck(theme, tiles, animated));
   group.visible = false;
   return { group, animated };
+}
+function cardFace(accent: string) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 96;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#f1e6c8";
+  ctx.fillRect(0, 0, 64, 96);
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 5;
+  ctx.strokeRect(5, 5, 54, 86);
+  ctx.fillStyle = accent;
+  ctx.font = "bold 40px Georgia, serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("✦", 32, 50);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+/**
+ * A floating party card hovers over every tile without a roadside encounter.
+ * One instanced mesh keeps all of them in a single draw call.
+ */
+function cardDeck(
+  theme: MapTheme,
+  tiles: ReturnType<typeof getTiles>,
+  animated: ((time: number) => void)[],
+) {
+  const stops = new Set(ROAD_STOPS.map((s) => s.tile));
+  const cardTiles = tiles.filter(
+    (t) => !stops.has(t.id) && t.kind !== "start" && t.kind !== "finish",
+  );
+  const texture = cardFace(theme.accent);
+  const material = new THREE.MeshStandardMaterial({
+    map: texture,
+    emissive: theme.accent,
+    emissiveIntensity: 0.18,
+    roughness: 0.6,
+  });
+  const mesh = new THREE.InstancedMesh(
+    new THREE.BoxGeometry(0.2, 0.3, 0.015),
+    material,
+    cardTiles.length,
+  );
+  mesh.name = "Party cards";
+  mesh.userData.cardTiles = cardTiles.map((t) => t.id);
+  mesh.castShadow = true;
+  const dummy = new THREE.Object3D();
+  const place = (t: number) => {
+    cardTiles.forEach((tile, i) => {
+      const side = tile.id % 2 ? 1 : -1;
+      dummy.position.set(
+        tile.x + side * 0.42,
+        tile.y + 0.42 + Math.sin(t * 1.6 + tile.id) * 0.05,
+        tile.z - 0.3,
+      );
+      dummy.rotation.set(0.12, t * 0.8 + tile.id, side * 0.12);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+  };
+  place(0);
+  let last = -1;
+  animated.push((t) => {
+    // Card spin is subtle; ~30 updates per second is plenty.
+    if (t - last < 0.033) return;
+    last = t;
+    place(t);
+  });
+  mesh.userData.dispose = () => {
+    texture.dispose();
+    material.dispose();
+    mesh.geometry.dispose();
+  };
+  return mesh;
 }

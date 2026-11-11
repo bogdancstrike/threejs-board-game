@@ -1,10 +1,21 @@
-import { graphicsSettings } from "./ui/graphics-settings";
+import { configPage, formatSetting } from "./ui/config-page";
 import {
   readGraphics,
   saveGraphics,
   GRAPHICS_DEFAULTS,
+  type GraphicsOptions,
   type LightingStyle,
 } from "./world/graphics";
+import {
+  readPreferences,
+  savePreferences,
+  readProfile,
+  saveProfile,
+  PREFERENCE_DEFAULTS,
+  MOVE_SPEEDS,
+  type Preferences,
+  type Profile,
+} from "./settings/preferences";
 import "./style.css";
 import { StartMenu, type MenuJourney } from "./ui/start-menu";
 import { RealtimeClient, type RoomUpdate } from "./network/client";
@@ -58,6 +69,17 @@ import {
   Feather,
   Circle,
   CheckCheck,
+  UserRound,
+  Monitor,
+  Palette,
+  Move3d,
+  Accessibility,
+  Gauge,
+  Shuffle,
+  SlidersHorizontal,
+  Play,
+  Filter,
+  Star,
 } from "lucide";
 import { roadStop } from "./game/road";
 import { CHARACTERS, getTiles, TILE_INFO } from "./game/data";
@@ -123,6 +145,17 @@ const icons = {
   Feather,
   Circle,
   CheckCheck,
+  UserRound,
+  Monitor,
+  Palette,
+  Move3d,
+  Accessibility,
+  Gauge,
+  Shuffle,
+  SlidersHorizontal,
+  Play,
+  Filter,
+  Star,
 };
 const icon = (name: string, cls = "") =>
   `<i data-lucide="${name}" class="${cls}"></i>`;
@@ -152,20 +185,42 @@ let theme = getMap(state.map),
 let scene: GameScene;
 let mapPreview: GameScene | null = null;
 let modalType = "";
-let graphicsQuality: Quality = "medium";
-try {
-  const prefs = JSON.parse(localStorage.getItem("wilder-display-v1") || "{}");
-  if (["low", "medium", "ultra"].includes(prefs.quality))
-    graphicsQuality = prefs.quality;
-  runMovement = prefs.run === true;
-} catch {}
+let prefs: Preferences = readPreferences();
+let profile: Profile = readProfile();
+let graphicsQuality: Quality = prefs.quality;
+runMovement = prefs.run;
 function saveDisplayPreferences() {
-  try {
-    localStorage.setItem(
-      "wilder-display-v1",
-      JSON.stringify({ quality: graphicsQuality, run: runMovement }),
-    );
-  } catch {}
+  prefs.quality = graphicsQuality;
+  prefs.run = runMovement;
+  savePreferences(prefs);
+}
+/** Apply camera, pacing and interface preferences to the board and document. */
+function applyPreferences() {
+  document.documentElement.style.setProperty(
+    "--ui-scale",
+    String(prefs.uiScale),
+  );
+  document.body.classList.toggle("reduce-motion", prefs.reduceMotion);
+  document.body.classList.toggle("hide-legend", !prefs.legend);
+  if (scene) configureBoard(scene);
+}
+function configureBoard(target: GameScene) {
+  target.configureCamera(prefs);
+  target.stepDuration = { ...MOVE_SPEEDS[prefs.moveSpeed] };
+  target.onFps = (fps, ratio) => {
+    const meter = document.getElementById("fps-meter");
+    if (!meter) return;
+    meter.hidden = !target.graphics.showFps;
+    meter.textContent = `${fps} FPS · ${ratio.toFixed(2)}×`;
+    meter.dataset.slow = String(fps < 40);
+  };
+  const meter = document.getElementById("fps-meter");
+  if (meter) meter.hidden = !target.graphics.showFps;
+}
+function boardScene(world = theme) {
+  const created = new GameScene($("viewport"), world, graphicsQuality);
+  configureBoard(created);
+  return created;
 }
 const gameAudio = new GameAudio(theme);
 muted = !gameAudio.preferences.enabled;
@@ -186,7 +241,7 @@ app.innerHTML = `
 <div class="journal-section"><div class="section-label">TRAVELER’S JOURNAL<button data-action="journal">View all ${icon("arrow-up-right")}</button></div><div id="journal"></div></div><div class="sidebar-footer"><span class="save-dot"></span> Your journey is saved automatically</div></aside>
 <section class="world-area" aria-label="Game board"><div class="sky-stars"></div><div class="world-grain"></div><div id="viewport"></div><div id="party-panel" class="party-overlay" hidden></div><div class="world-heading"><span class="eyebrow" id="chapter">CHAPTER I</span><h2 id="region-name">Hearthwick Village</h2><p id="region-subtitle">Every great tale begins with a small step.</p></div><div class="world-meta"><span class="live-dot"></span><span id="player-count">SOLO EXPEDITION</span><span class="meta-divider"></span><span id="turn-label">TURN 01</span></div><div class="world-label castle-label" id="destination-label">${icon("flag")}<span>CROWNFALL CASTLE</span></div><div id="tile-tooltip" class="tile-tooltip" hidden></div><div class="compass-rose"><span>N</span><div>✧</div></div><div class="camera-controls"><button data-action="focus" aria-label="Focus active character" title="Focus character (F)">${icon("crosshair")}</button><span></span><button data-action="zoom-in" aria-label="Zoom in">${icon("plus")}</button><button data-action="zoom-out" aria-label="Zoom out">${icon("minus")}</button><span></span><button data-action="reset-camera" aria-label="Reset camera" title="Reset camera (R)">${icon("scan")}</button></div><div class="camera-hint">${icon("orbit")} Drag to explore <span>·</span> Scroll to zoom</div>
 <div class="turn-panel"><div class="turn-icon">${icon("sparkles")}</div><div class="turn-copy"><span class="eyebrow" id="turn-eyebrow">YOUR STORY STARTS HERE</span><h3 id="turn-title">The first step is yours.</h3><p id="turn-description">Roll the dice. See where the path takes you.</p></div><div class="dice-separator"></div><div id="dice" class="dice-face" aria-label="Dice"><span class="dice-pip"></span></div><button id="roll-button" class="primary-button" data-action="roll">${icon("dices")}<span>Roll the dice</span><kbd>SPACE</kbd></button></div>
-<div class="board-legend"><span><i style="--dot:#b4a0dc"></i>Mystery</span><span><i style="--dot:#edbf67"></i>Treasure</span><span><i style="--dot:#83cbb4"></i>Fortune</span><span><i style="--dot:#82c9dd"></i>Portal</span></div><div class="scene-loading" id="scene-loading"><span class="loading-orbit"></span>Unfolding your world…</div></section></main>
+<div id="fps-meter" class="fps-meter" hidden></div><div class="board-legend"><span><i style="--dot:#b4a0dc"></i>Mystery</span><span><i style="--dot:#edbf67"></i>Treasure</span><span><i style="--dot:#83cbb4"></i>Fortune</span><span><i style="--dot:#82c9dd"></i>Portal</span></div><div class="scene-loading" id="scene-loading"><span class="loading-orbit"></span>Unfolding your world…</div></section></main>
 <dialog id="modal" class="modal"><div id="modal-content"></div></dialog><div id="toast" class="toast" role="status"></div>`;
 const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
   document.getElementById(id) as T;
@@ -469,6 +524,8 @@ function closeModal() {
   preview = null;
   mapPreview?.dispose();
   mapPreview = null;
+  profilePreview?.dispose();
+  profilePreview = null;
   dialog.close();
   modalType = "";
 }
@@ -478,6 +535,8 @@ function openModal(type: string, html: string, wide = false) {
   preview = null;
   mapPreview?.dispose();
   mapPreview = null;
+  profilePreview?.dispose();
+  profilePreview = null;
   modalType = type;
   if (scene) scene.paused = type !== "settings";
   dialog.className = `modal ${wide ? "modal-wide" : ""} modal-${type}`;
@@ -597,7 +656,10 @@ titleMenu = new StartMenu(app, {
   toggle: (open) => {
     if (scene) {
       scene.controls.autoRotate =
-        open && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+        open &&
+        prefs.menuOrbit &&
+        !prefs.reduceMotion &&
+        !matchMedia("(prefers-reduced-motion: reduce)").matches;
       scene.controls.autoRotateSpeed = 0.15;
       scene.controls.enabled = !open;
       scene.paused = dialog.open;
@@ -686,10 +748,44 @@ function showMaps() {
   if (busy) return;
   openModal(
     "maps",
-    modalHeader("THIRTY WORLDS. COUNTLESS STORIES.", "Where will you wander?") +
-      `<p class="modal-intro">Thirty silhouettes. Three to nine floors. Find a new kind of adventure.</p><div class="world-gallery-toolbar"><label>${icon("compass")}<input id="world-search" type="search" placeholder="Find a world, shape, or theme…" aria-label="Search worlds"/></label><span id="world-result-count">${MAPS.length} worlds</span></div><div class="maps-grid">${MAPS.map((m, i) => `<button class="map-card ${m.id === theme.id ? "selected" : ""}" data-map="${m.id}" style="--map-sky:${m.sky};--map-ground:${m.terrain[2]};--map-accent:${m.accent}"><div class="map-art"><img class="map-thumbnail" src="/previews/${m.id}.webp" alt="3D preview of ${m.name}" loading="lazy" onerror="this.style.display='none'"/><div class="map-art-moon"></div><div class="map-art-mountain back"></div><div class="map-art-mountain"></div><div class="map-art-island"></div><span class="map-art-icon">${icon(m.icon)}</span><span class="map-number">${String(i + 1).padStart(2, "0")}</span>${m.id === theme.id ? '<span class="map-current">CURRENT WORLD</span>' : ""}</div><div class="map-card-copy"><h3>${m.name}</h3><p>${MAP_SHAPES[m.id].name} · ${MAP_SHAPES[m.id].floors} floors</p><span>${m.id === "dragonkind" ? "Dragon rider academy" : "93 tiles · 4 chapters"} ${icon("arrow-up-right")}</span></div></button>`).join("")}</div><p class="modal-note">Choosing another world starts a fresh expedition. Your current journey is saved until you confirm.</p>`,
+    modalHeader(
+      `${MAPS.length} WORLDS. COUNTLESS STORIES.`,
+      "Where will you wander?",
+    ) +
+      `<p class="modal-intro">${MAPS.length} silhouettes. Three to nine floors. Find a new kind of adventure.</p><div class="world-gallery-toolbar"><label>${icon("compass")}<input id="world-search" type="search" placeholder="Find a world, shape, or theme…" aria-label="Search worlds"/></label><label class="world-sort">${icon("sliders-horizontal")}<select id="world-sort" aria-label="Sort worlds"><option value="catalogue">Catalogue order</option><option value="floors-asc">Fewest floors first</option><option value="floors-desc">Tallest first</option><option value="name">A to Z</option></select></label><button class="secondary-button" data-action="random-world">${icon("shuffle")}Surprise me</button><span id="world-result-count">${MAPS.length} worlds</span></div><div class="world-filters" role="group" aria-label="Filter worlds by family">${["all", ...new Set(MAPS.map((m) => m.theme))].map((f) => `<button data-world-filter="${f}" class="${f === "all" ? "active" : ""}">${f === "all" ? "All worlds" : f[0].toUpperCase() + f.slice(1)}</button>`).join("")}</div><div class="maps-grid">${MAPS.map((m, i) => `<button class="map-card ${m.id === theme.id ? "selected" : ""}" data-map="${m.id}" data-family="${m.theme}" data-floors="${MAP_SHAPES[m.id].floors}" data-index="${i}" data-name="${m.name}" style="--map-sky:${m.sky};--map-ground:${m.terrain[2]};--map-accent:${m.accent}"><div class="map-art"><img class="map-thumbnail" src="/previews/${m.id}.webp" alt="3D preview of ${m.name}" loading="lazy" onerror="this.style.display='none'"/><div class="map-art-moon"></div><div class="map-art-mountain back"></div><div class="map-art-mountain"></div><div class="map-art-island"></div><span class="map-art-icon">${icon(m.icon)}</span><span class="map-number">${String(i + 1).padStart(2, "0")}</span>${m.id === theme.id ? '<span class="map-current">CURRENT WORLD</span>' : ""}</div><div class="map-card-copy"><h3>${m.name}</h3><p>${MAP_SHAPES[m.id].name} · ${MAP_SHAPES[m.id].floors} floors</p><span>${m.id === "dragonkind" ? "Dragon rider academy" : "93 tiles · 4 chapters"} ${icon("arrow-up-right")}</span></div></button>`).join("")}</div><p class="modal-note">Choosing another world starts a fresh expedition. Your current journey is saved until you confirm.</p>`,
     true,
   );
+}
+let worldFamily = "all";
+function filterWorlds() {
+  const q = ($<HTMLInputElement>("world-search")?.value || "")
+    .toLowerCase()
+    .trim();
+  let shown = 0;
+  document.querySelectorAll<HTMLElement>(".map-card").forEach((card) => {
+    card.hidden =
+      !card.textContent?.toLowerCase().includes(q) ||
+      (worldFamily !== "all" && card.dataset.family !== worldFamily);
+    if (!card.hidden) shown++;
+  });
+  $("world-result-count").textContent =
+    shown + (shown === 1 ? " world" : " worlds");
+}
+function sortWorlds(order: string) {
+  const grid = document.querySelector(".maps-grid");
+  if (!grid) return;
+  const cards = [...grid.querySelectorAll<HTMLElement>(".map-card")];
+  const key = (c: HTMLElement) => Number(c.dataset.floors);
+  cards.sort((a, b) =>
+    order === "floors-asc"
+      ? key(a) - key(b)
+      : order === "floors-desc"
+        ? key(b) - key(a)
+        : order === "name"
+          ? a.dataset.name!.localeCompare(b.dataset.name!)
+          : Number(a.dataset.index) - Number(b.dataset.index),
+  );
+  grid.append(...cards);
 }
 function confirmMap(id: string) {
   const m = getMap(id),
@@ -743,7 +839,7 @@ async function startMap(id: string, count = state.players.length) {
     .style.setProperty("--world-bg", theme.sky);
   $("scene-loading").hidden = false;
   await delay(20);
-  scene = new GameScene($("viewport"), theme, graphicsQuality);
+  scene = boardScene();
   attachScene();
   await scene.setPlayers(state.players, 0);
   $("scene-loading").hidden = true;
@@ -821,23 +917,61 @@ function showVictory() {
   );
 }
 
-function showSettings() {
+let profilePreview: CharacterPreview | null = null;
+function showSettings(section = "") {
   openModal(
     "settings",
-    modalHeader("MAKE YOURSELF AT HOME", "Expedition settings") +
-      `<div class="audio-settings"><div class="section-label">THE SOUND OF YOUR JOURNEY</div><label class="toggle-setting"><span><strong>Enable sound</strong><small>Original generative music and themed soundscapes</small></span><input type="checkbox" id="audio-enabled" ${gameAudio.preferences.enabled ? "checked" : ""}></label>${[
-        ["music", "Ambient music"],
-        ["ambience", "World ambience"],
-        ["effects", "Game effects"],
-      ]
-        .map(
-          ([id, label]) =>
-            `<label class="audio-range"><span>${label}</span><input aria-label="${label} volume" type="range" min="0" max="100" value="${Math.round(gameAudio.preferences[id as "music" | "ambience" | "effects"] * 100)}" data-audio-volume="${id}"/><output id="volume-${id}">${Math.round(gameAudio.preferences[id as "music" | "ambience" | "effects"] * 100)}%</output></label>`,
-        )
-        .join(
-          "",
-        )}</div><div class="sidebar-rule"></div><label class="settings-label">Graphics quality<select id="quality-setting"><option value="low" ${scene.quality === "low" ? "selected" : ""}>Low · lighter rendering</option><option value="medium" ${scene.quality === "medium" ? "selected" : ""}>Medium · balanced</option><option value="ultra" ${scene.quality === "ultra" ? "selected" : ""}>Ultra · cinematic</option></select></label><label class="toggle-setting"><span><strong>Run between tiles</strong><small>A quicker pace for your adventure</small></span><input type="checkbox" id="run-setting" ${runMovement ? "checked" : ""}></label>${graphicsSettings()}<div class="sidebar-rule"></div><label class="settings-label">Traveling party<select id="party-setting">${[1, 2, 3, 4].map((n) => `<option value="${n}" ${state.players.length === n ? "selected" : ""}>${n === 1 ? "Solo expedition" : `${n} players · local pass-and-play`}</option>`).join("")}</select></label><p class="modal-note">Party size applies when you start a new expedition. Each player can choose a different character on their turn.</p><button class="secondary-button full-width" data-action="confirm-restart">${icon("rotate-ccw")}Start a new expedition</button><p class="modal-note">Your current game is saved on this browser automatically.</p>`,
+    modalHeader("MAKE YOURSELF AT HOME", "Configuration") +
+      configPage({
+        graphics: readGraphics(),
+        prefs,
+        profile,
+        quality: scene?.quality || graphicsQuality,
+        audio: gameAudio.preferences,
+        partySize: Math.min(4, state.players.length),
+        escape: safe,
+        icon,
+      }),
+    true,
   );
+  profilePreview?.dispose();
+  profilePreview = new CharacterPreview($("profile-preview"));
+  void profilePreview.show(
+    CHARACTERS.find((c) => c.id === profile.character)!,
+    profile.tint,
+  );
+  if (section) jumpToConfig(section);
+}
+function jumpToConfig(section: string) {
+  document
+    .getElementById("config-" + section)
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document
+    .querySelectorAll<HTMLElement>("[data-config-jump]")
+    .forEach((b) =>
+      b.classList.toggle("active", b.dataset.configJump === section),
+    );
+}
+function updateGraphics(change: (options: GraphicsOptions) => void) {
+  const options = readGraphics();
+  change(options);
+  saveGraphics(options);
+  scene.applyGraphics(options);
+  configureBoard(scene);
+}
+function updatePreferences(change: (p: Preferences) => void) {
+  change(prefs);
+  runMovement = prefs.run;
+  graphicsQuality = prefs.quality;
+  savePreferences(prefs);
+  applyPreferences();
+}
+function updateProfile(change: (p: Profile) => void) {
+  change(profile);
+  saveProfile(profile);
+  const hero = CHARACTERS.find((c) => c.id === profile.character)!;
+  $("profile-preview")?.style.setProperty("--hero-color", hero.color);
+  void profilePreview?.show(hero, profile.tint);
 }
 function showHelp() {
   openModal(
@@ -864,7 +998,7 @@ function attachScene() {
   scene.onLand = () => sound("land");
   scene.onTile = (id) => {
     const tip = $("tile-tooltip");
-    if (id === null || busy) {
+    if (id === null || busy || !prefs.tooltips) {
       tip.hidden = true;
       return;
     }
@@ -875,7 +1009,11 @@ function attachScene() {
       tip.innerHTML = `<span style="color:${theme.accent}">✧</span><div><strong>${stop.title}</strong><small>Tile ${id + 1} · ${stop.description}</small></div>`;
       return;
     }
-    tip.innerHTML = `<span style="color:${TILE_INFO[t.kind].color}">${TILE_INFO[t.kind].icon}</span><div><strong>${t.kind === "finish" ? theme.regions[3] : t.kind === "start" ? theme.regions[0] : TILE_INFO[t.kind].label}</strong><small>Tile ${id + 1} · ${t.kind === "finish" ? "The end of this path. The beginning of your legend." : TILE_INFO[t.kind].description}</small></div>`;
+    const card =
+      realtime.room?.challenges && t.kind !== "start" && t.kind !== "finish"
+        ? ` · Then draw a ${realtime.room.difficulty || "soft"} party card.`
+        : "";
+    tip.innerHTML = `<span style="color:${TILE_INFO[t.kind].color}">${TILE_INFO[t.kind].icon}</span><div><strong>${t.kind === "finish" ? theme.regions[3] : t.kind === "start" ? theme.regions[0] : TILE_INFO[t.kind].label}</strong><small>Tile ${id + 1} · ${t.kind === "finish" ? "The end of this path. The beginning of your legend." : TILE_INFO[t.kind].description}${card}</small></div>`;
     tip.hidden = false;
   };
 }
@@ -906,7 +1044,19 @@ app.addEventListener("click", async (e) => {
   else if (action === "reset-graphics") {
     saveGraphics(GRAPHICS_DEFAULTS);
     scene.applyGraphics(GRAPHICS_DEFAULTS);
-    showSettings();
+    configureBoard(scene);
+    showSettings("grading");
+  } else if (action === "reset-preferences") {
+    updatePreferences((p) =>
+      Object.assign(p, { ...PREFERENCE_DEFAULTS, quality: p.quality }),
+    );
+    showSettings("access");
+  } else if (el.dataset.configJump) jumpToConfig(el.dataset.configJump);
+  else if (el.dataset.profileTint) {
+    updateProfile((p) => (p.tint = el.dataset.profileTint!));
+    document
+      .querySelectorAll("[data-profile-tint]")
+      .forEach((b) => b.classList.toggle("active", b === el));
   } else if (action === "help") showHelp();
   else if (action === "journal") showJournal();
   else if (action === "close-modal") closeModal();
@@ -1009,19 +1159,45 @@ app.addEventListener("click", async (e) => {
 });
 app.addEventListener("change", (e) => {
   const el = e.target as HTMLInputElement;
-  if (el.id === "lighting-setting") {
-    const options = readGraphics();
-    options.lighting = el.value as LightingStyle;
-    saveGraphics(options);
-    scene.applyGraphics(options);
-  }
+  if (el.id === "lighting-setting")
+    updateGraphics((o) => (o.lighting = el.value as LightingStyle));
   if (el.dataset.graphicsToggle) {
-    const options = readGraphics();
-    options[el.dataset.graphicsToggle as "ao" | "spray" | "shadows"] =
-      el.checked;
-    saveGraphics(options);
-    scene.applyGraphics(options);
+    const key = el.dataset.graphicsToggle as keyof GraphicsOptions;
+    updateGraphics(
+      (o) => ((o as unknown as Record<string, boolean>)[key] = el.checked),
+    );
   }
+  if (el.dataset.graphicsSelect) {
+    const key = el.dataset.graphicsSelect;
+    updateGraphics((o) => {
+      (o as unknown as Record<string, unknown>)[key] =
+        key === "fpsCap" ? Number(el.value) : el.value;
+    });
+  }
+  if (el.dataset.prefToggle && el.id !== "run-setting") {
+    const key = el.dataset.prefToggle;
+    updatePreferences(
+      (p) => ((p as unknown as Record<string, boolean>)[key] = el.checked),
+    );
+  }
+  if (el.dataset.prefSelect) {
+    const key = el.dataset.prefSelect;
+    updatePreferences(
+      (p) => ((p as unknown as Record<string, string>)[key] = el.value),
+    );
+  }
+  if (el.dataset.profile) {
+    const key = el.dataset.profile;
+    updateProfile((p) => {
+      (p as unknown as Record<string, unknown>)[key] =
+        key === "partySize" ? Number(el.value) : el.value;
+    });
+  }
+  if (el.dataset.profileToggle)
+    updateProfile((p) => (p.challenges = el.checked));
+  if (el.id === "profile-name")
+    updateProfile((p) => (p.name = el.value.trim().slice(0, 24)));
+  if (el.id === "world-sort") sortWorlds(el.value);
   if (el.id === "quality-setting") {
     graphicsQuality = el.value as Quality;
     scene.setQuality(graphicsQuality);
@@ -1054,6 +1230,8 @@ dialog.addEventListener("cancel", (e) => {
     preview = null;
     mapPreview?.dispose();
     mapPreview = null;
+    profilePreview?.dispose();
+    profilePreview = null;
     modalType = "";
   }
 });
@@ -1085,29 +1263,23 @@ window.addEventListener("keydown", (e) => {
 });
 app.addEventListener("input", (e) => {
   const el = e.target as HTMLInputElement;
-  if (el.dataset.graphics) {
-    const key = el.dataset.graphics as
-      | "exposure"
-      | "bloom"
-      | "fog"
-      | "weather"
-      | "waterSpeed"
-      | "foam";
-    const options = readGraphics();
-    options[key] = Number(el.value) / 100;
-    saveGraphics(options);
-    scene.applyGraphics(options);
-    $("graphics-" + key).textContent = el.value + "%";
+  if (el.dataset.graphics || el.dataset.pref) {
+    const divisor = Number(el.dataset.divisor || 100),
+      value = Number(el.value) / divisor,
+      key = (el.dataset.graphics || el.dataset.pref)!;
+    if (el.dataset.graphics)
+      updateGraphics(
+        (o) => ((o as unknown as Record<string, number>)[key] = value),
+      );
+    else
+      updatePreferences(
+        (p) => ((p as unknown as Record<string, number>)[key] = value),
+      );
+    const output = $((el.dataset.graphics ? "graphics-" : "pref-") + key);
+    if (output)
+      output.textContent = formatSetting(Number(el.value), el.dataset.unit);
   }
-  if (el.id === "world-search") {
-    const q = el.value.toLowerCase().trim();
-    let shown = 0;
-    document.querySelectorAll<HTMLElement>(".map-card").forEach((card) => {
-      card.hidden = !card.textContent?.toLowerCase().includes(q);
-      if (!card.hidden) shown++;
-    });
-    $("world-result-count").textContent = shown + " worlds";
-  }
+  if (el.id === "world-search") filterWorlds();
   if (el.dataset.audioVolume) {
     const channel = el.dataset.audioVolume as "music" | "ambience" | "effects";
     gameAudio.setVolume(channel, Number(el.value) / 100);
@@ -1115,6 +1287,7 @@ app.addEventListener("input", (e) => {
   }
 });
 window.addEventListener("beforeunload", persist);
+applyPreferences();
 update();
 refreshIcons();
 syncSoundButton();
@@ -1122,7 +1295,7 @@ document
   .querySelector<HTMLElement>(".world-area")!
   .style.setProperty("--world-bg", theme.sky);
 try {
-  scene = new GameScene($("viewport"), theme, graphicsQuality);
+  scene = boardScene();
   attachScene();
   update();
   void scene.setPlayers(state.players, state.active).then(() => {
@@ -1158,7 +1331,7 @@ async function leaveOnline() {
   }
   theme = getMap(state.map);
   scene.dispose();
-  scene = new GameScene($("viewport"), theme, graphicsQuality);
+  scene = boardScene();
   attachScene();
   await scene.setPlayers(state.players, state.active);
   busy = false;
@@ -1190,7 +1363,7 @@ async function receiveRoom(message: RoomUpdate) {
     theme = getMap(state.map);
     gameAudio.setTheme(theme);
     scene.dispose();
-    scene = new GameScene($("viewport"), theme, graphicsQuality);
+    scene = boardScene();
     attachScene();
     $("scene-loading").hidden = false;
     document
@@ -1301,6 +1474,7 @@ async function receiveRoom(message: RoomUpdate) {
   }
   if (
     room.hotseat &&
+    prefs.handoff &&
     state.players.length > 1 &&
     state.phase === "ready" &&
     !initial &&

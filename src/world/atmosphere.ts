@@ -11,6 +11,7 @@ export interface Atmosphere {
   update: (t: number) => void;
   setQuality: (quality: string) => void;
   configure: (weather: number, fog: number) => void;
+  setSky: (color: THREE.Color) => void;
   dispose: () => void;
 }
 export function atmosphere(theme: MapTheme): Atmosphere {
@@ -215,13 +216,19 @@ export function atmosphere(theme: MapTheme): Atmosphere {
       Math.min(
         count,
         Math.round(
-          (quality === "low" ? 40 : quality === "ultra" ? 180 : 100) * weather,
+          (quality === "low"
+            ? 40
+            : quality === "ultra"
+              ? 180
+              : quality === "high"
+                ? 140
+                : 100) * weather,
         ),
       ),
     );
     mistMat.opacity = (quality === "low" ? 0.05 : 0.11) * fog;
     points.visible = weather > 0;
-    shafts.visible = quality === "ultra" && fog > 0;
+    shafts.visible = (quality === "ultra" || quality === "high") && fog > 0;
   };
   return {
     group,
@@ -231,7 +238,10 @@ export function atmosphere(theme: MapTheme): Atmosphere {
     setQuality(q) {
       quality = q;
       configure();
-      shafts.visible = q === "ultra";
+    },
+    setSky(color) {
+      skyMat.uniforms.top.value.copy(color).multiplyScalar(0.55);
+      skyMat.uniforms.bottom.value.copy(color).multiplyScalar(1.7);
     },
     configure(w, f) {
       weather = w;

@@ -300,5 +300,71 @@ export function biomeDetails(theme: MapTheme) {
     group.add(curtain);
     animated.push((t) => (curtain.material.uniforms.time.value = t * 0.4));
   }
+  if (id === "glacier") {
+    for (let i = 0; i < 5; i++) {
+      const c = crystal("#bfe6ff", 0.9 + (i % 3) * 0.35);
+      c.position.set(Math.cos(i * 1.3) * 1.1, 0.6, Math.sin(i * 1.3) * 0.9);
+      c.rotation.z = (i - 2) * 0.18;
+      group.add(c);
+    }
+    const heart = sphere(group, "#e4f6ff", 0, 1.6, 0, 0.5, 0.5, 0.5, 1.2);
+    animated.push((t) =>
+      heart.scale.setScalar(0.48 + Math.sin(t * 1.4) * 0.05),
+    );
+  }
+  if (id === "canyon") {
+    for (const x of [-1.1, 1.1])
+      box(group, "#a8623f", x, 1.1, 0, 0.6, 2.2, 0.8);
+    box(group, "#b9704a", 0, 2.35, 0, 2.9, 0.45, 0.8);
+    for (let i = 0; i < 3; i++)
+      box(group, "#8d5134", -0.4 + i * 0.4, 0.25, 1, 0.3, 0.5, 0.3);
+  }
+  if (id === "mire") {
+    cyl(group, stone, 0, 0.3, 0, 1.2, 0.6);
+    box(group, "#8d7a4d", 0, 1.1, 0, 0.9, 1, 0.5);
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      const lantern = sphere(
+        group,
+        gold,
+        Math.cos(a) * 1.5,
+        0.8,
+        Math.sin(a) * 1.5,
+        0.22,
+        0.28,
+        0.22,
+        1.5,
+      );
+      animated.push(
+        (t) => (lantern.position.y = 0.8 + Math.sin(t * 1.5 + i) * 0.15),
+      );
+    }
+  }
+  if (id === "starforge") {
+    box(group, "#3f3b58", 0, 0.5, 0, 1.8, 1, 1);
+    box(group, "#5a5580", 0, 1.1, 0, 2.3, 0.25, 1.1);
+    const star = crystal("#fff0c8", 0.8);
+    star.position.y = 2.2;
+    group.add(star);
+    animated.push((t) => {
+      star.rotation.y = t * 1.2;
+      star.position.y = 2.2 + Math.sin(t * 2) * 0.12;
+    });
+  }
+  if (id === "saltglass") {
+    cyl(group, "#e8e2cf", 0, 1.5, 0, 0.6, 3);
+    cyl(group, "#7fc6b0", 0, 3.25, 0, 0.5, 0.5);
+    cone(group, "#c9524a", 0, 3.85, 0, 1.2, 0.7);
+    const beam = sphere(group, "#fff2c1", 0, 3.25, 0, 0.3, 0.3, 0.3, 1.6);
+    animated.push((t) =>
+      beam.scale.setScalar(0.28 + Math.abs(Math.sin(t * 1.2)) * 0.1),
+    );
+  }
+  if (id === "foundry") {
+    cyl(group, "#4c3b33", 0, 0.9, 0, 1.4, 1.8);
+    const melt = cyl(group, "#ff9a3c", 0, 1.85, 0, 1.1, 0.08);
+    for (const x of [-1.2, 1.2]) cyl(group, "#3d302a", x, 2.1, -0.6, 0.35, 3);
+    animated.push((t) => melt.scale.set(1, 1 + Math.sin(t * 3) * 0.3, 1));
+  }
   return { group, animated };
 }

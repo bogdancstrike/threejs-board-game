@@ -7,6 +7,16 @@ export interface SkyExcursion {
   name: string;
 }
 export const SKY_ROUTES: Record<string, SkyExcursion[]> = {
+  starforge: [
+    {
+      start: 30,
+      upEnd: 38,
+      downStart: 52,
+      end: 61,
+      height: 7,
+      name: "The Orbiting Steps",
+    },
+  ],
   skyharbor: [
     {
       start: 27,

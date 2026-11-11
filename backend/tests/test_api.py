@@ -198,7 +198,7 @@ async def test_expired_accepted_danger_applies_once_and_persists_route(api):
 async def test_health_catalogue_invalid_join_and_request_limits(api):
     client, _, _ = api
     assert (await client.get("/api/health")).json()["database"] == "postgresql"
-    assert len((await client.get("/api/v1/catalogue")).json()["maps"]) == 30
+    assert len((await client.get("/api/v1/catalogue")).json()["maps"]) == 36
     assert (
         await client.post("/api/v1/rooms/invalid/join", json={"name": "Test"})
     ).status_code == 422

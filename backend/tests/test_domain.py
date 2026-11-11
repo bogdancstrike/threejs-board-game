@@ -7,9 +7,11 @@ import pytest
 from app import domain
 
 
-def party(count=2, mode="classic"):
+def party(count=2, mode="classic", challenges=True):
     host = str(uuid4())
-    room = domain.initial_room(str(uuid4()), "ABC234", host, "Ada", "verdant", mode)
+    room = domain.initial_room(
+        str(uuid4()), "ABC234", host, "Ada", "verdant", mode, challenges
+    )
     for i in range(1, count):
         domain.join(room, str(uuid4()), f"Player {i + 1}")
     for p in room["game"]["players"]:
@@ -49,11 +51,38 @@ def test_server_draws_dice_and_rejects_client_points_and_out_of_turn_roll():
     assert events[0]["payload"]["dice"] == 3
     assert events[0]["payload"]["route"] == [1, 2, 3]
     assert result["game"]["players"][0]["points"] == 3
+    assert result["game"]["phase"] == "road"
+    assert result["game"]["road"]["partyCard"]["level"] == "soft"
+    assert result["game"]["active"] == 0
+    result, _ = domain.apply(result, host, "RESOLVE_ROAD", {"choice": "leave"})
     assert result["game"]["active"] == 1
 
 
+def test_every_adventure_tile_holds_a_card_or_roadside_encounter():
+    from app.adventures import STOPS
+
+    stops = set(STOPS)
+    for tile in range(1, 92):
+        room = land(party(), tile)
+        game = room["game"]
+        p = game["players"][0]
+        if game["phase"] == "won":
+            continue
+        assert game["phase"] in {"road", "challenge"}, tile
+        if game["phase"] == "road" and p["position"] not in stops:
+            assert game["road"]["partyCard"]["prompt"], tile
+
+
+def test_tile_rewards_apply_before_the_card_and_story_mode_has_no_cards():
+    room = land(party(), 21)  # treasure tile
+    assert room["game"]["players"][0]["gold"] == 3
+    assert room["game"]["phase"] == "road"
+    quiet = land(party(challenges=False), 2)
+    assert quiet["game"]["phase"] == "ready" and quiet["game"]["active"] == 1
+
+
 def test_story_choice_rewards_and_affordability():
-    room = party()
+    room = party(challenges=False)
     room["game"]["players"][0]["position"] = 3
     room, _ = domain.apply(room, room["hostId"], "ROLL_DIE", {}, randbelow=lambda n: 0)
     assert room["game"]["phase"] == "event"
@@ -101,6 +130,8 @@ def test_score_race_closes_round_and_uses_points_instead_of_first_finisher():
     room, _ = domain.apply(room, second["id"], "ROLL_DIE", {}, randbelow=lambda n: 0)
     assert room["finishing"] and room["phase"] == "playing"
     room, _ = domain.apply(room, third["id"], "ROLL_DIE", {}, randbelow=lambda n: 0)
+    assert room["game"]["phase"] == "road"
+    room, _ = domain.apply(room, third["id"], "RESOLVE_ROAD", {"choice": "leave"})
     assert room["phase"] == "finished"
     assert room["game"]["winner"] == 2
 
@@ -434,3 +465,16 @@ def test_story_purchase_is_atomic_and_host_can_advance_a_disconnected_turn():
     assert room == before
     room, _ = domain.apply(room, actor, "SKIP_TURN", {})
     assert room["game"]["active"] == 1 and room["game"]["phase"] == "ready"
+
+
+def test_every_deck_has_at_least_250_unique_cards_without_disclaimer_asides():
+    from app import cards
+
+    banned = ("private details", "level of openness", "optional", "willing", "no pressure")
+    for level, deck in cards.DECKS.items():
+        assert len(deck) >= 250, level
+        assert len({c["id"] for c in deck}) == len(deck)
+        assert len({c["prompt"] for c in deck}) == len(deck)
+        for card in deck:
+            text = card["prompt"].lower()
+            assert not any(b in text for b in banned), card["id"]

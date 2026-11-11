@@ -318,6 +318,93 @@ export function rawShapeField(id: string, x: number, z: number): number {
         )) *
       18
     );
+  if (id === "glacier") {
+    const shard = (
+      cx: number,
+      cz: number,
+      rx: number,
+      rz: number,
+      rot: number,
+    ) => {
+      const dx = x - cx * g.width,
+        dz = z - cz * g.depth,
+        u = dx * Math.cos(rot) + dz * Math.sin(rot),
+        v = -dx * Math.sin(rot) + dz * Math.cos(rot);
+      return (
+        (1 -
+          Math.max(
+            Math.abs(u) / (rx * g.width),
+            Math.abs(v) / (rz * g.depth),
+          )) *
+        Math.min(rx * g.width, rz * g.depth)
+      );
+    };
+    return Math.max(
+      shard(-0.38, -0.42, 0.5, 0.42, 0.35),
+      shard(0.42, -0.35, 0.45, 0.4, -0.3),
+      shard(-0.35, 0.42, 0.48, 0.4, -0.25),
+      shard(0.4, 0.45, 0.45, 0.42, 0.4),
+    );
+  }
+  if (id === "canyon")
+    return Math.max(
+      ellipse(x, z, -g.width * 0.45, 0, g.width * 0.55, g.depth * 0.95),
+      ellipse(
+        x,
+        z,
+        g.width * 0.48,
+        Math.sin(z * 0.2) * 2,
+        g.width * 0.5,
+        g.depth * 0.9,
+      ),
+    );
+  if (id === "mire") {
+    let field = -Infinity;
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2 + 0.4,
+        d = i % 2 ? 0.58 : 0.46;
+      field = Math.max(
+        field,
+        ellipse(
+          x,
+          z,
+          Math.cos(a) * d * g.width,
+          Math.sin(a) * d * g.depth,
+          g.width * 0.36,
+          g.depth * 0.34,
+        ),
+      );
+    }
+    return Math.max(field, ellipse(x, z, 0, 0, g.width * 0.35, g.depth * 0.35));
+  }
+  if (id === "starforge") return (0.3 - Math.abs(r - 0.68)) * 30;
+  if (id === "saltglass")
+    return Math.min(
+      ellipse(x, z, 0, 0, g.width * 1.02, g.depth * 1.02),
+      -ellipse(
+        x,
+        z,
+        g.width * 0.55,
+        -g.depth * 0.1,
+        g.width * 0.5,
+        g.depth * 0.55,
+      ) + 2,
+    );
+  if (id === "foundry")
+    return poly([
+      [-0.95, -1],
+      [0.95, -1],
+      [0.95, -0.45],
+      [0.3, -0.35],
+      [0.3, 0.35],
+      [0.9, 0.5],
+      [1, 1],
+      [-1, 1],
+      [-0.9, 0.5],
+      [-0.3, 0.35],
+      [-0.3, -0.35],
+      [-0.95, -0.45],
+    ]);
 
   switch (id) {
     case "dragonkind":

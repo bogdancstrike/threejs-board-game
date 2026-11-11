@@ -469,32 +469,38 @@ def apply(
             if adventures.begin(room, p, clock, randbelow):
                 return room, [event]
             tile = tile_kind(p["position"])
-            if tile == "mystery":
-                if room["challenges"] and p["position"] % 8 == 0:
-                    game["phase"], game["challenge"] = (
-                        "challenge",
-                        challenge(randbelow(100_000), clock),
-                    )
-                else:
-                    game["phase"], game["mystery"] = (
-                        "event",
-                        randbelow(len(MAPS[game["map"]]["encounters"])),
-                    )
+            if room["challenges"] and tile == "mystery" and p["position"] % 8 == 0:
+                game["phase"], game["challenge"] = (
+                    "challenge",
+                    challenge(randbelow(100_000), clock),
+                )
                 room["turnDeadline"] = clock + 30_000
-            else:
-                if tile == "treasure":
-                    p["gold"] += 3
-                    award(p, 30)
-                    journal(game, f"{p['name']} found a treasure: 3 gold and 30 points.")
-                elif tile == "fortune":
-                    p["gold"] += 2
-                    p["clues"] += 1
-                    award(p, 35)
-                    journal(game, f"Fortune favors {p['name']}: 2 gold, a clue and 35 points.")
-                elif tile == "portal":
-                    route.extend(move(p, 3))
-                    journal(game, f"{p['name']} takes an ancient portal three tiles forward.")
-                end_turn(room, clock)
+                return room, [event]
+            if not room["challenges"] and tile == "mystery":
+                game["phase"], game["mystery"] = (
+                    "event",
+                    randbelow(len(MAPS[game["map"]]["encounters"])),
+                )
+                room["turnDeadline"] = clock + 30_000
+                return room, [event]
+            # Tile rewards apply first; in Adventure every tile then holds a card.
+            if tile == "treasure":
+                p["gold"] += 3
+                award(p, 30)
+                journal(game, f"{p['name']} found a treasure: 3 gold and 30 points.")
+            elif tile == "fortune":
+                p["gold"] += 2
+                p["clues"] += 1
+                award(p, 35)
+                journal(game, f"Fortune favors {p['name']}: 2 gold, a clue and 35 points.")
+            elif tile == "portal":
+                route.extend(move(p, 3))
+                journal(game, f"{p['name']} takes an ancient portal three tiles forward.")
+                if finish(room, active):
+                    return room, [event]
+            if adventures.draw_card(room, p, clock, randbelow):
+                return room, [event]
+            end_turn(room, clock)
         elif kind == "RESOLVE_ROAD":
             route = adventures.resolve(room, p, payload.get("choice"), clock, randbelow)
             event["payload"].update(route=route, playerIndex=active)

@@ -14,19 +14,20 @@ def choice(key, label, detail):
     return {"key": key, "label": label, "detail": detail}
 
 
-def begin(room, p, clock, randbelow=secrets.randbelow):
-    stop = STOPS.get(p["position"])
-    from .domain import tile_kind
+def draw_card(room, p, clock, randbelow=secrets.randbelow):
+    """Every Adventure tile between the start and the finish holds a party card."""
+    if not room["challenges"] or not 0 < p["position"] < 92:
+        return False
+    return cards.begin(room, p, clock, None, randbelow)
 
-    card_tile = p["position"] % 5 == 0 and tile_kind(p["position"]) == "path"
-    if (
-        (not stop and not card_tile)
-        or not room["challenges"]
-        or p["position"] in p.get("visitedStops", [])
-    ):
+
+def begin(room, p, clock, randbelow=secrets.randbelow):
+    """Named roadside stops keep their own encounter, once per player."""
+    stop = STOPS.get(p["position"])
+    if not stop or not room["challenges"] or p["position"] in p.get("visitedStops", []):
         return False
     p.setdefault("visitedStops", []).append(p["position"])
-    if not stop or stop["kind"] == "dare":
+    if stop["kind"] == "dare":
         return cards.begin(room, p, clock, stop, randbelow)
     kind = stop["kind"]
     options = []

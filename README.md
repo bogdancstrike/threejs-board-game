@@ -6,7 +6,7 @@
 
 ### A path of mysteries
 
-**Twelve adventurers. Thirty worlds. One unforgettable journey.**
+**Twelve adventurers. Thirty-six worlds. One unforgettable journey.**
 
 Roll the dice, follow a trail of weathered stones, and discover what waits beyond the next bend.<br>
 A browser fantasy board game built with Three.js, original ambient audio, and living miniature worlds.
@@ -16,11 +16,11 @@ A browser fantasy board game built with Three.js, original ambient audio, and li
 [![Vite](https://img.shields.io/badge/Vite-localhost%3A7777-697953?style=flat-square&logo=vite&logoColor=white)](#-quick-start)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?style=flat-square&logo=fastapi&logoColor=white)](backend/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169e1?style=flat-square&logo=postgresql&logoColor=white)](compose.yaml)
-[![Worlds](https://img.shields.io/badge/worlds-30-d0ad6e?style=flat-square)](#-thirty-worlds-thirty-shapes)
+[![Worlds](https://img.shields.io/badge/worlds-36-d0ad6e?style=flat-square)](#-thirty-six-worlds-thirty-six-shapes)
 [![Heroes](https://img.shields.io/badge/adventurers-12-9b87b7?style=flat-square)](#-meet-your-adventurer)
 [![Players](https://img.shields.io/badge/players-1–8_online-66968a?style=flat-square)](#-how-to-play)
 
-[Quick start](#-quick-start) · [World gallery](#-thirty-worlds-thirty-shapes) · [Characters](#-meet-your-adventurer) · [Audio & atmosphere](#-a-world-that-breathes) · [Architecture](#-under-the-island) · [Testing](#-tested-on-the-trail) · [Art status](#-art-status--credits)
+[Quick start](#-quick-start) · [World gallery](#-thirty-six-worlds-thirty-six-shapes) · [Characters](#-meet-your-adventurer) · [Audio & atmosphere](#-a-world-that-breathes) · [Architecture](#-under-the-island) · [Testing](#-tested-on-the-trail) · [Art status](#-art-status--credits)
 
 <img src="docs/screenshots/menu.webp" width="1080" alt="Wilder title screen: New game, Continue journey, settings, and a living 3D world" />
 
@@ -36,8 +36,8 @@ A little strategy. A little luck. A lot of curiosity.
 
 Wilder brings a tabletop adventure into an interactive 3D diorama. Your character follows **93 connected tiles** from a welcoming village through four chapters across three to nine floors to a final destination. Along the way, hidden treasure, ancient portals, and strange encounters ask what kind of traveler you want to be.
 
-- 🧭 **A real start menu:** New game, Continue, settings, how to play, and a carousel of thirty world previews over a living 3D island.
-- 🏝️ **Thirty distinct landscapes:** different physical island shapes, terrain palettes, destinations, regional names, and encounter decks.
+- 🧭 **A real start menu:** New game, Continue, settings, how to play, and a carousel of thirty-six world previews over a living 3D island.
+- 🏝️ **Thirty-six distinct landscapes:** different physical island shapes, terrain palettes, destinations, regional names, and encounter decks.
 - 🎲 **A complete game:** fair six-sided dice, animated movement, branching encounters, gold, clues, points, local turns, live online rooms, and victory.
 - 🧙 **Twelve adult adventurers:** next/previous selection, a rotating 3D preview, equipment and close-up views, action previews, and cosmetic aura colors.
 - 🌿 **A path in the landscape:** low weathered stones, moss, plants, bridges, and visible changes in elevation.
@@ -45,6 +45,8 @@ Wilder brings a tabletop adventure into an interactive 3D diorama. Your characte
 - 🦋 **A living world:** rotating windmills, flowing rivers and waterfalls, swaying foliage, portal energy, fireflies, weather, and animated themed creatures.
 - 🎧 **An original soundscape:** procedural ambient music, environmental textures, footsteps, discovery sounds, and separate volume controls.
 - 💾 **Your journey stays with you:** validated local saves preserve progress, pending choices, party members, and appearance.
+- 🎛️ **A full configuration page:** player profile with a live 3D hero preview, quality presets (Low/Medium/High/Ultra), render scale, dynamic resolution, frame-rate cap, shadow resolution, FXAA, eight lighting moods including a living day-and-night cycle, storms and auroras, sun direction, colour grading, wind, water, camera, pacing, audio and accessibility.
+- 🃏 **A card on every tile:** in Adventure, every step between the start and the finish draws from the chosen deck — Soft, Drinking, Teasing, Spicy or Hot, 300 cards each — after any treasure, fortune or portal reward.
 - 🗺️ **Preview before you travel:** actual map thumbnails and a live, orbitable 3D map preview, with previous/next navigation.
 
 ## 🚀 Quick start
@@ -91,7 +93,7 @@ Classic races end at the finish. Score expeditions finish the current round, the
 
 Room progress persists in PostgreSQL. Browser sessions reconnect to an authoritative snapshot; commands use revision checks and idempotency keys to prevent duplicate rolls. Turns and encounters have server deadlines. Room sessions last 12 hours. **Local 1–4 player pass-and-play remains available without the backend.**
 
-## 🗺️ Thirty worlds. Thirty shapes.
+## 🗺️ Thirty-six worlds. Thirty-six shapes.
 
 **These are screenshots of the real 3D maps**, refreshed from the same scene builders used by the game. Click any image to inspect it. Use **Worlds** in the game for a live preview before replacing your expedition.
 
@@ -194,7 +196,7 @@ Dragonkind is an original fan-inspired setting. It includes no copied novel text
 
 Bonus movement ends without triggering a chain of tile effects. Gold and clues record discoveries and can pay for safe passage at Adventure encounters; they do not gate the finish. All character cosmetics share the same rules.
 
-Play solo or choose **2–4 local players** in settings. Each player takes a turn on this device and can choose a different character. **Journey** opens the progress, inventory, and journal drawer. Restarting or changing worlds requires confirmation before replacing the saved expedition.
+Play solo or choose **2–4 local players** in Configuration → Gameplay. Each player takes a turn on this device and can choose a different character. **Journey** opens the progress, inventory, and journal drawer. Restarting or changing worlds requires confirmation before replacing the saved expedition.
 
 ## 🐉 The road has other plans
 
@@ -261,7 +263,7 @@ flowchart LR
     Socket --> API[FastAPI authoritative rules]
     API --> DB[(PostgreSQL rooms · events · commands)]
     Rules --> Movement[Tile-by-tile movement]
-    Maps[30 worlds · shape fields] --> Terrain[Sculpted terrain · protected tiles]
+    Maps[36 worlds · shape fields] --> Terrain[Sculpted terrain · protected tiles]
     Assets[Cached GLB models] --> World[Scenery · NPCs · creatures]
     Terrain --> Render[Three.js WebGL + post-processing]
     World --> Render
@@ -275,7 +277,7 @@ flowchart LR
 |---|---|
 | [`backend/`](backend/) | FastAPI, PostgreSQL transactions, room sessions, authoritative turns, points, challenges and WebSocket broadcasts |
 | [`src/network/`](src/network/) | Room lobby, reconnecting client, unique hero claims and mini-game panels |
-| [`src/game/`](src/game/) | Roster, deterministic route, thirty themes, rules, turns, mysteries, victory, saves |
+| [`src/game/`](src/game/) | Roster, deterministic route, thirty-six themes, rules, turns, mysteries, victory, saves |
 | [`shapes.ts`](src/world/shapes.ts) · [`terrain.ts`](src/world/terrain.ts) | Unique physical silhouettes, cutouts, islands, protected tile and landmark foundations, sculpted cliffs |
 | [`world.ts`](src/world/world.ts) · [`landmarks.ts`](src/world/landmarks.ts) | Board integration, village, windmill, portal, rivers, bridges and themed destinations |
 | [`environment.ts`](src/world/environment.ts) | Optimized imported plants, buildings, NPCs and animated creatures |
@@ -308,9 +310,9 @@ Coverage metrics are refreshed by `npm run test:release`.
 
 The frontend gate includes **every `src/**/*.ts` file**, including rendering, audio, UI and networking. It measures actual instrumented browser execution, separately from Vitest unit coverage; this avoids combining incompatible statement maps. The backend gate includes **every `backend/app` module**. Both require at least **90% line coverage**; branch coverage is reported separately. Reports are in `coverage/frontend/index.html`, `reports/frontend-coverage-summary.json`, and `reports/backend-coverage-summary.json`. Each release run deletes old browser counters first.
 
-Browser checks cover the title menu, all 30 maps, mobile layout, unique characters, animation bounds, live previews, audible Web Audio, offline saves and complete rules-engine games, same-device handoff, two independent online browsers, complete classic/score games via authenticated commands, finish screens and rematches. Transport tests inject connection loss, delayed ACKs, rejected/stale messages and expired sessions. Backend tests exercise all ten mini-games, road outcomes, concurrency, authorization, idempotency, persistence and the running deadline worker.
+Browser checks cover the title menu, all 36 maps, mobile layout, unique characters, animation bounds, live previews, audible Web Audio, offline saves and complete rules-engine games, same-device handoff, two independent online browsers, complete classic/score games via authenticated commands, finish screens and rematches. Transport tests inject connection loss, delayed ACKs, rejected/stale messages and expired sessions. Backend tests exercise all ten mini-games, road outcomes, concurrency, authorization, idempotency, persistence and the running deadline worker.
 
-Headless rendering uses Chromium software WebGL. These checks establish functional behavior; hardware FPS and broad-device soak measurements remain separate. [Recorded route metrics](reports/map_metrics.json) describe geometry for all 30 maps, not GPU performance.
+Headless rendering uses Chromium software WebGL. These checks establish functional behavior; hardware FPS and broad-device soak measurements remain separate. [Recorded route metrics](reports/map_metrics.json) describe geometry for all 36 maps, not GPU performance.
 
 ## 🎨 Art status & credits
 
@@ -332,7 +334,7 @@ With the development server running:
 
 ```bash
 npm run screenshots
-# Only menu/character/party UI changed? Refresh UI images without rerendering 30 maps:
+# Only menu/character/party UI changed? Refresh UI images without rerendering 36 maps:
 node scripts/render-previews.mjs --ui-only
 ```
 

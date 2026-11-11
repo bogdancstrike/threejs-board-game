@@ -1933,6 +1933,330 @@
           ]
         }
       ]
+    },
+    {
+      "id": "glacier",
+      "name": "The Shattered Glacier",
+      "regions": [
+        "Floe Harbour",
+        "The Crevasse Steps",
+        "Shardlight Hollow",
+        "The Glacier Heart"
+      ],
+      "encounters": [
+        {
+          "title": "The singing crevasse",
+          "text": "Wind hums through a deep crack in the ice. Far below, something blue answers in perfect harmony.",
+          "icon": "snowflake",
+          "choices": [
+            {
+              "label": "Climb down toward the song",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Chart the crevasse from above",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Glacier Heart",
+          "text": "A sealed note bears the mark of The Glacier Heart. “The old way through Shardlight Hollow still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "snowflake",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "canyon",
+      "name": "Redstone Canyon",
+      "regions": [
+        "Dustwind Post",
+        "The Narrows",
+        "Echo Mesa",
+        "The Sunset Arch"
+      ],
+      "encounters": [
+        {
+          "title": "The echo that answers back",
+          "text": "You call into the canyon. The echo replies with words you never said, and points toward a hidden ledge.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the echo’s directions",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Search the ledge for its source",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Sunset Arch",
+          "text": "A sealed note bears the mark of The Sunset Arch. “The old way through Echo Mesa still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mire",
+      "name": "The Lanternmire",
+      "regions": [
+        "Reedwatch Landing",
+        "Firefly Fen",
+        "The Sunken Shrine",
+        "Lantern Throne"
+      ],
+      "encounters": [
+        {
+          "title": "The will-o’-wisp’s bargain",
+          "text": "A tiny light bobs in front of you. It offers to guide you through the fog in exchange for a song.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Sing and follow the wisp",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Find the path without it",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from Lantern Throne",
+          "text": "A sealed note bears the mark of Lantern Throne. “The old way through The Sunken Shrine still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "starforge",
+      "name": "The Starforge Ring",
+      "regions": [
+        "Meteor Gate",
+        "The Orbiting Steps",
+        "The Anvil of Stars",
+        "Starforge Crown"
+      ],
+      "encounters": [
+        {
+          "title": "A cooling star",
+          "text": "A small star lies hissing in the dust, still warm. The smiths of the ring would pay well for it — or teach you how to shape it.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Carry it to the forge",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Learn the starsmith’s craft",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from Starforge Crown",
+          "text": "A sealed note bears the mark of Starforge Crown. “The old way through The Anvil of Stars still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "saltglass",
+      "name": "The Saltglass Shoals",
+      "regions": [
+        "Driftwood Pier",
+        "Shell Market",
+        "The Coral Stair",
+        "Saltglass Lighthouse"
+      ],
+      "encounters": [
+        {
+          "title": "The message in a bottle",
+          "text": "A green bottle rolls to your feet. The note inside is addressed to you, written in your own handwriting.",
+          "icon": "waves",
+          "choices": [
+            {
+              "label": "Follow the note’s map",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Write a reply and send it back",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from Saltglass Lighthouse",
+          "text": "A sealed note bears the mark of Saltglass Lighthouse. “The old way through The Coral Stair still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "waves",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "foundry",
+      "name": "The Ember Foundry",
+      "regions": [
+        "Coalyard Gate",
+        "The Bellows Walk",
+        "Gearsmith Terrace",
+        "The Great Crucible"
+      ],
+      "encounters": [
+        {
+          "title": "The unfinished blade",
+          "text": "On a cooling anvil lies a half-forged blade. A note reads: “Finish what I could not.”",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Take up the hammer",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the smith’s notes",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        },
+        {
+          "title": "A message from The Great Crucible",
+          "text": "A sealed note bears the mark of The Great Crucible. “The old way through Gearsmith Terrace still remembers those who travel with courage.” The seal begins to glow.",
+          "icon": "sparkles",
+          "choices": [
+            {
+              "label": "Follow the glowing seal",
+              "detail": "Press onward · move 2 tiles and discover a clue",
+              "gold": 0,
+              "clues": 1,
+              "move": 2
+            },
+            {
+              "label": "Study the forgotten route",
+              "detail": "Explore the secret · gain 3 gold and a clue",
+              "gold": 3,
+              "clues": 1,
+              "move": 0
+            }
+          ]
+        }
+      ]
     }
   ]
 }
