@@ -56,6 +56,7 @@ export class StartMenu {
           (this.selected + (action === "next" ? 1 : MAPS.length - 1)) %
           MAPS.length;
         this.renderWorld();
+        this.actions.preview(MAPS[this.selected].id);
       }
     });
   }
@@ -64,7 +65,11 @@ export class StartMenu {
   }
   show(journey: MenuJourney, map: string) {
     this.journey = journey;
-    this.selected = Math.floor(Math.random() * MAPS.length);
+    // Start on the world already behind the menu; browsing swaps the island.
+    this.selected = Math.max(
+      0,
+      MAPS.findIndex((m) => m.id === map),
+    );
     this.root.hidden = false;
     document.body.classList.add("on-title-screen");
     const i = this.actions.icon;
@@ -97,7 +102,6 @@ export class StartMenu {
     const image =
       this.root.querySelector<HTMLImageElement>("#menu-world-image")!;
     image.src = `/previews/${map.id}.webp`;
-    this.actions.preview(map.id);
     image.alt = `Preview of ${map.name}`;
     this.root.querySelector("#menu-world-name")!.textContent = map.name;
     this.root.querySelector("#menu-world-shape")!.textContent =
