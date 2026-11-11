@@ -4,7 +4,7 @@ import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { clone } from "three/addons/utils/SkeletonUtils.js";
 import { characterEffects } from "./character-effects";
 import { rigStaticModel } from "./rig";
-import { registerRig } from "./animation";
+import { registerRig, simpleLimb } from "./animation";
 import type { Character } from "../game/data";
 const mats = new Map<string, THREE.MeshStandardMaterial>();
 export function material(color: string, glow = 0, metal = 0) {
@@ -287,35 +287,20 @@ export function prototypeCharacter(c: Character, tint = c.color) {
       );
       horn.rotation.z = x < 0 ? 0.4 : -0.4;
     }
-  const limbs: {
-    node: THREE.Object3D;
-    side: number;
-    kind: string;
-    rotation: THREE.Euler;
-  }[] = [];
+  const limbs: ReturnType<typeof simpleLimb>[] = [];
   for (const child of [...body.children]) {
     if (Math.abs(child.position.x) === 0.1 && child.position.y < 0.6) {
       const pivot = new THREE.Group();
       pivot.position.set(child.position.x, 0.58, 0);
       body.add(pivot);
       pivot.attach(child);
-      limbs.push({
-        node: pivot,
-        side: pivot.position.x < 0 ? 0 : 1,
-        kind: "leg",
-        rotation: pivot.rotation.clone(),
-      });
+      limbs.push(simpleLimb(pivot, "leg", pivot.position.x < 0 ? -1 : 1));
     } else if (Math.abs(child.position.x) === 0.24) {
       const pivot = new THREE.Group();
       pivot.position.set(child.position.x, 0.94, 0);
       body.add(pivot);
       pivot.attach(child);
-      limbs.push({
-        node: pivot,
-        side: pivot.position.x < 0 ? 0 : 1,
-        kind: "arm",
-        rotation: pivot.rotation.clone(),
-      });
+      limbs.push(simpleLimb(pivot, "arm", pivot.position.x < 0 ? -1 : 1));
     }
   }
   g.userData.limbs = limbs;
@@ -332,7 +317,13 @@ export const MODEL_PATHS: Record<string, string> = {
   alaric: "/models/environment/warrior.glb",
   elowen: "/models/environment/archer.glb",
   vesper: "/models/environment/demon-queen.glb",
+  mira: "/models/heroes/mira.glb",
+  ysolde: "/models/heroes/ysolde.glb",
+  isla: "/models/heroes/isla.glb",
+  wren: "/models/heroes/wren.glb",
 };
+/** Figurines sculpted mid-action (e.g. drawing a bow) keep their arm pose. */
+const POSE_LOCKED = new Set(["elowen"]);
 const loader = new GLTFLoader();
 loader.setMeshoptDecoder(MeshoptDecoder);
 const cache = new Map<string, Promise<GLTF>>();
@@ -377,7 +368,7 @@ export async function characterModel(c: Character, tint = c.color) {
     root.add(normalizer);
     root.userData.body = normalizer;
     root.userData.asset = true;
-    registerRig(root, display);
+    registerRig(root, display, { lockArms: POSE_LOCKED.has(c.id) });
     if (gltf.animations.length) {
       const mixer = new THREE.AnimationMixer(model);
       const idle = gltf.animations.find((a) => /^idle$/i.test(a.name));

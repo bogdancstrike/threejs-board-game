@@ -259,9 +259,11 @@ export class GameScene {
     this.vfx.update(t);
     this.pawns.forEach((p, i) => {
       if (!this.moving && !(p.userData.reactionUntil > t)) {
-        const cycle = (t + i * 3) % 19;
-        const action: Action =
-          cycle > 14 ? "rest" : cycle > 10 ? "magic" : "idle";
+        // Heroes fidget between turns: a glance, a wave, a stretch, a little dance.
+        const cycle = (t + i * 5) % 34,
+          moods: Action[] = ["think", "wave", "magic", "dance", "bow", "rest"],
+          mood = moods[Math.floor((t + i * 5) / 34 + i) % moods.length];
+        const action: Action = cycle > 26 ? mood : "idle";
         if (p.userData.action !== action) setAction(p, action);
       }
       animateCharacter(p, t, dt);

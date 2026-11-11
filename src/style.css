@@ -4463,3 +4463,60 @@ dialog.modal-road:has(.party-card) .card-alternative summary {
     display: none;
   }
 }
+
+/* ── Challenge outcome ──────────────────────────────────────────── */
+.challenge-result {
+  text-align: center;
+  padding: 8px 4px 18px;
+}
+.challenge-result-badge {
+  width: 74px;
+  height: 74px;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #b0574a;
+  box-shadow: 0 10px 30px #b0574a55;
+  animation: party-card-in 0.5s ease-out;
+}
+.challenge-result.won .challenge-result-badge {
+  background: linear-gradient(135deg, #e3b65d, #b98a2f);
+  box-shadow: 0 10px 30px #d3a44a77;
+}
+.challenge-result-badge svg {
+  width: 36px;
+  height: 36px;
+}
+.challenge-result h2 {
+  font-family: Marcellus, serif;
+  font-weight: 400;
+  font-size: 34px;
+  margin: 6px 0 8px;
+}
+.challenge-result-reward {
+  font-size: 18px;
+  font-weight: 600;
+  color: #8a6a22;
+}
+.challenge-result dl {
+  display: grid;
+  gap: 4px;
+  margin: 16px auto 0;
+  max-width: 360px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #e4e0cf;
+}
+.challenge-result dt {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6c7366;
+}
+.challenge-result dd {
+  margin: 0 0 6px;
+  font-size: 24px;
+  letter-spacing: 0.08em;
+}

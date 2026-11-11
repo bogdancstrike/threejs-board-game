@@ -601,12 +601,42 @@ def apply(
                 playerIndex=active,
                 route=route,
                 rewardPoints=card.get("rewardPoints", 50) if success else 0,
+                rewardGold=card.get("rewardGold", 2) if success else 0,
+                challengeTitle=card["title"],
+                skipped=kind == "SKIP_CHALLENGE",
+                timedOut=kind != "SKIP_CHALLENGE" and clock > card["deadline"],
+                solution=solution_text(card),
+                given=given_text(card, payload.get("answer")),
             )
             end_turn(room, clock)
         elif kind == "SKIP_TURN":
             journal(game, f"The host passed {players[active]['name']}’s turn.")
             end_turn(room, clock)
     return room, [event]
+
+
+def solution_text(card: dict) -> str:
+    """A player-facing explanation of the right answer, revealed after the attempt."""
+    answer, options = card.get("_answer"), card.get("options") or []
+    if isinstance(answer, list):
+        return " ".join(str(v) for v in answer)
+    if isinstance(answer, int) and 0 <= answer < len(options):
+        return str(options[answer])
+    return {
+        "balance": "Stop the lantern inside the golden zone.",
+        "rhythm": "Four taps, each on the glowing beat.",
+        "maze": "A path of adjacent open squares from the start to the star.",
+        "alchemy": f"Three ingredients adding up to {card.get('targetSum', '?')}.",
+    }.get(card.get("type"), "")
+
+
+def given_text(card: dict, answer) -> str:
+    options = card.get("options") or []
+    if isinstance(answer, list) and card.get("type") == "memory":
+        return " ".join(str(v) for v in answer)
+    if type(answer) is int and 0 <= answer < len(options):
+        return str(options[answer])
+    return ""
 
 
 def public_room(room: dict, connected: set[str] | None = None) -> dict:

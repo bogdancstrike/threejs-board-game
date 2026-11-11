@@ -101,6 +101,13 @@ export interface RoomUpdate {
       playerIndex?: number;
       dice?: number;
       success?: boolean;
+      rewardPoints?: number;
+      rewardGold?: number;
+      challengeTitle?: string;
+      skipped?: boolean;
+      timedOut?: boolean;
+      solution?: string;
+      given?: string;
     };
   };
   commandId?: string;

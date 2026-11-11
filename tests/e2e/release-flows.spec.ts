@@ -70,7 +70,7 @@ test("offline rules finish a full party; restored encounters, victory and restar
   await expect(page.locator("#roll-button")).toBeEnabled();
   await page.locator('[data-action="maps"]').first().click();
   await page.locator("#world-search").fill("Dragonkind");
-  await expect(page.locator("#world-result-count")).toHaveText("1 worlds");
+  await expect(page.locator("#world-result-count")).toHaveText("1 world");
   await page.locator('[data-map="dragonkind"]').click();
   await expect(page.locator("#map-preview-loading")).toBeHidden({
     timeout: 45000,

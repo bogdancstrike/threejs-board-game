@@ -80,6 +80,11 @@ import {
   Play,
   Filter,
   Star,
+  Hand,
+  Music,
+  Lightbulb,
+  Heart,
+  PartyPopper,
 } from "lucide";
 import { roadStop } from "./game/road";
 import { CHARACTERS, getTiles, TILE_INFO } from "./game/data";
@@ -156,6 +161,11 @@ const icons = {
   Play,
   Filter,
   Star,
+  Hand,
+  Music,
+  Lightbulb,
+  Heart,
+  PartyPopper,
 };
 const icon = (name: string, cls = "") =>
   `<i data-lucide="${name}" class="${cls}"></i>`;
@@ -688,6 +698,11 @@ function showCharacters(index?: number) {
         ["run", "wind", "Run"],
         ["rest", "feather", "Relax"],
         ["magic", "wand-sparkles", "Magic"],
+        ["wave", "hand", "Wave"],
+        ["dance", "music", "Dance"],
+        ["think", "lightbulb", "Think"],
+        ["bow", "heart", "Bow"],
+        ["celebrate", "party-popper", "Cheer"],
       ]
         .map(
           ([a, i, n]) =>
@@ -704,7 +719,7 @@ function showCharacters(index?: number) {
 function updateCharacter() {
   const c = CHARACTERS[selected];
   $("char-number").textContent =
-    `${String(selected + 1).padStart(2, "0")} / 12 ADVENTURERS`;
+    `${String(selected + 1).padStart(2, "0")} / ${CHARACTERS.length} ADVENTURERS`;
   $("char-name").textContent = c.name;
   $("char-title").textContent = `${c.title} · Age ${c.age}`;
   $("char-bio").textContent = c.bio;
@@ -1083,7 +1098,9 @@ app.addEventListener("click", async (e) => {
         : "Sound is on. Music and ambience follow your world.",
     );
   } else if (action === "prev-character" || action === "next-character") {
-    selected = (selected + (action === "next-character" ? 1 : 11)) % 12;
+    selected =
+      (selected + (action === "next-character" ? 1 : CHARACTERS.length - 1)) %
+      CHARACTERS.length;
     updateCharacter();
   } else if (action === "select-character") {
     if (realtime.session) {
@@ -1487,26 +1504,55 @@ async function receiveRoom(message: RoomUpdate) {
     dialog.close();
     modalType = "";
   }
-  if (
+  const result =
+    payload?.success !== undefined && payload.challengeTitle
+      ? challengeResult(
+          previous.players[payload.playerIndex ?? previous.active]?.name || "",
+          payload,
+        )
+      : "";
+  const handoff =
     room.hotseat &&
     prefs.handoff &&
     state.players.length > 1 &&
     state.phase === "ready" &&
     !initial &&
-    previous.active !== state.active
-  ) {
+    previous.active !== state.active;
+  if (handoff) {
     const player = state.players[state.active],
       hero = CHARACTERS.find((c) => c.id === player.character)!;
     openModal(
       "handoff",
-      modalHeader("PASS THE DEVICE", `${safe(player.name)}, your turn.`) +
+      (result ? result : "") +
+        modalHeader("PASS THE DEVICE", `${safe(player.name)}, your turn.`) +
         `<div class="handoff-hero" style="--hero-color:${hero.color}">${icon("users")}</div><p class="encounter-text">${hero.name} is waiting on tile ${player.position + 1}. Pass the phone or keyboard to ${safe(player.name)}.</p><button class="primary-button full-width" data-action="close-modal">${icon("check")}I’m ready to explore</button>`,
     );
-  }
-  if (payload?.success !== undefined)
-    toast(
-      payload.success
-        ? "Challenge complete! Your reward is added to the party scores."
-        : "The trial is resolved. Check the journal for its outcome.",
+  } else if (
+    result &&
+    !(
+      dialog.open &&
+      ["road", "challenge", "encounter", "victory"].includes(modalType)
+    )
+  )
+    openModal(
+      "challenge-result",
+      result +
+        `<button class="primary-button full-width" data-action="close-modal">${icon("check")}Continue</button>`,
     );
+}
+/** The outcome of a mini-game, shown to everyone once the server has judged it. */
+function challengeResult(
+  name: string,
+  p: NonNullable<RoomUpdate["event"]>["payload"],
+) {
+  const won = Boolean(p.success);
+  const verdict = won
+    ? "Success!"
+    : p.skipped
+      ? "Challenge passed"
+      : p.timedOut
+        ? "Out of time"
+        : "Not this time";
+  sound(won ? "treasure" : "land");
+  return `<section class="challenge-result ${won ? "won" : "lost"}"><div class="challenge-result-badge">${icon(won ? "crown" : "x")}</div><span class="eyebrow">${safe(name.toUpperCase())} · ${safe((p.challengeTitle || "").toUpperCase())}</span><h2>${verdict}</h2>${won ? `<p class="challenge-result-reward">+${p.rewardPoints} points · +${p.rewardGold} gold</p>` : ""}${p.solution ? `<dl><dt>${won ? "Answer" : "The answer was"}</dt><dd>${safe(p.solution)}</dd>${!won && p.given ? `<dt>${safe(name)} chose</dt><dd>${safe(p.given)}</dd>` : ""}</dl>` : ""}</section>`;
 }

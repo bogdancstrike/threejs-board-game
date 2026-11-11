@@ -35,15 +35,24 @@ test("same device party names, unique character picks and turn handoff", async (
     .poll(
       async () =>
         (await page.locator('[data-choice="1"]').isVisible()) ||
-        (await page.locator('[data-challenge-action="road"]').isVisible()) ||
+        (await page
+          .locator('[data-challenge-action="road"]')
+          .first()
+          .isVisible()) ||
         (await page.locator(".handoff-hero").isVisible()),
       { timeout: 40000 },
     )
     .toBe(true);
   if (await page.locator('[data-choice="1"]').isVisible())
     await page.locator('[data-choice="1"]').click();
-  if (await page.locator('[data-challenge-action="road"]').isVisible()) {
-    await expect(page.locator(".road-choices")).toContainText("mystery box");
+  if (
+    await page.locator('[data-challenge-action="road"]').first().isVisible()
+  ) {
+    // Every Adventure tile holds a party card (or a roadside encounter).
+    await expect(
+      page.locator(".party-card, .road-choices").first(),
+    ).toBeVisible();
+    await expect(page.locator("#modal-content")).not.toContainText("Exit game");
     await page
       .locator('[data-challenge-action="road"][data-choice="leave"]')
       .click();

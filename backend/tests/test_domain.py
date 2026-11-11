@@ -278,13 +278,13 @@ def test_hotseat_controller_plays_all_seats_without_granting_remote_impersonatio
     room["phase"] = "lobby"
     second = room["game"]["players"][1]["id"]
     room, _ = domain.apply(
-        room, room["hostId"], "SELECT_CHARACTER", {"playerId": second, "character": "orion"}
+        room, room["hostId"], "SELECT_CHARACTER", {"playerId": second, "character": "wren"}
     )
-    assert room["game"]["players"][1]["character"] == "orion"
+    assert room["game"]["players"][1]["character"] == "wren"
     room["hotseat"] = False
     with pytest.raises(domain.GameError):
         domain.apply(
-            room, room["hostId"], "SELECT_CHARACTER", {"playerId": second, "character": "kael"}
+            room, room["hostId"], "SELECT_CHARACTER", {"playerId": second, "character": "isla"}
         )
 
 
@@ -355,7 +355,7 @@ def test_valid_name_aura_world_changes_and_lobby_phase_lock():
     actor = room["hostId"]
     room, _ = domain.apply(room, actor, "SET_NAME", {"name": "  Captain   Rowan "})
     room, _ = domain.apply(
-        room, actor, "SELECT_CHARACTER", {"character": "orion", "tint": "#8fc5b3"}
+        room, actor, "SELECT_CHARACTER", {"character": "wren", "tint": "#8fc5b3"}
     )
     room, _ = domain.apply(room, actor, "SET_WORLD", {"map": "dragonkind"})
     assert room["game"]["players"][0]["name"] == "Captain Rowan"
@@ -493,3 +493,20 @@ def test_host_can_change_spice_level_during_the_expedition():
     room["phase"] = "finished"
     with pytest.raises(domain.GameError, match="rematch"):
         domain.apply(room, room["hostId"], "SET_DIFFICULTY", {"difficulty": "soft"})
+
+
+def test_challenge_result_reveals_the_solution_and_the_given_answer():
+    room = party()
+    card = domain.challenge(2, 1000)  # rune memory
+    room["game"].update(phase="challenge", challenge=card)
+    wrong = list(reversed(card["_answer"]))
+    if wrong == card["_answer"]:
+        wrong = [card["options"][0]] * 4
+    _, events = domain.apply(
+        room, room["hostId"], "SUBMIT_CHALLENGE", {"answer": wrong}, clock=card["revealUntil"] + 1
+    )
+    payload = events[0]["payload"]
+    assert payload["success"] is False
+    assert payload["solution"] == " ".join(card["_answer"])
+    assert payload["given"] == " ".join(wrong)
+    assert payload["challengeTitle"] == "Rune memory"

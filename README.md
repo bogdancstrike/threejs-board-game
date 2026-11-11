@@ -202,7 +202,7 @@ Play solo or choose **2–4 local players** in Configuration → Gameplay. Each 
 
 Seventeen marked stops turn each map into an adventure: **dragon guardians**, **mystery boxes**, **mini-game pavilions**, **creative dares**, **dangerous crossings**, **warding shrines**, **hexes**, and **rest camps**. Guardians stand beside their protected tiles; boxes and shrines have animated roadside props. Hover a marked tile for its encounter.
 
-Face a dragon's trial for **75 points, 4 gold and a shortcut**, offer tribute, or retreat safely. Boxes can contain treasure, a mimic, or a mini-game. Wards absorb danger; camps clear hexes. A failed risky trial can cost gold or points, push you back, or slow your next move. **Every risk is stated before accepting it**, and currencies stay at zero or above. Creative dares are optional and self-reported, with puzzle and pass alternatives.
+Face a dragon's trial for **75 points, 4 gold and a shortcut**, offer tribute, or retreat safely. Boxes can contain treasure, a mimic, or a mini-game. Wards absorb danger; camps clear hexes. A failed risky trial can cost gold or points, push you back, or slow your next move. **Every risk is stated before accepting it**, and currencies stay at zero or above. Party cards are self-reported, with a board-game version and a pass option.
 
 Read the [full encounter and multiplayer specification](docs/specifications/ROAD_ADVENTURES.md) for rewards, deadlines, probabilities and protections. Choose Story only at creation to keep the original road rules.
 
@@ -212,16 +212,16 @@ Read the [full encounter and multiplayer specification](docs/specifications/ROAD
 
 | Adventurer | Archetype | Adventurer | Archetype |
 |---|---|---|---|
-| Lyra | Violet Enchantress | Aurelia | Golden Valkyrie |
+| Lyra | Violet Enchantress | Ysolde | Winter Queen |
 | Seraphine | Moonlight Knight | Selene | Frost Witch |
 | Rhea | Scarlet Rogue | Vesper | Crimson Demoness |
 | Elowen | Elven Priestess | Alaric | Royal Paladin |
-| Akari | Kitsune Sorceress | Kael | Shadow Swordsman |
-| Nyx | Shadow Assassin | Orion | Arcane Scholar |
+| Mira | Festival Wanderer | Isla | Wandering Voyager |
+| Nyx | Shadow Assassin | Wren | Meadow Ranger |
 
-All twelve fictional characters are adults. The selector provides **full body, upper body, close-up, and equipment views**, smooth camera transitions, orbit/zoom, previous/next buttons, and selection. Action previews include **Idle, Walk, Run, Relax, and Magic**. Characters breathe, gesture, rest while waiting, and react to discoveries; their visual animation stays separate from authoritative game state.
+All twelve fictional characters are adults. The selector provides **full body, upper body, close-up, and equipment views**, smooth camera transitions, orbit/zoom, previous/next buttons, and selection. Action previews include **Idle, Walk, Run, Relax, Magic, Wave, Dance, Think, Bow and Cheer**. A shared pose system relaxes T- and A-posed models into a natural stance, drives shoulders, elbows, wrists, spine, head, hips, knees and feet, and blends smoothly between actions. Static figurines get a generated skeleton with elbow and wrist joints found from their silhouette. Between turns heroes glance around, wave, think, stretch and dance.
 
-Eight entries currently use adapted GLB art from the supplied model collection. Four use clearly labeled prototype figurines. See [art status](#-art-status--credits) for the practical limits of the current art and animation.
+All twelve entries use adapted GLB art from the supplied model collection. See [art status](#-art-status--credits) for the practical limits of the current art and animation.
 
 ## 🎧 A world that breathes
 

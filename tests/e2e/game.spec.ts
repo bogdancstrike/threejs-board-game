@@ -126,7 +126,7 @@ test("supplied characters remain centered in every action", async ({
       const root = await assets.characterModel(
         data.CHARACTERS.find((c: { id: string }) => c.id === id),
       );
-      for (const action of ["idle", "walk", "run", "rest", "magic"]) {
+      for (const action of animation.ACTIONS) {
         animation.setAction(root, action);
         animation.animateCharacter(root, 2, 0.016);
         root.updateMatrixWorld(true);
@@ -145,7 +145,7 @@ test("supplied characters remain centered in every action", async ({
     }
     return results;
   });
-  expect(bounds).toHaveLength(40);
+  expect(bounds).toHaveLength(12 * 10);
   for (const b of bounds) {
     expect(b.maxY, `${b.id} ${b.action} height`).toBeLessThan(2.3);
     expect(b.minY, `${b.id} ${b.action} feet`).toBeGreaterThan(-0.5);

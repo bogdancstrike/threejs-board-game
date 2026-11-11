@@ -154,7 +154,7 @@ async def test_same_device_party_can_name_pick_and_play_each_seat(api):
         ).status_code == 200
     second = host["room"]["game"]["players"][1]["id"]
     assert (
-        await command(api, host, "SELECT_CHARACTER", {"character": "orion", "playerId": second})
+        await command(api, host, "SELECT_CHARACTER", {"character": "wren", "playerId": second})
     ).status_code == 200
     assert (
         await command(api, host, "SET_READY", {"ready": True, "playerId": second})
@@ -163,7 +163,7 @@ async def test_same_device_party_can_name_pick_and_play_each_seat(api):
         await app.state.repo.pool.fetchval(
             "SELECT character_id FROM room_members WHERE id=$1", UUID(second)
         )
-        == "orion"
+        == "wren"
     )
     assert (await command(api, host, "START_GAME")).status_code == 200
     for _ in range(2):

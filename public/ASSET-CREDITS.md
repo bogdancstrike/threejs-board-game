@@ -205,3 +205,35 @@ Models were supplied from the user’s local model collection. Original model id
 - License: CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
 - Changes: Textures resized to 1024px and encoded as WebP; geometry simplified with 0.001 extent error tolerance; redundant meshes/materials merged; runtime scale normalization and animation.
 
+
+## mira
+
+- Original title: Anime Girl Casual Outfit | Stylized 3D Character
+- Creator: agra_aoe (https://sketchfab.com/AoG.01)
+- Source: https://sketchfab.com/3d-models/anime-girl-casual-outfit-stylized-3d-character-c9e4a8b3ebdc4677b8ef25a7d59cf038
+- License: CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+- Changes: Textures resized to 1024px and encoded as WebP; geometry simplified and Meshopt-compressed; generated runtime skeleton and pose animation.
+
+## isla
+
+- Original title: Girl speedsculpt
+- Creator: mrrobot (https://sketchfab.com/mrrobot)
+- Source: https://sketchfab.com/3d-models/girl-speedsculpt-9c97d319c4754b1ba0465ccd9dcc1b77
+- License: CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+- Changes: Textures resized to 1024px and encoded as WebP; geometry simplified and Meshopt-compressed; generated runtime skeleton and pose animation.
+
+## wren
+
+- Original title: Stylized Lowpoly Female
+- Creator: Yulius Krisna (https://sketchfab.com/yuliuskrisna)
+- Source: https://sketchfab.com/3d-models/stylized-lowpoly-female-c43faccd52f042bd855bb0d0c65c4234
+- License: CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+- Changes: Textures resized to 1024px and encoded as WebP; geometry simplified and Meshopt-compressed; generated runtime skeleton and pose animation.
+
+## ysolde
+
+- Original title: Sexy Frozen Queen
+- Creator: suddel (https://sketchfab.com/suddel13)
+- Source: https://sketchfab.com/3d-models/sexy-frozen-queen-c7814f7634124955833ad090db347d7d
+- License: CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+- Changes: Textures resized to 1024px and encoded as WebP; geometry simplified and Meshopt-compressed; generated runtime skeleton and pose animation.

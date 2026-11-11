@@ -1,6 +1,8 @@
 import { defineConfig } from "@playwright/test";
 const coverage = process.env.COVERAGE === "true";
-const baseURL = coverage ? "http://localhost:7779" : "http://localhost:7777";
+const baseURL =
+  process.env.E2E_URL ||
+  (coverage ? "http://localhost:7779" : "http://localhost:7777");
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 90000,

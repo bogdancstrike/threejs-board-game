@@ -152,11 +152,11 @@
       "color": "#8fbe9b"
     },
     {
-      "id": "akari",
-      "name": "Akari",
-      "title": "The Kitsune Sorceress",
+      "id": "mira",
+      "name": "Mira",
+      "title": "The Festival Wanderer",
       "age": 24,
-      "color": "#e99e7d"
+      "color": "#e7a3c4"
     },
     {
       "id": "nyx",
@@ -166,11 +166,11 @@
       "color": "#9589b7"
     },
     {
-      "id": "aurelia",
-      "name": "Aurelia",
-      "title": "The Golden Valkyrie",
+      "id": "ysolde",
+      "name": "Ysolde",
+      "title": "The Winter Queen",
       "age": 29,
-      "color": "#e3c173"
+      "color": "#a9c8f0"
     },
     {
       "id": "selene",
@@ -194,18 +194,18 @@
       "color": "#81a8d3"
     },
     {
-      "id": "kael",
-      "name": "Kael",
-      "title": "The Shadow Swordsman",
-      "age": 27,
-      "color": "#b197ca"
+      "id": "isla",
+      "name": "Isla",
+      "title": "The Wandering Voyager",
+      "age": 26,
+      "color": "#c9a26b"
     },
     {
-      "id": "orion",
-      "name": "Orion",
-      "title": "The Arcane Scholar",
-      "age": 30,
-      "color": "#8badd8"
+      "id": "wren",
+      "name": "Wren",
+      "title": "The Meadow Ranger",
+      "age": 23,
+      "color": "#9cc78a"
     }
   ],
   "maps": [
