@@ -542,7 +542,8 @@ function openModal(type: string, html: string, wide = false) {
   dialog.className = `modal ${wide ? "modal-wide" : ""} modal-${type}`;
   $("modal-content").innerHTML =
     html +
-    (titleMenu?.isOpen
+    (titleMenu?.isOpen ||
+    ["encounter", "challenge", "road", "victory", "handoff"].includes(type)
       ? ""
       : `<div class="modal-exit"><button class="text-button" data-action="exit-game">${icon("chevron-left")} Exit game · save & return to menu</button></div>`);
   if (!dialog.open) dialog.showModal();
@@ -929,6 +930,13 @@ function showSettings(section = "") {
         quality: scene?.quality || graphicsQuality,
         audio: gameAudio.preferences,
         partySize: Math.min(4, state.players.length),
+        room:
+          realtime.room && realtime.room.phase !== "finished"
+            ? {
+                difficulty: realtime.room.difficulty || "soft",
+                host: realtime.isHost,
+              }
+            : undefined,
         escape: safe,
         icon,
       }),
@@ -1198,6 +1206,13 @@ app.addEventListener("change", (e) => {
   if (el.id === "profile-name")
     updateProfile((p) => (p.name = el.value.trim().slice(0, 24)));
   if (el.id === "world-sort") sortWorlds(el.value);
+  if (el.id === "game-difficulty")
+    void realtime
+      .command("SET_DIFFICULTY", { difficulty: el.value })
+      .then(() =>
+        toast("Deck switched. The next card comes from the new level."),
+      )
+      .catch((error) => toast(error.message));
   if (el.id === "quality-setting") {
     graphicsQuality = el.value as Quality;
     scene.setQuality(graphicsQuality);

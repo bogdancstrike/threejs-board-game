@@ -13,7 +13,7 @@ export const DIFFICULTIES = [
     name: "Drinking",
     count: 300,
     description:
-      "Toasts, table games, drinking buddies and bar-room performances.",
+      "Drinking dares, drinking buddies, table rules and challenges built to make everyone laugh.",
     adult: true,
   },
   {
@@ -21,7 +21,7 @@ export const DIFFICULTIES = [
     name: "Teasing",
     count: 300,
     description:
-      "Playful flirting, compliments, light confessions and friendly touch.",
+      "Flirt with each other: pickup lines, compliments, hand-holding, cheek kisses and fake dates.",
     adult: true,
   },
   {
@@ -29,7 +29,7 @@ export const DIFFICULTIES = [
     name: "Spicy",
     count: 300,
     description:
-      "Bolder adult romance, affectionate gestures and dramatic chemistry.",
+      "Kisses, lap seats, close dances, seductive whispers and juicy truths.",
     adult: true,
   },
   {
@@ -37,7 +37,7 @@ export const DIFFICULTIES = [
     name: "Hot",
     count: 300,
     description:
-      "The boldest adult party mix: romantic performances, touch, confessions and celebratory toasts.",
+      "The boldest deck: make-outs, strip dares, body shots, lap dances and steamy truths.",
     adult: true,
   },
 ] as const;

@@ -73,6 +73,8 @@ export interface ConfigState {
   quality: Quality;
   audio: { enabled: boolean; music: number; ambience: number; effects: number };
   partySize: number;
+  /** Present while in an Adventure room: the shared card deck. */
+  room?: { difficulty: string; host: boolean };
   escape: (s: string) => string;
   icon: (name: string) => string;
 }
@@ -168,7 +170,17 @@ export function configPage(s: ConfigState) {
     "gameplay",
     "YOUR PACE",
     "Gameplay",
-    `${select(
+    `${
+      s.room
+        ? `<div class="spice-setting">${select(
+            "game-difficulty",
+            s.room.host ? "" : "disabled",
+            "Card spice level · this expedition",
+            DIFFICULTIES.map((d) => [d.id, `${d.name} · ${d.count} cards`]),
+            s.room.difficulty,
+          )}<p class="modal-note">${s.room.host ? "Changes the deck for everyone from the next card." : "Only the host can change the deck."}</p></div>`
+        : ""
+    }${select(
       "",
       'data-pref-select="moveSpeed"',
       "Movement speed",

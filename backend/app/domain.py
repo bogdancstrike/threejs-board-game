@@ -349,7 +349,6 @@ def apply(
         "SET_READY",
         "START_GAME",
         "SET_WORLD",
-        "SET_DIFFICULTY",
     }
     if kind in lobby_actions and room["phase"] != "lobby":
         raise GameError("not_in_lobby", "The party is already on its expedition.")
@@ -399,10 +398,16 @@ def apply(
         level = payload.get("difficulty")
         if not isinstance(level, str) or level not in cards.LEVELS:
             raise GameError("invalid_difficulty", "Choose one of the five card levels.", 422)
+        if room["phase"] == "finished":
+            raise GameError("finished", "Start a rematch to change the card level.")
+        changed = room.get("difficulty") != level
         room["difficulty"] = level
         room.pop("_partyDeck", None)
-        for participant in players:
-            participant["ready"] = False
+        if room["phase"] == "lobby":
+            for participant in players:
+                participant["ready"] = False
+        elif changed:
+            journal(game, f"The host switched the deck to {cards.LEVELS[level]['name']}.")
     elif kind == "SET_WORLD":
         if not isinstance(payload.get("map"), str) or payload.get("map") not in MAPS:
             raise GameError("invalid_world", "Choose one of the available worlds.", 422)

@@ -83,6 +83,10 @@ export class ChallengePanel {
     const owner = this.client.myTurn,
       e = this.ui.escape,
       p = room.game.players[room.game.active];
+    if (card.partyCard) {
+      this.openPartyCard();
+      return;
+    }
     this.ui.open(
       "road",
       this.ui.header(
@@ -90,8 +94,51 @@ export class ChallengePanel {
         card.title,
         false,
       ) +
-        `<div class="road-encounter-art ${card.kind}">${this.ui.icon(card.icon)}<span>✧</span></div><p class="challenge-prompt">${e(card.description)}</p>${card.partyCard ? `<div class="party-card-label" data-level="${card.partyCard.level}">${e(card.partyCard.level.toUpperCase())} · ${e(card.partyCard.category)} · ${e(card.partyCard.id)}</div><details class="card-alternative"><summary>Board-game version · same reward</summary><p>${e(card.partyCard.alternative)}</p></details><p class="modal-note">Take up to ${card.partyCard.seconds / 60} minutes.</p>` : ""}${card.dare ? `<blockquote class="dare-prompt">${e(card.dare)}</blockquote>` : ""}<div class="road-choices">${card.choices.map((c) => `<button data-challenge-action="road" data-choice="${c.key}" ${!owner || (c.key === "pay" && p.gold < 3) || (c.key === "clue" && p.clues < 1) ? "disabled" : ""}><strong>${e(c.label)}</strong><small>${e(c.detail)}</small></button>`).join("")}</div><p class="modal-note">${owner ? "Read each outcome before choosing. Setbacks affect only the game; gold and points never drop below zero." : e(p.name) + " is choosing. Everyone will see the outcome."}</p>`,
+        `<div class="road-encounter-art ${card.kind}">${this.ui.icon(card.icon)}<span>✧</span></div><p class="challenge-prompt">${e(card.description)}</p>${card.dare ? `<blockquote class="dare-prompt">${e(card.dare)}</blockquote>` : ""}<div class="road-choices">${card.choices.map((c) => `<button data-challenge-action="road" data-choice="${c.key}" ${!owner || (c.key === "pay" && p.gold < 3) || (c.key === "clue" && p.clues < 1) ? "disabled" : ""}><strong>${e(c.label)}</strong><small>${e(c.detail)}</small></button>`).join("")}</div><p class="modal-note">${owner ? "Read each outcome before choosing. Setbacks affect only the game; gold and points never drop below zero." : e(p.name) + " is choosing. Everyone will see the outcome."}</p>`,
     );
+  }
+  /** A party card is the whole point of the dialog: the prompt is the hero. */
+  private openPartyCard() {
+    const room = this.client.room!,
+      road = room.game.road!,
+      card = road.partyCard!,
+      owner = this.client.myTurn,
+      e = this.ui.escape,
+      i = this.ui.icon,
+      p = room.game.players[room.game.active];
+    const level = card.level,
+      labels: Record<string, string> = {
+        dare: "Done it",
+        alternative: "Did the board-game version",
+        leave: "Pass",
+      };
+    this.ui.open(
+      "road",
+      `<div class="party-card" data-level="${level}"><div class="party-card-top"><span class="party-card-level">${e(level.toUpperCase())}</span><span>${e(p.name)}’s card</span><span class="party-card-category">${e(card.category)}</span></div><p class="party-card-text">${e(road.description)}</p><div class="party-card-bottom"><span>${e(card.title)}</span><span id="party-card-clock"></span></div></div><div class="party-card-actions">${road.choices
+        .map(
+          (c) =>
+            `<button class="${c.key === "dare" ? "primary-button" : c.key === "leave" ? "text-button" : "secondary-button"}" data-challenge-action="road" data-choice="${c.key}" ${owner ? "" : "disabled"}>${c.key === "dare" ? i("check") : c.key === "alternative" ? i("dices") : ""}<span>${labels[c.key] || e(c.label)}</span>${c.key !== "leave" ? `<small>+${card.points} pts · +${card.gold} gold</small>` : ""}</button>`,
+        )
+        .join(
+          "",
+        )}</div><details class="card-alternative"><summary>Board-game version</summary><p>${e(card.alternative)}</p></details>${owner ? "" : `<p class="modal-note party-card-wait">${e(p.name)} is playing this card.</p>`}`,
+    );
+    this.roadClock(road.deadline);
+  }
+  private roadTimer = 0;
+  private roadClock(deadline: number) {
+    clearInterval(this.roadTimer);
+    const draw = () => {
+      const el = document.getElementById("party-card-clock");
+      if (!el) return clearInterval(this.roadTimer);
+      const left = Math.max(
+        0,
+        Math.ceil((deadline - Date.now() - this.client.clockOffset) / 1000),
+      );
+      el.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
+    };
+    draw();
+    this.roadTimer = window.setInterval(draw, 500);
   }
   private card(): Challenge | null {
     return this.client.room?.game.challenge || null;
@@ -233,5 +280,6 @@ export class ChallengePanel {
   }
   stop() {
     cancelAnimationFrame(this.frame);
+    clearInterval(this.roadTimer);
   }
 }

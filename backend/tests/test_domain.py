@@ -478,3 +478,18 @@ def test_every_deck_has_at_least_250_unique_cards_without_disclaimer_asides():
         for card in deck:
             text = card["prompt"].lower()
             assert not any(b in text for b in banned), card["id"]
+
+
+def test_host_can_change_spice_level_during_the_expedition():
+    room = party()
+    guest = room["game"]["players"][1]["id"]
+    with pytest.raises(domain.GameError, match="host"):
+        domain.apply(room, guest, "SET_DIFFICULTY", {"difficulty": "hot"})
+    room, _ = domain.apply(room, room["hostId"], "SET_DIFFICULTY", {"difficulty": "hot"})
+    assert room["difficulty"] == "hot" and room["phase"] == "playing"
+    assert "Hot" in room["game"]["journal"][0]["text"]
+    room = land(room, 2)
+    assert room["game"]["road"]["partyCard"]["level"] == "hot"
+    room["phase"] = "finished"
+    with pytest.raises(domain.GameError, match="rematch"):
+        domain.apply(room, room["hostId"], "SET_DIFFICULTY", {"difficulty": "soft"})
