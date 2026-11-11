@@ -26,6 +26,13 @@ describe("board and roster", () => {
   });
 });
 describe("game rules", () => {
+  it("keeps every local hero unique regardless of the lead character", () => {
+    for (const hero of CHARACTERS) {
+      const state = newGame(4, hero.id);
+      expect(state.players[0].character).toBe(hero.id);
+      expect(new Set(state.players.map((p) => p.character)).size).toBe(4);
+    }
+  });
   it("moves tile by tile, then changes turns", () => {
     const s = newGame(2);
     expect(roll(s, 3, 0)).toEqual([1, 2, 3]);

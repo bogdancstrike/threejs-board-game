@@ -13,3 +13,6 @@ __pycache__/
 .ruff_cache/
 .coverage
 htmlcov/
+
+coverage/
+reports/backend-coverage.json

@@ -11,7 +11,12 @@
     "test:e2e": "playwright test",
     "screenshots": "node scripts/render-previews.mjs",
     "format": "prettier --write src tests *.ts",
-    "catalogue": "node scripts/export-catalogue.mjs"
+    "catalogue": "node scripts/export-catalogue.mjs",
+    "test:coverage": "node scripts/clean-coverage.mjs && vitest run --coverage && COVERAGE=true playwright test && node scripts/report-coverage.mjs",
+    "coverage:report": "node scripts/report-coverage.mjs",
+    "test:backend": "uv run --directory backend pytest --cov=app --cov-branch --cov-fail-under=90 --cov-report=term-missing --cov-report=json:../reports/backend-coverage.json && node scripts/report-backend-coverage.mjs && uv run --directory backend ruff check app tests",
+    "test:release": "npm run build && npm run test:coverage && npm run test:backend && node scripts/update-validation-docs.mjs",
+    "test:production": "playwright test tests/e2e/menu.spec.ts tests/e2e/hotseat.spec.ts tests/e2e/online.spec.ts"
   },
   "dependencies": {
     "lucide": "^0.468.0",
@@ -19,11 +24,18 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.51.0",
+    "@types/node": "^24.19.2",
     "@types/three": "^0.180.0",
+    "@vitest/coverage-istanbul": "^5.1.0",
+    "istanbul-lib-coverage": "^3.2.2",
+    "istanbul-lib-report": "^3.0.1",
+    "istanbul-lib-source-maps": "^5.0.6",
+    "istanbul-reports": "^3.2.0",
     "prettier": "^3.6.2",
     "sharp": "^0.35.5",
     "typescript": "^5.7.3",
     "vite": "^6.1.0",
+    "vite-plugin-istanbul": "^8.0.0",
     "vitest": "^5.1.0"
   }
 }

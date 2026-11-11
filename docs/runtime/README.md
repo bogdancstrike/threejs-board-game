@@ -1,4 +1,4 @@
-# Current runtime · 2026-11-10
+# Current runtime · 2026-11-11
 
 The user's explicit request for Python, FastAPI, PostgreSQL and WebSocket multiplayer extends the incremental v2 blueprint. Existing vanilla TypeScript/Vite/Three.js rendering and local saves remain. The supplied `docs/` design package is preserved as design history; this folder records executable behavior.
 
@@ -29,3 +29,9 @@ Thirty original IDs, 93 route tiles each, distinct shape fields, 3–9 terrain f
 ## Validation
 
 `npm run build`, `npm test`, `npm run test:e2e`; `uv run --directory backend pytest` (running PostgreSQL required), `uv run --directory backend ruff check app tests`. Docker builds are reproducible. Headless browser checks use software WebGL; hardware FPS and five-minute soak targets in the blueprint remain to be measured.
+
+## Title screen and release checks
+
+See [start-menu behavior](../specifications/START_MENU.md). New game, Continue, settings, how-to-play and thirty featured world previews are available before entering the board. Live room deadlines continue in the menu. Rematches bring every connected player back to the lobby.
+
+`npm run test:release` builds the production bundle, runs unit and instrumented browser tests, then validates all backend modules with PostgreSQL. Frontend and backend enforce separate 90% line thresholds and report branch coverage. The instrumented browser server uses port 7779. Backend tests create a disposable database using the configured role (CREATEDB required), and delete only that database after the run.

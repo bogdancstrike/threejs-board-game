@@ -2,28 +2,32 @@
 
 from __future__ import annotations
 
+import secrets
+
+from . import cards
 from .catalogue import CATALOGUE
 
 STOPS = {stop["tile"]: stop for stop in CATALOGUE.get("roadStops", [])}
-DARES = [
-    "Invent a dramatic name for your dragon and say it with a royal bow.",
-    "Tell a ten-second tale about the strangest thing in your hero’s backpack.",
-    "Give your hero a ridiculous victory pose. A seated hand gesture works too.",
-    "Name three imaginary creatures that might live on this island.",
-    "Deliver a one-line speech to convince a grumpy dragon to share its treasure.",
-    "Make up a two-line spell using the words moon and mushroom.",
-]
 
 
 def choice(key, label, detail):
     return {"key": key, "label": label, "detail": detail}
 
 
-def begin(room, p, clock):
+def begin(room, p, clock, randbelow=secrets.randbelow):
     stop = STOPS.get(p["position"])
-    if not stop or not room["challenges"] or p["position"] in p.get("visitedStops", []):
+    from .domain import tile_kind
+
+    card_tile = p["position"] % 5 == 0 and tile_kind(p["position"]) == "path"
+    if (
+        (not stop and not card_tile)
+        or not room["challenges"]
+        or p["position"] in p.get("visitedStops", [])
+    ):
         return False
     p.setdefault("visitedStops", []).append(p["position"])
+    if not stop or stop["kind"] == "dare":
+        return cards.begin(room, p, clock, stop, randbelow)
     kind = stop["kind"]
     options = []
     if kind == "dragon":
@@ -68,21 +72,6 @@ def begin(room, p, clock):
                 "+1 clue and +20 points. Next roll reduced by 2 (minimum 1).",
             ),
         ]
-    elif kind == "dare":
-        dare = DARES[(p["position"] + room["game"]["turn"]) % len(DARES)]
-        options = [
-            choice(
-                "dare",
-                "I tried the dare",
-                "+25 points and +1 gold. This is an optional, self-reported creative task.",
-            ),
-            choice(
-                "trial",
-                "Choose a rune game instead",
-                "Win: +50 points and +2 gold. No failure penalty.",
-            ),
-            choice("leave", "Pass comfortably", "No reward or penalty."),
-        ]
     elif kind == "shrine":
         options = [
             choice(
@@ -115,7 +104,7 @@ def begin(room, p, clock):
         road={
             **stop,
             "choices": options,
-            "dare": dare if kind == "dare" else None,
+            "dare": None,
             "deadline": clock + 45_000,
         },
     )
@@ -223,7 +212,7 @@ def resolve(room, p, key, clock, randbelow):
         p["clues"] += 1
         domain.award(p, 20)
         p["hex"] = 2
-    elif key == "dare":
+    elif key in {"dare", "alternative"}:
         domain.award(p, 25)
         p["gold"] += 1
     elif key == "ward":

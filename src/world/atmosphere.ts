@@ -10,6 +10,7 @@ export interface Atmosphere {
   group: THREE.Group;
   update: (t: number) => void;
   setQuality: (quality: string) => void;
+  configure: (weather: number, fog: number) => void;
   dispose: () => void;
 }
 export function atmosphere(theme: MapTheme): Atmosphere {
@@ -205,15 +206,37 @@ export function atmosphere(theme: MapTheme): Atmosphere {
   sky.userData.excludeAO = true;
   group.add(sky);
   disposables.push(sky.geometry, skyMat);
+  let quality = "medium",
+    weather = 1,
+    fog = 0.8;
+  const configure = () => {
+    geo.setDrawRange(
+      0,
+      Math.min(
+        count,
+        Math.round(
+          (quality === "low" ? 40 : quality === "ultra" ? 180 : 100) * weather,
+        ),
+      ),
+    );
+    mistMat.opacity = (quality === "low" ? 0.05 : 0.11) * fog;
+    points.visible = weather > 0;
+    shafts.visible = quality === "ultra" && fog > 0;
+  };
   return {
     group,
     update(t) {
       updates.forEach((f) => f(t));
     },
     setQuality(q) {
-      geo.setDrawRange(0, q === "low" ? 40 : q === "ultra" ? 180 : 100);
+      quality = q;
+      configure();
       shafts.visible = q === "ultra";
-      mistMat.opacity = q === "low" ? 0.05 : 0.11;
+    },
+    configure(w, f) {
+      weather = w;
+      fog = f;
+      configure();
     },
     dispose() {
       disposables.forEach((d) => d.dispose());

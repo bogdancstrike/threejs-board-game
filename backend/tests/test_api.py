@@ -4,8 +4,8 @@ from uuid import UUID, uuid4
 import httpx
 import pytest
 
-from app.main import create_app
 from app import domain
+from app.main import create_app
 
 
 @pytest.fixture
@@ -193,3 +193,95 @@ async def test_expired_accepted_danger_applies_once_and_persists_route(api):
     assert result["room"]["game"]["players"][0]["gold"] == 0
     assert result["event"]["payload"]["route"] == [28, 27, 26]
     assert await app.state.repo.timeout(room["id"]) is None
+
+
+async def test_health_catalogue_invalid_join_and_request_limits(api):
+    client, _, _ = api
+    assert (await client.get("/api/health")).json()["database"] == "postgresql"
+    assert len((await client.get("/api/v1/catalogue")).json()["maps"]) == 30
+    assert (
+        await client.post("/api/v1/rooms/invalid/join", json={"name": "Test"})
+    ).status_code == 422
+    assert (
+        await client.post("/api/v1/rooms/ZZZZZZ/join", json={"name": "Test"})
+    ).status_code == 404
+    assert (await client.post("/api/v1/rooms", content="x" * 17000)).status_code == 413
+    assert (
+        await client.post("/api/v1/rooms", headers={"Content-Length": "bad"}, content="")
+    ).status_code == 400
+    assert (
+        await client.post("/api/v1/rooms", json={"name": "Host", "players": ["Unowned seat"]})
+    ).status_code == 422
+
+
+async def test_command_key_cannot_be_reused_with_different_intent_and_tokens_are_bounded(api):
+    host = await create(api)
+    client, app, _ = api
+    key = str(uuid4())
+    assert (await command(api, host, "SET_READY", {"ready": True}, key=key)).status_code == 200
+    assert (await command(api, host, "SET_READY", {"ready": False}, key=key)).status_code == 422
+    assert (
+        await client.get(
+            "/api/v1/rooms/" + host["room"]["id"], headers={"Authorization": "Bearer short"}
+        )
+    ).status_code == 401
+    with pytest.raises(domain.GameError):
+        await app.state.repo.snapshot(str(uuid4()), host["playerId"])
+    with pytest.raises(domain.GameError):
+        await app.state.repo.command(
+            str(uuid4()),
+            host["playerId"],
+            {
+                "type": "SET_READY",
+                "payload": {"ready": True},
+                "expected_version": 1,
+                "idempotency_key": str(uuid4()),
+            },
+        )
+    assert (await command(api, host, "SET_NAME", {"name": "x" * 9000})).status_code == 413
+    assert (await command(api, host, "START_GAME")).status_code == 200
+    assert (await command(api, host, "SKIP_TURN")).status_code == 200
+
+
+async def test_snapshot_survives_a_new_api_instance(api):
+    host = await create(api)
+    app = create_app()
+    async with app.router.lifespan_context(app), httpx.AsyncClient(
+        transport=httpx.ASGITransport(app), base_url="http://restart"
+    ) as client:
+        snapshot = (
+            await client.get("/api/v1/rooms/" + host["room"]["id"], headers=headers(host))
+        ).json()["room"]
+        assert snapshot["id"] == host["room"]["id"]
+        assert snapshot["game"]["players"][0]["name"] == "Ada"
+
+
+async def test_http_rate_limit_returns_structured_retry_error(api):
+    client, _, _ = api
+    responses = [await client.get("/api/v1/catalogue") for _ in range(241)]
+    assert responses[-1].status_code == 429
+    assert responses[-1].json()["error"]["code"] == "rate_limited"
+
+
+async def test_background_worker_advances_expired_turn_and_publishes(api):
+    host = await create(api)
+    _, app, _ = api
+    await command(api, host, "SET_READY", {"ready": True})
+    await command(api, host, "START_GAME")
+    room = await app.state.repo.snapshot(host["room"]["id"], host["playerId"])
+    original_turn = room["game"]["turn"]
+    room["turnDeadline"] = 1
+    await app.state.repo.pool.execute(
+        "UPDATE rooms SET snapshot=$1 WHERE id=$2", room, UUID(room["id"])
+    )
+    # Observe the actual lifespan worker, rather than directly calling timeout().
+    for _ in range(30):
+        await asyncio.sleep(0.1)
+        current = await app.state.repo.snapshot(room["id"], host["playerId"])
+        if current["game"]["turn"] > original_turn:
+            break
+    assert current["game"]["turn"] == original_turn + 1
+    assert current["game"]["phase"] == "ready"
+    events = await app.state.repo.events(room["id"], host["playerId"], room["eventSeq"])
+    assert len(events) == 1
+    assert current["turnDeadline"] > domain.now_ms()

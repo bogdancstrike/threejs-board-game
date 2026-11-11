@@ -1,0 +1,10 @@
+# Party decks and cinematic worlds
+
+Continue the functional-release objective: production on localhost:7777, periodic commits/pushes, README/screenshots current, all application code included in separate frontend/backend ≥90% line coverage gates.
+
+1. Readability: larger parchment-menu type, high-contrast ink, readable disabled/status states, phone reflow. Verify computed text contrast and screenshots. **Implemented and deployed; targeted browser check passed.**
+2. Navigation/setup: explicit Exit game returns to the main menu while preserving resumable progress; random world suggestion when opening New game with a reroll control; improve named player setup and unique character selection.
+3. Five decks: Soft, Drinking, Teasing, Spicy, Hot, at least 250 unique complete prompts each. Select during configuration; persist and display level for everyone. Soft = board-game/talk/draw/creative tasks. Higher levels = optional beverage, flirting, consensual non-graphic adult romance and bold party performances. Every card supports passing and a neutral alternative; alcohol is never required. Server draws without repeats until deck exhaustion, validates outcomes, and supports reload/reconnect/rematch. Catalogue and content tests verify counts, IDs and duplicates.
+4. Rendering/settings: improve falling-water sheets, foam, impact ripples and spray; add independent persisted bloom, exposure, lighting preset, shadows, AO, fog, weather and water-effect controls. Verify settings across map changes and reloads, shader rendering and disposal.
+5. Maps: expand from 30 to 36 distinct worlds, update shape/geography/catalogue definitions, remove hard-coded world counts, render all previews and refresh README gallery.
+6. Final release: full browser/gameplay/transport/rendering suite; backend rules/PostgreSQL/WebSocket checks; ≥90% coverage gates; production smoke; commit and push. Update tests for new card encounters and final map count. Never count previous-source coverage counters in the final report.

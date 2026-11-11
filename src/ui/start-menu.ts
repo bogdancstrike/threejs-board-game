@@ -62,10 +62,7 @@ export class StartMenu {
   }
   show(journey: MenuJourney, map: string) {
     this.journey = journey;
-    this.selected = Math.max(
-      0,
-      MAPS.findIndex((m) => m.id === map),
-    );
+    this.selected = Math.floor(Math.random() * MAPS.length);
     this.root.hidden = false;
     document.body.classList.add("on-title-screen");
     const i = this.actions.icon;

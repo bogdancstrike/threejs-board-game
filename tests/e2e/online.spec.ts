@@ -1,8 +1,8 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 test("two browsers share unique heroes, turns, points and reconnect", async ({
   browser,
 }) => {
-  test.setTimeout(180000);
+  test.setTimeout(240000);
   const errors: string[] = [];
   const hostContext = await browser.newContext();
   const guestContext = await browser.newContext();
@@ -18,6 +18,8 @@ test("two browsers share unique heroes, turns, points and reconnect", async ({
   for (const page of [host, guest])
     page.on("pageerror", (e) => errors.push(e.message));
   await Promise.all([host.goto("/"), guest.goto("/")]);
+  for (const page of [host, guest])
+    await page.locator('[data-menu-action="classic"]').click();
   for (const page of [host, guest])
     await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 60000 });
   await host.locator('[data-action="rooms"]').click();
@@ -73,10 +75,65 @@ test("two browsers share unique heroes, turns, points and reconnect", async ({
     guest.locator(".party-score-row").first().locator("b"),
   ).toHaveText(hostScore!);
   await guest.reload();
+  await guest.locator('[data-menu-action="continue"]').click();
   await expect(guest.locator("#roll-button")).toBeEnabled({ timeout: 60000 });
   await expect(
     guest.locator(".party-score-row").first().locator("b"),
   ).toHaveText(hostScore!);
+  // Finish a full classic race through the public authenticated command API.
+  // Both browser clients remain connected and resume the committed finish screen.
+  for (const page of [host, guest])
+    await page.locator('[data-action="main-menu"]').click();
+  const sessions = await Promise.all(
+    [host, guest].map((page) =>
+      page.evaluate(() => JSON.parse(localStorage.getItem("wilder-room-v1")!)),
+    ),
+  );
+  const winner = await host.evaluate(async (sessions) => {
+    const url = "/api/v1/rooms/" + sessions[0].roomId;
+    let { room } = await (
+      await fetch(url, {
+        headers: { Authorization: "Bearer " + sessions[0].token },
+      })
+    ).json();
+    for (let turn = 0; turn < 500 && room.phase !== "finished"; turn++) {
+      const player = room.game.players[room.game.active];
+      const session = sessions.find((s) => s.playerId === player.id)!;
+      const type = room.game.phase === "event" ? "CHOOSE" : "ROLL_DIE";
+      const response = await fetch(url + "/commands", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + session.token,
+        },
+        body: JSON.stringify({
+          type,
+          payload: type === "CHOOSE" ? { index: 1 } : {},
+          expected_version: room.revision,
+          idempotency_key: crypto.randomUUID(),
+        }),
+      });
+      const result = await response.json();
+      if (response.status === 429) {
+        await new Promise((r) => setTimeout(r, 1000));
+        continue;
+      }
+      if (!response.ok) throw Error(JSON.stringify(result));
+      room = result.room;
+    }
+    if (room.phase !== "finished") throw Error("Classic race did not finish");
+    return room.game.players[room.game.winner].name;
+  }, sessions);
+  for (const page of [host, guest]) {
+    await page.locator('[data-menu-action="continue"]').click();
+    await expect(page.locator(".modal-header h2")).toHaveText(
+      winner + " wins the expedition.",
+    );
+  }
+  await host.locator('[data-action="rooms"]').last().click();
+  await host.locator('[data-room-action="rematch"]').click();
+  await expect(host.locator('[data-room-action="start"]')).toBeDisabled();
+  await expect(guest.locator(".lobby-ready").first()).toContainText("Choosing");
   expect(errors).toEqual([]);
   await hostContext.close();
   await guestContext.close();

@@ -1,4 +1,4 @@
-> **Runtime extension (2026-11-10):** the user's later explicit request adds FastAPI, PostgreSQL, WebSocket rooms, solo/same-device parties, road dangers and ten mini-games. See [current runtime](runtime/README.md) and [road adventure specification](specifications/ROAD_ADVENTURES.md). The original blueprint below remains preserved; its local-only recommendation is superseded by that request.
+> **Runtime extension (2026-11-10):** the user's later explicit request adds FastAPI, PostgreSQL, WebSocket rooms, solo/same-device parties, road dangers and ten mini-games. See [current runtime](runtime/README.md) [road adventure specification](specifications/ROAD_ADVENTURES.md), and [start menu](specifications/START_MENU.md). The original blueprint below remains preserved; its local-only recommendation is superseded by that request.
 
 # Wilder — Big Fantasy Map Expansion / Implementation Blueprint v2
 **2026-11-10** | Design + reference ZIP, not executable game | Inspected public GitHub repository, no changes pushed

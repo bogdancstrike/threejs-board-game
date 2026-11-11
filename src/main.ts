@@ -1,3 +1,10 @@
+import { graphicsSettings } from "./ui/graphics-settings";
+import {
+  readGraphics,
+  saveGraphics,
+  GRAPHICS_DEFAULTS,
+  type LightingStyle,
+} from "./world/graphics";
 import "./style.css";
 import { StartMenu, type MenuJourney } from "./ui/start-menu";
 import { RealtimeClient, type RoomUpdate } from "./network/client";
@@ -171,7 +178,7 @@ const safe = (s: string) =>
       ]!,
   );
 app.innerHTML = `
-<header class="topbar"><a class="brand" href="#" aria-label="Wilder main menu"><span class="brand-mark"><img src="/brand/wilder-mark.svg" alt=""/></span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> A little courage. A little magic. <span class="tiny-star">✧</span></div><nav><button class="icon-button" data-action="main-menu" aria-label="Open main menu">${icon("compass")}</button><button class="nav-link online-nav" data-action="rooms">${icon("users")}<span id="room-nav-label">Play · Solo & party</span></button><button class="nav-link" data-action="journey" aria-label="Toggle journey details">${icon("book-open")}<span>Journey</span></button><button class="nav-link" data-action="characters" aria-label="Choose character">${icon("users")}<span>Adventurer</span></button><button class="nav-link" data-action="maps">${icon("map")}<span>Worlds</span><span class="count-badge">${MAPS.length}</span></button><button class="nav-link" data-action="help">${icon("circle-help")}<span>How to play</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="Enable sound">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="Game settings">${icon("settings-2")}</button></nav></header>
+<header class="topbar"><a class="brand" href="#" aria-label="Wilder main menu"><span class="brand-mark"><img src="/brand/wilder-mark.svg" alt=""/></span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> A little courage. A little magic. <span class="tiny-star">✧</span></div><nav><button class="nav-link exit-game-button" data-action="exit-game" aria-label="Exit game to main menu">${icon("chevron-left")}<span>Exit game</span></button><button class="icon-button" data-action="main-menu" aria-label="Open main menu">${icon("compass")}</button><button class="nav-link online-nav" data-action="rooms">${icon("users")}<span id="room-nav-label">Play · Solo & party</span></button><button class="nav-link" data-action="journey" aria-label="Toggle journey details">${icon("book-open")}<span>Journey</span></button><button class="nav-link" data-action="characters" aria-label="Choose character">${icon("users")}<span>Adventurer</span></button><button class="nav-link" data-action="maps">${icon("map")}<span>Worlds</span><span class="count-badge">${MAPS.length}</span></button><button class="nav-link" data-action="help">${icon("circle-help")}<span>How to play</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="Enable sound">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="Game settings">${icon("settings-2")}</button></nav></header>
 <main class="game-shell"><aside class="sidebar"><div class="expedition-intro"><div class="eyebrow">AN ADVENTURE AWAITS</div><h1 id="map-title"></h1><p class="intro-copy">Follow the path.<br>Find your own story.</p><button class="map-link" data-action="maps">${icon("map")}<span>Explore another world</span>${icon("arrow-up-right")}</button></div>
 <div class="sidebar-rule"></div><div class="section-label">YOUR ADVENTURER<button data-action="characters">Change ${icon("chevron-right")}</button></div><button class="hero-card" data-action="characters"><div id="hero-avatar" class="hero-avatar">${icon("wand-sparkles")}</div><div><strong id="hero-name"></strong><span id="hero-class"></span></div><span class="hero-online"></span></button>
 <div class="journey"><div class="section-label"><span>THE JOURNEY</span><span class="tile-counter"><b id="tile-current">01</b> / 93</span></div><div class="progress-track"><div id="progress-fill"></div></div><div id="region-list" class="region-list"></div></div>
@@ -472,9 +479,13 @@ function openModal(type: string, html: string, wide = false) {
   mapPreview?.dispose();
   mapPreview = null;
   modalType = type;
-  if (scene) scene.paused = true;
+  if (scene) scene.paused = type !== "settings";
   dialog.className = `modal ${wide ? "modal-wide" : ""} modal-${type}`;
-  $("modal-content").innerHTML = html;
+  $("modal-content").innerHTML =
+    html +
+    (titleMenu?.isOpen
+      ? ""
+      : `<div class="modal-exit"><button class="text-button" data-action="exit-game">${icon("chevron-left")} Exit game · save & return to menu</button></div>`);
   if (!dialog.open) dialog.showModal();
   refreshIcons();
 }
@@ -533,8 +544,18 @@ function showMainMenu() {
   launchFromMenu = false;
   titleMenu?.show(menuJourney(), state.map);
 }
+function exitToMenu() {
+  if (busy) {
+    toast("Your hero is moving. Exit after this step.");
+    return;
+  }
+  showMainMenu();
+  if (realtime.session) realtime.disconnect(false);
+  toast("Progress saved. You can continue from the main menu.");
+}
 async function continueJourney() {
   await restorePromise;
+  if (realtime.session && !realtime.connected) await realtime.restore();
   launchFromMenu = false;
   titleMenu?.hide();
   shownNetworkEncounter = "";
@@ -815,7 +836,7 @@ function showSettings() {
         )
         .join(
           "",
-        )}</div><div class="sidebar-rule"></div><label class="settings-label">Graphics quality<select id="quality-setting"><option value="low" ${scene.quality === "low" ? "selected" : ""}>Low · lighter rendering</option><option value="medium" ${scene.quality === "medium" ? "selected" : ""}>Medium · balanced</option><option value="ultra" ${scene.quality === "ultra" ? "selected" : ""}>Ultra · cinematic</option></select></label><label class="toggle-setting"><span><strong>Run between tiles</strong><small>A quicker pace for your adventure</small></span><input type="checkbox" id="run-setting" ${runMovement ? "checked" : ""}></label><div class="sidebar-rule"></div><label class="settings-label">Traveling party<select id="party-setting">${[1, 2, 3, 4].map((n) => `<option value="${n}" ${state.players.length === n ? "selected" : ""}>${n === 1 ? "Solo expedition" : `${n} players · local pass-and-play`}</option>`).join("")}</select></label><p class="modal-note">Party size applies when you start a new expedition. Each player can choose a different character on their turn.</p><button class="secondary-button full-width" data-action="confirm-restart">${icon("rotate-ccw")}Start a new expedition</button><p class="modal-note">Your current game is saved on this browser automatically.</p>`,
+        )}</div><div class="sidebar-rule"></div><label class="settings-label">Graphics quality<select id="quality-setting"><option value="low" ${scene.quality === "low" ? "selected" : ""}>Low · lighter rendering</option><option value="medium" ${scene.quality === "medium" ? "selected" : ""}>Medium · balanced</option><option value="ultra" ${scene.quality === "ultra" ? "selected" : ""}>Ultra · cinematic</option></select></label><label class="toggle-setting"><span><strong>Run between tiles</strong><small>A quicker pace for your adventure</small></span><input type="checkbox" id="run-setting" ${runMovement ? "checked" : ""}></label>${graphicsSettings()}<div class="sidebar-rule"></div><label class="settings-label">Traveling party<select id="party-setting">${[1, 2, 3, 4].map((n) => `<option value="${n}" ${state.players.length === n ? "selected" : ""}>${n === 1 ? "Solo expedition" : `${n} players · local pass-and-play`}</option>`).join("")}</select></label><p class="modal-note">Party size applies when you start a new expedition. Each player can choose a different character on their turn.</p><button class="secondary-button full-width" data-action="confirm-restart">${icon("rotate-ccw")}Start a new expedition</button><p class="modal-note">Your current game is saved on this browser automatically.</p>`,
   );
 }
 function showHelp() {
@@ -868,7 +889,9 @@ app.addEventListener("click", async (e) => {
   if (!el || el.hasAttribute("disabled")) return;
   const action = el.dataset.action;
   if (action !== "sound") sound("ui");
-  if (action === "main-menu") {
+  if (action === "exit-game") {
+    exitToMenu();
+  } else if (action === "main-menu") {
     showMainMenu();
   } else if (action === "new-game-setup") {
     openGameSetup(el.dataset.world || state.map);
@@ -880,7 +903,11 @@ app.addEventListener("click", async (e) => {
   else if (action === "characters") showCharacters();
   else if (action === "maps") showMaps();
   else if (action === "settings") showSettings();
-  else if (action === "help") showHelp();
+  else if (action === "reset-graphics") {
+    saveGraphics(GRAPHICS_DEFAULTS);
+    scene.applyGraphics(GRAPHICS_DEFAULTS);
+    showSettings();
+  } else if (action === "help") showHelp();
   else if (action === "journal") showJournal();
   else if (action === "close-modal") closeModal();
   else if (action === "focus") scene.focusPlayer();
@@ -982,6 +1009,19 @@ app.addEventListener("click", async (e) => {
 });
 app.addEventListener("change", (e) => {
   const el = e.target as HTMLInputElement;
+  if (el.id === "lighting-setting") {
+    const options = readGraphics();
+    options.lighting = el.value as LightingStyle;
+    saveGraphics(options);
+    scene.applyGraphics(options);
+  }
+  if (el.dataset.graphicsToggle) {
+    const options = readGraphics();
+    options[el.dataset.graphicsToggle as "ao" | "spray" | "shadows"] =
+      el.checked;
+    saveGraphics(options);
+    scene.applyGraphics(options);
+  }
   if (el.id === "quality-setting") {
     graphicsQuality = el.value as Quality;
     scene.setQuality(graphicsQuality);
@@ -1045,6 +1085,20 @@ window.addEventListener("keydown", (e) => {
 });
 app.addEventListener("input", (e) => {
   const el = e.target as HTMLInputElement;
+  if (el.dataset.graphics) {
+    const key = el.dataset.graphics as
+      | "exposure"
+      | "bloom"
+      | "fog"
+      | "weather"
+      | "waterSpeed"
+      | "foam";
+    const options = readGraphics();
+    options[key] = Number(el.value) / 100;
+    saveGraphics(options);
+    scene.applyGraphics(options);
+    $("graphics-" + key).textContent = el.value + "%";
+  }
   if (el.id === "world-search") {
     const q = el.value.toLowerCase().trim();
     let shown = 0;
@@ -1127,7 +1181,8 @@ async function receiveRoom(message: RoomUpdate) {
           .map((p) => p.id + ":" + p.character + ":" + p.tint)
           .join("|"),
     mapChanged = state.map !== room.game.map,
-    wasLobby = visualRoomPhase === "lobby";
+    wasLobby = visualRoomPhase === "lobby",
+    returnedToLobby = room.phase === "lobby" && visualRoomPhase === "finished";
   visualRoomId = room.id;
   visualRoomPhase = room.phase;
   state = room.game;
@@ -1208,6 +1263,7 @@ async function receiveRoom(message: RoomUpdate) {
     if (modalType === "characters") updateCharacter();
     else if (
       modalType === "lobby" ||
+      returnedToLobby ||
       modalType === "rooms" ||
       initial ||
       !dialog.open

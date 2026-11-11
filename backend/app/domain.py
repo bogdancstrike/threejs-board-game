@@ -8,7 +8,7 @@ import secrets
 import time
 from uuid import uuid4
 
-from . import adventures
+from . import adventures, cards
 from .catalogue import CHARACTERS, MAPS
 
 COLORS = ["#cbb17a", "#90c7ba", "#c49adc", "#e89783", "#8bbbd3", "#c5cb89", "#dfb5c8", "#d4a777"]
@@ -51,10 +51,19 @@ def player(player_id: str, name: str, character: str, index: int) -> dict:
 
 
 def initial_room(
-    room_id: str, code: str, host_id: str, name: str, map_id: str, mode="classic", challenges=True
+    room_id: str,
+    code: str,
+    host_id: str,
+    name: str,
+    map_id: str,
+    mode="classic",
+    challenges=True,
+    difficulty="soft",
 ) -> dict:
     if map_id not in MAPS or mode not in ("classic", "score"):
         raise GameError("invalid_rules", "Choose a valid world and rule preset.", 422)
+    if difficulty not in cards.LEVELS:
+        raise GameError("invalid_difficulty", "Choose Soft, Drinking, Teasing, Spicy or Hot.", 422)
     game = {
         "version": 1,
         "map": map_id,
@@ -76,6 +85,7 @@ def initial_room(
         "phase": "lobby",
         "mode": mode,
         "challenges": challenges,
+        "difficulty": difficulty,
         "game": game,
         "turnDeadline": None,
         "finishing": False,
@@ -325,14 +335,22 @@ def apply(
         "SKIP_CHALLENGE": set(),
         "REQUEST_REMATCH": set(),
         "SET_WORLD": {"map"},
+        "SET_DIFFICULTY": {"difficulty"},
         "SKIP_TURN": set(),
     }
     if kind not in allowed or set(payload) - allowed[kind]:
         raise GameError("invalid_command", "That command contains unsupported fields.", 422)
-    host_actions = {"START_GAME", "REQUEST_REMATCH", "SET_WORLD", "SKIP_TURN"}
+    host_actions = {"START_GAME", "REQUEST_REMATCH", "SET_WORLD", "SET_DIFFICULTY", "SKIP_TURN"}
     if kind in host_actions and actor != room["hostId"]:
         raise GameError("host_only", "Only the host can do that.", 403)
-    lobby_actions = {"SELECT_CHARACTER", "SET_NAME", "SET_READY", "START_GAME", "SET_WORLD"}
+    lobby_actions = {
+        "SELECT_CHARACTER",
+        "SET_NAME",
+        "SET_READY",
+        "START_GAME",
+        "SET_WORLD",
+        "SET_DIFFICULTY",
+    }
     if kind in lobby_actions and room["phase"] != "lobby":
         raise GameError("not_in_lobby", "The party is already on its expedition.")
     controller = room.get("hotseat", False) and actor == room["hostId"]
@@ -377,6 +395,14 @@ def apply(
         if not isinstance(payload.get("ready"), bool):
             raise GameError("invalid_ready", "Ready must be true or false.", 422)
         p["ready"] = payload["ready"]
+    elif kind == "SET_DIFFICULTY":
+        level = payload.get("difficulty")
+        if not isinstance(level, str) or level not in cards.LEVELS:
+            raise GameError("invalid_difficulty", "Choose one of the five card levels.", 422)
+        room["difficulty"] = level
+        room.pop("_partyDeck", None)
+        for participant in players:
+            participant["ready"] = False
     elif kind == "SET_WORLD":
         if not isinstance(payload.get("map"), str) or payload.get("map") not in MAPS:
             raise GameError("invalid_world", "Choose one of the available worlds.", 422)
@@ -392,6 +418,7 @@ def apply(
         if room["phase"] != "finished":
             raise GameError("not_finished", "Finish this expedition before requesting a rematch.")
         room["phase"], room["finishing"], room["turnDeadline"] = "lobby", False, None
+        room.pop("_partyDeck", None)
         game.update(
             active=0,
             turn=1,
@@ -439,7 +466,7 @@ def apply(
                 return room, [event]
             if hex_amount:
                 journal(game, f"A lingering hex reduces {p['name']}’s move to {steps} tiles.")
-            if adventures.begin(room, p, clock):
+            if adventures.begin(room, p, clock, randbelow):
                 return room, [event]
             tile = tile_kind(p["position"])
             if tile == "mystery":

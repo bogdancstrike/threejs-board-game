@@ -24,6 +24,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from .cards import LEVELS
 from .catalogue import CATALOGUE
 from .config import Settings
 from .domain import GameError, now_ms, public_room
@@ -37,6 +38,7 @@ class CreateRoom(BaseModel):
     name: str = Field(min_length=1, max_length=24)
     map: str = Field(default="verdant", max_length=32)
     mode: Literal["classic", "score"] = "classic"
+    difficulty: Literal["soft", "drinking", "teasing", "spicy", "hot"] = "soft"
     challenges: bool = True
     hotseat: bool = False
     players: list[str] = Field(default_factory=list, max_length=7)
@@ -62,6 +64,7 @@ class Command(BaseModel):
         "SKIP_CHALLENGE",
         "REQUEST_REMATCH",
         "SET_WORLD",
+        "SET_DIFFICULTY",
         "SKIP_TURN",
     ]
     expected_version: int = Field(ge=1)
@@ -228,13 +231,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/api/v1/catalogue")
     async def catalogue():
-        return CATALOGUE
+        return {**CATALOGUE, "difficulties": list(LEVELS.values())}
 
     @app.post("/api/v1/rooms")
     async def create(body: CreateRoom, request: Request):
         hub.throttle("create:" + (request.client.host if request.client else "?"), 12)
         room, actor, token = await app.state.repo.create(
-            body.name, body.map, body.mode, body.challenges, body.hotseat, body.players
+            body.name,
+            body.map,
+            body.mode,
+            body.challenges,
+            body.hotseat,
+            body.players,
+            body.difficulty,
         )
         return {
             "room": public_room(room),

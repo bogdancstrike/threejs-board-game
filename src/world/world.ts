@@ -8,6 +8,8 @@ import {
 } from "../game/data";
 import type { MapTheme } from "../game/maps";
 import { waterMaterial } from "./water";
+import { createWaterfall } from "./waterfall";
+import type { GraphicsOptions } from "./graphics";
 import { ENVIRONMENT_RESERVES } from "./environment";
 import { roadMarkers } from "./road-markers";
 import { skyways } from "./skyways";
@@ -35,6 +37,7 @@ export interface World {
   tiles: THREE.InstancedMesh;
   encounters: THREE.Group;
   animated: ((t: number) => void)[];
+  configureWater: (options: GraphicsOptions) => void;
   dispose: () => void;
 }
 function roundedTile() {
@@ -306,53 +309,20 @@ export function buildWorld(theme: MapTheme): World {
     ...riverEdges.slice(-3),
     ...[6, -1, -8].filter((z) => shapeField(theme.id, riverX(z), z) > 0.2),
   ].slice(0, 4);
-  for (const z of waterfallPositions) {
+  const waterfalls = waterfallPositions.map((z) => {
     const x = riverX(z),
       top = groundHeight(z),
-      height = riverEdges.includes(z) ? groundHeight(z) + 3.7 : 1.1;
-    const waterfallFlow = waterMaterial(
+      height = riverEdges.includes(z) ? top + 3.7 : 1.1;
+    const waterfall = createWaterfall(
       theme.water,
-      true,
+      height,
       theme.theme === "volcano",
     );
-    animated.push(waterfallFlow.update);
-    const fall = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.2, height, 4, 12),
-      waterfallFlow.material,
-    );
-    fall.position.set(x, top - height / 2, z + 0.1);
-    group.add(fall);
-    for (let i = 0; i < 8; i++) {
-      const stream = box(
-        props,
-        "#c4eef0",
-        x - 0.5 + i * 0.15,
-        top - height / 2,
-        z + 0.12,
-        0.025,
-        height,
-        0.02,
-        0.45,
-      );
-      stream.rotation.z = (rng() - 0.5) * 0.03;
-    }
-    for (let j = 0; j < 5; j++) {
-      const foam = sphere(
-        group,
-        theme.water,
-        x + (rng() - 0.5),
-        top - height + 0.2,
-        z + (rng() - 0.5) * 0.3,
-        0.25,
-        0.1,
-        0.18,
-        0.35,
-      );
-      animated.push((t) => {
-        foam.scale.y = 0.1 + Math.sin(t * 1.5 + j) * 0.025;
-      });
-    }
-  }
+    waterfall.group.position.set(x, top, z + 0.1);
+    group.add(waterfall.group);
+    animated.push(waterfall.update);
+    return waterfall;
+  });
   for (const tile of TILES.filter((t) => Math.abs(t.x - riverX(t.z)) < 1.3)) {
     for (const side of [-1, 1]) {
       box(
@@ -822,6 +792,12 @@ export function buildWorld(theme: MapTheme): World {
     tiles,
     encounters: road.group,
     animated,
+    configureWater(options) {
+      riverFlow.configure(options.waterSpeed, options.foam);
+      waterfalls.forEach((f) =>
+        f.configure(options.waterSpeed, options.foam, options.spray),
+      );
+    },
     dispose() {
       group.traverse((o) => {
         if (!(o instanceof THREE.Mesh)) return;
@@ -838,6 +814,7 @@ export function buildWorld(theme: MapTheme): World {
             mat.dispose();
           }
       });
+      waterfalls.forEach((f) => f.dispose());
       cloudTexture.dispose();
       cloudMaterial.dispose();
       cleanup.forEach((f) => f());

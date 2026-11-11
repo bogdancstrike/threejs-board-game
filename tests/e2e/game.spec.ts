@@ -1,5 +1,5 @@
 import { MAPS } from "../../src/game/maps";
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 test("full-screen board, character preview, movement and save restoration", async ({
   page,
 }) => {
@@ -12,6 +12,7 @@ test("full-screen board, character preview, movement and save restoration", asyn
     ),
   );
   await page.goto("/");
+  await page.locator('[data-menu-action="classic"]').click();
   await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
   const canvas = await page.locator("#viewport canvas").boundingBox();
   expect(canvas!.height / 900).toBeGreaterThan(0.9);
@@ -50,6 +51,7 @@ test("full-screen board, character preview, movement and save restoration", asyn
     await expect(page.locator("#modal")).not.toBeVisible();
   }
   await page.reload();
+  await page.locator('[data-menu-action="continue"]').click();
   await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
   expect(
     await page.evaluate(
@@ -72,6 +74,7 @@ test("all thirty themes render and mobile controls fit the viewport", async ({
     ),
   );
   await page.goto("/");
+  await page.locator('[data-menu-action="classic"]').click();
   await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
   await page.locator('[data-action="maps"]').first().click();
   expect(await page.locator("[data-map]").count()).toBe(30);
@@ -101,6 +104,7 @@ test("supplied characters remain centered in every action", async ({
   page,
 }) => {
   await page.goto("/");
+  await page.locator('[data-menu-action="classic"]').click();
   await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
   const bounds = await page.evaluate(async () => {
     const assetPath = "/src/world/assets.ts",
@@ -154,6 +158,7 @@ test("audio controls persist and the sound engine produces an audible signal", a
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
+  await page.locator('[data-menu-action="classic"]').click();
   await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
   await page.locator('[data-action="settings"]').click();
   await page.locator("#audio-enabled").check();
@@ -180,6 +185,27 @@ test("audio controls persist and the sound engine produces an audible signal", a
     const samples = new Float32Array(analyser.fftSize);
     analyser.getFloatTimeDomainData(samples);
     const peak = Math.max(...samples.map(Math.abs));
+    // Switch every soundscape family and exercise all named game effects.
+    const families = [...new Set(MAPS.map((m: any) => m.theme))];
+    for (const family of families) {
+      engine.setTheme(MAPS.find((m: any) => m.theme === family));
+      engine.play("step");
+      await new Promise((r) => setTimeout(r, 750));
+    }
+    for (const effect of [
+      "ui",
+      "roll",
+      "land",
+      "portal",
+      "magic",
+      "victory",
+      "transition",
+    ])
+      engine.play(effect);
+    engine.setVolume("ambience", 0.25);
+    await new Promise((r) => setTimeout(r, 2000));
+    await engine.setEnabled(false);
+    if (engine.preferences.enabled) throw Error("Audio mute was not retained");
     engine.dispose();
     return peak;
   });
@@ -191,6 +217,7 @@ test("map preview is interactive and does not replace the current saved expediti
   page,
 }) => {
   await page.goto("/");
+  await page.locator('[data-menu-action="classic"]').click();
   await expect(page.locator("#scene-loading")).toBeHidden({ timeout: 45000 });
   await page.locator('[data-action="maps"]').first().click();
   await expect(page.locator(".map-thumbnail")).toHaveCount(30);

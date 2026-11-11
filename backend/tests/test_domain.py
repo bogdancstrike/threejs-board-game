@@ -170,7 +170,7 @@ def test_eight_road_encounter_categories_are_playable(tile, kind):
     assert room["game"]["phase"] == "road"
     assert room["game"]["road"]["kind"] == kind
     assert room["game"]["road"]["choices"]
-    assert room["turnDeadline"] == 46000
+    assert room["turnDeadline"] == (121000 if kind == "dare" else 46000)
 
 
 def test_dragon_trial_failure_retreats_and_ward_absorbs_it():
@@ -294,3 +294,143 @@ def test_memory_cannot_be_submitted_during_reveal_and_wards_are_capped():
     room["game"]["players"][0]["wards"] = 2
     room, _ = domain.apply(room, room["hostId"], "RESOLVE_ROAD", {"choice": "ward"})
     assert room["game"]["players"][0]["wards"] == 2
+
+
+@pytest.mark.parametrize(
+    "kind,payload",
+    [
+        ("SELECT_CHARACTER", {"character": "missing"}),
+        ("SELECT_CHARACTER", {"character": "lyra", "tint": []}),
+        ("SET_NAME", {"name": {}}),
+        ("SET_NAME", {"name": "Player 2"}),
+        ("SET_READY", {"ready": "yes"}),
+        ("SET_WORLD", {"map": "missing"}),
+        ("REQUEST_REMATCH", {}),
+        ("FLY_TO_FINISH", {}),
+    ],
+)
+def test_lobby_rejects_invalid_changes_without_mutating_the_party(kind, payload):
+    room = party()
+    room["phase"] = "lobby"
+    before = deepcopy(room)
+    with pytest.raises(domain.GameError):
+        domain.apply(room, room["hostId"], kind, payload)
+    assert room == before
+
+
+def test_valid_name_aura_world_changes_and_lobby_phase_lock():
+    room = party()
+    room["phase"] = "lobby"
+    actor = room["hostId"]
+    room, _ = domain.apply(room, actor, "SET_NAME", {"name": "  Captain   Rowan "})
+    room, _ = domain.apply(
+        room, actor, "SELECT_CHARACTER", {"character": "orion", "tint": "#8fc5b3"}
+    )
+    room, _ = domain.apply(room, actor, "SET_WORLD", {"map": "dragonkind"})
+    assert room["game"]["players"][0]["name"] == "Captain Rowan"
+    assert room["game"]["players"][0]["tint"] == "#8fc5b3"
+    assert room["game"]["map"] == "dragonkind"
+    assert not any(p["ready"] for p in room["game"]["players"])
+    room["phase"] = "playing"
+    with pytest.raises(domain.GameError):
+        domain.apply(room, actor, "SET_NAME", {"name": "After start"})
+
+
+def test_room_capacity_membership_and_unique_names():
+    room = party(8)
+    room["phase"] = "lobby"
+    with pytest.raises(domain.GameError, match="eight"):
+        domain.join(room, str(uuid4()), "Ninth")
+    with pytest.raises(domain.GameError, match="belong"):
+        domain.member(room, str(uuid4()))
+    room = party(2)
+    with pytest.raises(domain.GameError, match="started"):
+        domain.join(room, str(uuid4()), "Late")
+    room["phase"] = "lobby"
+    with pytest.raises(domain.GameError, match="name"):
+        domain.join(room, str(uuid4()), "ADA")
+    room["hotseat"] = True
+    with pytest.raises(domain.GameError):
+        domain.apply(room, room["hostId"], "SET_NAME", {"playerId": {}, "name": "Bad"})
+    with pytest.raises(domain.GameError):
+        domain.initial_room(str(uuid4()), "ABC234", str(uuid4()), "Name", "missing")
+
+
+@pytest.mark.parametrize("tile,key,resource", [(29, "pay", "gold"), (11, "clue", "clues")])
+def test_safe_passage_requires_and_consumes_resources(tile, key, resource):
+    room = land(party(), tile)
+    actor = room["hostId"]
+    with pytest.raises(domain.GameError):
+        domain.apply(room, actor, "RESOLVE_ROAD", {"choice": key})
+    room["game"]["players"][0][resource] = 3 if resource == "gold" else 1
+    result, _ = domain.apply(room, actor, "RESOLVE_ROAD", {"choice": key})
+    assert result["game"]["players"][0][resource] == 0
+    assert result["game"]["players"][0]["position"] == tile
+
+
+def test_shrine_study_camp_recovery_and_failed_dangers():
+    room = land(party(), 33)
+    result, _ = domain.apply(room, room["hostId"], "RESOLVE_ROAD", {"choice": "study"})
+    assert result["game"]["players"][0]["clues"] == 1
+    room = land(party(), 69)
+    room["game"]["players"][0]["hex"] = 2
+    result, _ = domain.apply(room, room["hostId"], "RESOLVE_ROAD", {"choice": "rest"})
+    assert result["game"]["players"][0]["gold"] == 2
+    assert result["game"]["players"][0]["hex"] == 0
+    for tile in [11, 53]:
+        room = land(party(), tile)
+        room, _ = domain.apply(
+            room,
+            room["hostId"],
+            "RESOLVE_ROAD",
+            {"choice": "trial"},
+            clock=2000,
+            randbelow=lambda n: 0,
+        )
+        assert room["game"]["phase"] == "challenge"
+        result, _ = domain.apply(room, room["hostId"], "SKIP_CHALLENGE", {}, clock=3000)
+        p = result["game"]["players"][0]
+        assert p["position"] == (9 if tile == 11 else 53)
+        assert p["hex"] == (2 if tile == 53 else 0)
+        assert p["points"] >= 0
+    with pytest.raises(domain.GameError):
+        domain.apply(party(), room["hostId"], "RESOLVE_ROAD", {"choice": "rest"})
+
+
+def test_rhythm_uses_server_taps_and_wrong_phase_actions_are_rejected():
+    room = party()
+    actor = room["hostId"]
+    for kind in ["CHOOSE", "SUBMIT_CHALLENGE", "CHALLENGE_TAP", "RESOLVE_ROAD"]:
+        with pytest.raises(domain.GameError):
+            domain.apply(room, actor, kind, {"index": 1} if kind == "CHOOSE" else {})
+    room["game"].update(phase="challenge", challenge=domain.challenge(5, 1000))
+    for clock in [1100, 1800, 2500, 3200, 3900]:
+        room, _ = domain.apply(room, actor, "CHALLENGE_TAP", {}, clock=clock)
+    assert len(room["game"]["challenge"]["taps"]) == 4
+    result, _ = domain.apply(room, actor, "SUBMIT_CHALLENGE", {}, clock=4000)
+    assert result["game"]["players"][0]["completed"] == 1
+    room["game"]["challenge"] = domain.challenge(0, 1000)
+    with pytest.raises(domain.GameError):
+        domain.apply(room, actor, "CHALLENGE_TAP", {}, clock=2000)
+    with pytest.raises(domain.GameError):
+        domain.apply(room, actor, "ROLL_DIE", {})
+
+
+def test_story_purchase_is_atomic_and_host_can_advance_a_disconnected_turn():
+    room = party()
+    actor = room["hostId"]
+    # Find an authored story with a purchase, rather than assuming catalogue order.
+    stories = domain.MAPS[room["game"]["map"]]["encounters"]
+    index, choice_index = next(
+        (i, j)
+        for i, story in enumerate(stories)
+        for j, c in enumerate(story["choices"])
+        if c["gold"] < 0
+    )
+    room["game"].update(phase="event", mystery=index)
+    before = deepcopy(room)
+    with pytest.raises(domain.GameError):
+        domain.apply(room, actor, "CHOOSE", {"index": choice_index})
+    assert room == before
+    room, _ = domain.apply(room, actor, "SKIP_TURN", {})
+    assert room["game"]["active"] == 1 and room["game"]["phase"] == "ready"

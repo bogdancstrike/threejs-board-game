@@ -1,3 +1,4 @@
+import type { Difficulty } from "../game/decks";
 import type { RoadStop } from "../game/road";
 import { CHARACTERS } from "../game/data";
 import type { GameState } from "../game/engine";
@@ -51,12 +52,27 @@ export interface Challenge {
   taps?: number[];
   beat?: number;
 }
+export interface PartyCard {
+  id: string;
+  level: Difficulty;
+  category: string;
+  title: string;
+  prompt: string;
+  solo: string;
+  alternative: string;
+  seconds: number;
+  points: number;
+  gold: number;
+}
 export interface RoadCard extends RoadStop {
+  partyCard?: PartyCard;
+  sourceTitle?: string;
   choices: { key: string; label: string; detail: string }[];
   dare?: string;
   deadline: number;
 }
 export interface Room {
+  difficulty?: Difficulty;
   hotseat?: boolean;
   id: string;
   code: string;
@@ -173,13 +189,14 @@ export class RealtimeClient {
     challenges = true,
     hotseat = false,
     players: string[] = [],
+    difficulty: Difficulty = "soft",
   ) {
     const result = await this.request<{
       room: Room;
       playerId: string;
       token: string;
       serverTime: number;
-    }>("/rooms", { name, map, mode, challenges, hotseat, players });
+    }>("/rooms", { name, map, mode, challenges, hotseat, players, difficulty });
     this.adopt(result);
   }
   async join(code: string, name: string) {

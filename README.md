@@ -292,15 +292,25 @@ Static props are batched, tiles are instanced, symbols share an atlas, imported 
 ## 🧪 Tested on the trail
 
 ```bash
-uv run --directory backend pytest # Domain and real PostgreSQL integration tests
-uv run --directory backend ruff check app tests
-npm test                        # Pure rules, complete routes, world and preference validation
-npm run test:e2e                 # Chromium/WebGL gameplay, previews, animation bounds and audio
-npm run build                   # Strict TypeScript and production bundle
+npx playwright install chromium
+npm run test:release             # Build + unit/browser tests + both 90% coverage gates
+npm run test:coverage            # All frontend source, instrumented Chromium tests
+npm run test:backend             # Domain + isolated PostgreSQL + HTTP/WebSocket tests
+npm test                        # Fast rules, routes, geography and audio preference checks
 node scripts/map-metrics.mjs     # Route bounds, elevations and every map transition
 ```
 
-The browser suite checks two independent multiplayer browsers, same-device names/hero picks/turn handoff, and exercises character selection and movement, save restoration, all thirty themes, mobile layout, live map previews, animation bounds, and nonzero Web Audio output. It uses software WebGL in headless Chromium; install the browser with `npx playwright install chromium` if needed. Low-quality smoke checks and normal-quality visual renders serve different validation purposes. [Recorded route metrics](reports/map_metrics.json) cover all 30 maps; these describe geometry and do not claim GPU performance.
+Run the API and database first (`docker compose up -d db api`). The coverage command starts its own instrumented Vite server on **7779**, leaving the playable deployment on **7777** available. Backend integration tests create and remove a disposable database; the local test role needs `CREATEDB`. Saved player rooms are never reused as test fixtures.
+
+<!-- COVERAGE_START -->
+Coverage metrics are refreshed by `npm run test:release`.
+<!-- COVERAGE_END -->
+
+The frontend gate includes **every `src/**/*.ts` file**, including rendering, audio, UI and networking. It measures actual instrumented browser execution, separately from Vitest unit coverage; this avoids combining incompatible statement maps. The backend gate includes **every `backend/app` module**. Both require at least **90% line coverage**; branch coverage is reported separately. Reports are in `coverage/frontend/index.html`, `reports/frontend-coverage-summary.json`, and `reports/backend-coverage-summary.json`. Each release run deletes old browser counters first.
+
+Browser checks cover the title menu, all 30 maps, mobile layout, unique characters, animation bounds, live previews, audible Web Audio, offline saves and complete rules-engine games, same-device handoff, two independent online browsers, complete classic/score games via authenticated commands, finish screens and rematches. Transport tests inject connection loss, delayed ACKs, rejected/stale messages and expired sessions. Backend tests exercise all ten mini-games, road outcomes, concurrency, authorization, idempotency, persistence and the running deadline worker.
+
+Headless rendering uses Chromium software WebGL. These checks establish functional behavior; hardware FPS and broad-device soak measurements remain separate. [Recorded route metrics](reports/map_metrics.json) describe geometry for all 30 maps, not GPU performance.
 
 ## 🎨 Art status & credits
 
@@ -322,6 +332,8 @@ With the development server running:
 
 ```bash
 npm run screenshots
+# Only menu/character/party UI changed? Refresh UI images without rerendering 30 maps:
+node scripts/render-previews.mjs --ui-only
 ```
 
 This renders **every real map** through its current Three.js scene, publishes the thumbnails used by the app and README, and regenerates the contact sheet. Refresh this gallery whenever terrain, silhouettes, lighting, assets, or composition changes. Feature claims, limitations, controls, and validation instructions in this README should be updated in the same commit as the implementation.

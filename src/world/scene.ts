@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { readGraphics, type GraphicsOptions } from "./graphics";
 import { WorldVFX, type WorldEffect } from "./vfx";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
@@ -47,6 +48,7 @@ export class GameScene {
   frame = 0;
   clock = new THREE.Clock();
   quality: Quality = "medium";
+  graphics = readGraphics();
   active = 0;
   moving = false;
   paused = false;
@@ -366,10 +368,25 @@ export class GameScene {
     this.light.shadow.map = null;
     this.atmosphere.setQuality(q);
     this.environment.setQuality(q);
-    this.ao.enabled = q !== "low";
+    this.ao.enabled = q !== "low" && this.graphics.ao;
     this.ao.blendIntensity = q === "ultra" ? 0.48 : 0.38;
     this.ao.updateGtaoMaterial({ samples: q === "ultra" ? 16 : 8 });
+    this.applyGraphics(this.graphics);
     this.resize();
+  }
+  applyGraphics(options: GraphicsOptions) {
+    this.graphics = { ...options };
+    this.renderer.toneMappingExposure = options.exposure;
+    this.renderer.shadowMap.enabled = options.shadows && this.quality !== "low";
+    this.bloom.strength = options.bloom;
+    this.bloom.radius = 0.55;
+    this.bloom.threshold = 0.9;
+    this.bloom.enabled = options.bloom > 0;
+    this.ao.enabled = options.ao && this.quality !== "low";
+    (this.scene.fog as THREE.FogExp2).density = 0.007 * options.fog;
+    this.lighting.setStyle(options.lighting);
+    this.atmosphere.configure(options.weather, options.fog);
+    this.world.configureWater(options);
   }
   dispose() {
     cancelAnimationFrame(this.frame);

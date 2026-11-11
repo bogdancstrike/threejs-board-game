@@ -43,6 +43,8 @@ export function newGame(
   character = "lyra",
   map = "verdant",
 ): GameState {
+  // Exclude the chosen lead hero before assigning the remaining local seats.
+  const available = CHARACTERS.filter((c) => c.id !== character);
   return {
     version: 1,
     map,
@@ -50,7 +52,8 @@ export function newGame(
       { length: Math.max(1, Math.min(4, count)) },
       (_, i) => ({
         name: i === 0 ? "You" : `Player ${i + 1}`,
-        character: i === 0 ? character : CHARACTERS[(i * 3) % 12].id,
+        character:
+          i === 0 ? character : available[(i * 3 - 1) % available.length].id,
         position: 0,
         gold: 0,
         clues: 0,

@@ -50,13 +50,22 @@ class PostgresRooms:
         return {"playerId": str(row["id"]), "roomId": str(row["room_id"])}
 
     async def create(
-        self, name: str, map_id: str, mode: str, challenges: bool, hotseat=False, names=None
+        self,
+        name: str,
+        map_id: str,
+        mode: str,
+        challenges: bool,
+        hotseat=False,
+        names=None,
+        difficulty="soft",
     ) -> tuple[dict, str, str]:
         room_id, actor, token = str(uuid4()), str(uuid4()), secrets.token_urlsafe(32)
         alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
         for _ in range(5):
             code = "".join(secrets.choice(alphabet) for _ in range(6))
-            room = domain.initial_room(room_id, code, actor, name, map_id, mode, challenges)
+            room = domain.initial_room(
+                room_id, code, actor, name, map_id, mode, challenges, difficulty
+            )
             if names and not hotseat:
                 raise domain.GameError(
                     "invalid_party", "Extra seats belong to same-device parties.", 422

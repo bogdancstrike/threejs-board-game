@@ -1,10 +1,12 @@
 import { defineConfig } from "@playwright/test";
+const coverage = process.env.COVERAGE === "true";
+const baseURL = coverage ? "http://localhost:7779" : "http://localhost:7777";
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 90000,
   workers: 1,
   use: {
-    baseURL: "http://localhost:7777",
+    baseURL,
     viewport: { width: 1280, height: 900 },
     launchOptions: {
       args: [
@@ -17,9 +19,11 @@ export default defineConfig({
     },
   },
   webServer: {
-    command: "npm run dev",
-    url: "http://localhost:7777",
-    reuseExistingServer: true,
+    command: coverage
+      ? "VITE_COVERAGE=true npm run dev -- --port 7779 --strictPort"
+      : "npm run dev",
+    url: baseURL,
+    reuseExistingServer: !coverage,
   },
   reporter: "list",
 });
