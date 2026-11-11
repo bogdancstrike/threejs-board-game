@@ -8,5 +8,6 @@ class Settings(BaseSettings):
         "http://localhost:7777",
         "http://127.0.0.1:7777",
         "http://localhost:7778",
+        "http://localhost:7779",
     ]
     session_hours: int = 12

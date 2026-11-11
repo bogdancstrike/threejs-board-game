@@ -22,7 +22,7 @@ A browser fantasy board game built with Three.js, original ambient audio, and li
 
 [Quick start](#-quick-start) · [World gallery](#-thirty-worlds-thirty-shapes) · [Characters](#-meet-your-adventurer) · [Audio & atmosphere](#-a-world-that-breathes) · [Architecture](#-under-the-island) · [Testing](#-tested-on-the-trail) · [Art status](#-art-status--credits)
 
-<img src="public/previews/verdant.webp" width="880" alt="The Verdant Crown: a floating fantasy board with a village, forest, river, glowing portal, and castle" />
+<img src="docs/screenshots/menu.webp" width="1080" alt="Wilder title screen: New game, Continue journey, settings, and a living 3D world" />
 
 <sub>Actual Three.js render. Every screenshot below comes from the playable world.</sub>
 
@@ -36,6 +36,7 @@ A little strategy. A little luck. A lot of curiosity.
 
 Wilder brings a tabletop adventure into an interactive 3D diorama. Your character follows **93 connected tiles** from a welcoming village through four chapters across three to nine floors to a final destination. Along the way, hidden treasure, ancient portals, and strange encounters ask what kind of traveler you want to be.
 
+- 🧭 **A real start menu:** New game, Continue, settings, how to play, and a carousel of thirty world previews over a living 3D island.
 - 🏝️ **Thirty distinct landscapes:** different physical island shapes, terrain palettes, destinations, regional names, and encounter decks.
 - 🎲 **A complete game:** fair six-sided dice, animated movement, branching encounters, gold, clues, points, local turns, live online rooms, and victory.
 - 🧙 **Twelve adult adventurers:** next/previous selection, a rotating 3D preview, equipment and close-up views, action previews, and cosmetic aura colors.
@@ -78,9 +79,13 @@ npm run preview -- --port 7778   # Inspect the production build
 
 For backend development, run `docker compose up -d db`, then `uv sync --directory backend` and `uv run --directory backend uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload` alongside `npm run dev`. Vite proxies HTTP and WebSocket traffic under `/api`. The generated `.env` must stay private. PostgreSQL data lives in a named Docker volume.
 
+<img src="docs/screenshots/game.webp" width="1080" alt="The playable full-screen island and its journey controls" />
+
 ## 👥 Bring your party
 
-Choose **Play · Solo & party**, enter player names, and choose **On this device** for solo/pass-and-play or **Online** to create/join a six-character room code. Same-device Adventure supports **1–8 named players**, unique heroes, and a “pass the device” dialog between turns. Both Adventure play styles use the running game server. **1–8 online players** each claim a unique hero, mark ready, and let the host begin. Character claims are enforced by a PostgreSQL constraint and transactional server rules. Every browser sees the same die roll, movement, active player, journal, and points.
+<img src="docs/screenshots/party.webp" width="880" alt="A named three-player same-device party with unique characters and ready checks" />
+
+Choose **New game** on the title screen (or **Play · Solo & party** on the board), enter player names, and choose **On this device** for solo/pass-and-play or **Online** to create/join a six-character room code. Same-device Adventure supports **1–8 named players**, unique heroes, and a “pass the device” dialog between turns. Both Adventure play styles use the running game server. **1–8 online players** each claim a unique hero, mark ready, and let the host begin. Character claims are enforced by a PostgreSQL constraint and transactional server rules. Every browser sees the same die roll, movement, active player, journal, and points.
 
 Classic races end at the finish. Score expeditions finish the current round, then rank players by points. The server awards progress, treasure, clues, challenge rewards, and a finish bonus. **Ten mini-games** include riddles, counting, memory, patterns, balance, rhythm, arithmetic, spotting a mimic, a navigable maze, and alchemy. Rematches return the party to the lobby.
 
@@ -201,6 +206,8 @@ Read the [full encounter and multiplayer specification](docs/specifications/ROAD
 
 ## 🧙 Meet your adventurer
 
+<img src="docs/screenshots/characters.webp" width="880" alt="Character selection with a 3D preview, next and previous buttons, action previews and unique hero selection" />
+
 | Adventurer | Archetype | Adventurer | Archetype |
 |---|---|---|---|
 | Lyra | Violet Enchantress | Aurelia | Golden Valkyrie |
@@ -290,9 +297,10 @@ uv run --directory backend ruff check app tests
 npm test                        # Pure rules, complete routes, world and preference validation
 npm run test:e2e                 # Chromium/WebGL gameplay, previews, animation bounds and audio
 npm run build                   # Strict TypeScript and production bundle
+node scripts/map-metrics.mjs     # Route bounds, elevations and every map transition
 ```
 
-The browser suite checks two independent multiplayer browsers, same-device names/hero picks/turn handoff, and exercises character selection and movement, save restoration, all thirty themes, mobile layout, live map previews, animation bounds, and nonzero Web Audio output. It uses software WebGL in headless Chromium; install the browser with `npx playwright install chromium` if needed. Low-quality smoke checks and normal-quality visual renders serve different validation purposes.
+The browser suite checks two independent multiplayer browsers, same-device names/hero picks/turn handoff, and exercises character selection and movement, save restoration, all thirty themes, mobile layout, live map previews, animation bounds, and nonzero Web Audio output. It uses software WebGL in headless Chromium; install the browser with `npx playwright install chromium` if needed. Low-quality smoke checks and normal-quality visual renders serve different validation purposes. [Recorded route metrics](reports/map_metrics.json) cover all 30 maps; these describe geometry and do not claim GPU performance.
 
 ## 🎨 Art status & credits
 

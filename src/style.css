@@ -3123,5 +3123,402 @@ a {
     grid-template-columns: 1fr;
   }
 }
-.handoff-hero { display: grid; place-items: center; width: 95px; height: 95px; margin: 28px auto; border: 1px solid var(--hero-color); border-radius: 50%; color: var(--hero-color); }
-.handoff-hero svg { width: 38px; height: 38px; }
+.handoff-hero {
+  display: grid;
+  place-items: center;
+  width: 95px;
+  height: 95px;
+  margin: 28px auto;
+  border: 1px solid var(--hero-color);
+  border-radius: 50%;
+  color: var(--hero-color);
+}
+.handoff-hero svg {
+  width: 38px;
+  height: 38px;
+}
+/* The title screen is a quiet storybook cover over the living island. */
+.start-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  color: #f0ebda;
+  overflow-y: auto;
+  isolation: isolate;
+}
+.title-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(
+      90deg,
+      #091d26 0%,
+      #0b2029f5 28%,
+      #0c242dc9 46%,
+      #102e3740 73%,
+      #0b20293b
+    ),
+    linear-gradient(
+      0deg,
+      #081b26 0%,
+      transparent 27%,
+      transparent 80%,
+      #0a2029a8
+    );
+  pointer-events: none;
+}
+.title-topline {
+  position: absolute;
+  top: 28px;
+  left: 6vw;
+  right: 4vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #a4b5ac;
+  font-size: 9px;
+  letter-spacing: 3px;
+}
+.title-icon {
+  border: 1px solid #c7b58740;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: #d4c18e;
+}
+.title-content {
+  width: min(510px, 48vw);
+  margin: clamp(90px, 13vh, 160px) 0 120px 9vw;
+  animation: title-arrive 1s both;
+}
+.title-emblem {
+  width: 76px;
+  height: 76px;
+  margin-left: -8px;
+  margin-bottom: 24px;
+}
+.title-eyebrow {
+  font-size: 9px;
+  letter-spacing: 3.4px;
+  color: #b5bba3;
+  margin: 0 0 15px;
+}
+.title-content h1 {
+  font: 400 clamp(78px, 8.4vw, 132px) / 0.88 var(--serif);
+  color: #efe7cb;
+  letter-spacing: -5px;
+  margin: 0;
+  text-shadow: 0 6px 40px #0002;
+}
+.title-content h1 span {
+  display: block;
+  font:
+    400 10px/1.5 "DM Sans",
+    sans-serif;
+  letter-spacing: 6px;
+  color: #c3ad7a;
+  margin: 22px 0 25px 6px;
+}
+.title-intro {
+  font: 21px/1.55 var(--serif);
+  color: #c2cabc;
+  margin: 0 0 30px 5px;
+}
+.title-actions {
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.title-new {
+  background: #d2b779;
+  color: #192f34;
+  min-height: 59px;
+  border-radius: 5px;
+  padding: 0 21px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e6cd93;
+  box-shadow: 0 5px 35px #08192280;
+  font-size: 15px;
+}
+.title-new > span {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.title-new:hover {
+  background: #e1ca96;
+  transform: translateY(-1px);
+}
+.title-continue {
+  min-height: 66px;
+  display: flex;
+  text-align: left;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid #c5bd9840;
+  border-radius: 5px;
+  padding: 13px 17px;
+  background: #17313a55;
+  font-size: 13px;
+}
+.title-continue > span {
+  flex: 1;
+}
+.title-continue small {
+  display: block;
+  color: #9caeaa;
+  font-size: 10px;
+  line-height: 1.5;
+  margin-top: 5px;
+}
+.title-secondary {
+  display: flex;
+  gap: 24px;
+  padding: 13px 0 3px;
+}
+.title-secondary button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: #c3c8b7;
+}
+.title-secondary button:hover,
+.title-classic:hover {
+  color: #f3db9f;
+}
+.title-classic {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  font-size: 11px;
+  color: #93aaa7;
+  padding: 8px 0;
+}
+.title-classic svg {
+  width: 13px;
+}
+.title-mode-note {
+  margin-top: 21px;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: #819b9b;
+}
+.title-world {
+  position: absolute;
+  right: 5vw;
+  bottom: 100px;
+  width: min(410px, 37vw);
+  animation: title-arrive 1.3s 0.2s both;
+}
+.title-world-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: #bec4b3;
+}
+.title-world-heading > div {
+  display: flex;
+  gap: 5px;
+}
+.title-world-heading button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #c5bd9833;
+  border-radius: 50%;
+}
+.title-world-card {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  border: 1px solid #c5bd9840;
+  border-radius: 7px;
+  overflow: hidden;
+  background: #122c35e8;
+  box-shadow: 0 10px 40px #081d2650;
+}
+.title-world-card > img {
+  width: 140px;
+  height: 117px;
+  object-fit: cover;
+}
+.title-world-card > span {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 15px;
+  gap: 9px;
+}
+.title-world-card small {
+  font:
+    8px/1.5 "DM Sans",
+    sans-serif;
+  color: #a6b9ae;
+}
+.title-world-card strong {
+  font: 19px/1.2 var(--serif);
+  color: #e6ddc1;
+}
+.title-world-card em {
+  font-style: normal;
+  font-size: 9px;
+  color: #c7b57c;
+}
+.title-world-card em svg {
+  width: 12px;
+  height: 12px;
+}
+.title-footer {
+  position: absolute;
+  bottom: 28px;
+  left: 6vw;
+  right: 5vw;
+  display: flex;
+  justify-content: space-between;
+  gap: 25px;
+  color: #91a6a2;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+}
+.title-footer b {
+  margin: 0 12px;
+  font-weight: 400;
+  color: #c5b788;
+}
+.title-footer > span:last-child {
+  letter-spacing: 0.3px;
+}
+.on-title-screen .topbar {
+  visibility: hidden;
+}
+.on-title-screen
+  .world-area
+  > :not(#viewport):not(.sky-stars):not(.world-grain):not(.scene-loading) {
+  visibility: hidden;
+}
+.on-title-screen .sidebar {
+  visibility: hidden;
+}
+@keyframes title-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (min-width: 1400px) {
+  .title-content {
+    margin-left: 11vw;
+  }
+}
+@media (max-height: 800px) and (min-width: 701px) {
+  .title-content {
+    margin-top: 80px;
+    margin-bottom: 75px;
+  }
+  .title-emblem {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+  }
+  .title-content h1 {
+    font-size: 90px;
+  }
+  .title-intro {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+  .title-content h1 span {
+    margin: 15px 0;
+  }
+  .title-mode-note {
+    margin-top: 12px;
+  }
+}
+@media (max-width: 700px) {
+  .title-vignette {
+    background:
+      linear-gradient(90deg, #0b2029fa, #0b2029b8),
+      linear-gradient(0deg, #081b26, transparent);
+  }
+  .title-topline {
+    top: 20px;
+    left: 25px;
+    right: 25px;
+    font-size: 7px;
+    letter-spacing: 1.5px;
+  }
+  .title-content {
+    width: auto;
+    margin: 90px 30px 30px;
+  }
+  .title-emblem {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 20px;
+  }
+  .title-content h1 {
+    font-size: 86px;
+  }
+  .title-content h1 span {
+    font-size: 8px;
+    letter-spacing: 4.4px;
+  }
+  .title-intro {
+    font-size: 20px;
+    margin-bottom: 22px;
+  }
+  .title-actions {
+    max-width: none;
+  }
+  .title-world {
+    position: relative;
+    width: auto;
+    right: auto;
+    bottom: auto;
+    margin: 30px 30px 70px;
+  }
+  .title-world-card {
+    grid-template-columns: 115px 1fr;
+  }
+  .title-world-card > img {
+    width: 115px;
+    height: 110px;
+  }
+  .title-footer {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    margin: 0 30px 25px;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 7px;
+  }
+  .title-mode-note {
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .title-content,
+  .title-world {
+    animation: none;
+  }
+}
+@media(max-width:700px) { .topbar [data-action="main-menu"] { display: none; } }
