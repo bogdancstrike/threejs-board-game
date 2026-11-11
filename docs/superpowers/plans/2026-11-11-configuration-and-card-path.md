@@ -7,3 +7,11 @@ Goal: a highly configurable game with a real configuration page, a card on every
 3. **Card text.** Remove disclaimer-style asides from prompts and UI notes; decks grow to 300 unique cards per level (25 activities × 12 themes). **Implemented; a test bans the asides and enforces ≥250 unique cards per level.**
 4. **Worlds 30 → 36.** Shattered Glacier, Redstone Canyon, Lanternmire, Starforge Ring (with skyway), Saltglass Shoals, Ember Foundry: shapes, geography, landmarks, catalogue, previews. World gallery gains family filters, sorting and "Surprise me". **Implemented; previews pending render.**
 5. Release: unit/backend/e2e suites, preview refresh, README, commit and push.
+
+## Follow-up (same day)
+
+6. **Bolder decks.** Drinking (drinking buddies, table rules, laugh dares), Teasing (players flirt with each other), Spicy and Hot (kisses, lap seats, strip dares, body shots, truth-or-strip, blindfold games). Adult cards target real players ("the player on your left", "a player chosen by the group"…). No disclaimer asides, no solo suffixes. **Implemented.**
+7. **Card mechanics (20) + mini-games (10) + roadside encounters (8) = 38 mechanics.** Pick a card, risk or reveal, spin the bottle, seven minutes, dare duel, double or nothing, the bet, wheel of misfortune, coin flip, hot seat, everybody, chain, mirror, jackpot, beat the clock, nominate, secret card, encore, pickpocket, classic. Each game draws its own private plan: 10–19 mechanics with random weights, a random subset of mini-game types on 4–10 random tiles, and a random subset of roadside stops. Random outcomes are server-side; hidden hands are never published. **Implemented; backend tests cover every mechanic and plan randomness.**
+8. **Card dialog.** The card text is the hero; level colours; face-down card choices; animated wheel; readable board-game version; the roll button reopens any pending card so turns cannot stall. **Implemented.**
+9. **Characters.** Akari, Aurelia, Kael and Orion removed; Mira, Ysolde, Isla and Wren added (CC-BY). Shared pose system relaxes T/A poses and animates shoulders, elbows, wrists, spine, head and legs; ten actions. **Implemented.**
+10. **Challenge results** with solution and given answer; **Clouds** world (37 total); title-screen background follows the featured world; tablet top bar. **Implemented.**
