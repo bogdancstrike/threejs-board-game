@@ -102,10 +102,10 @@ describe("game rules", () => {
 import { MAPS } from "../src/game/maps";
 import { getTiles } from "../src/game/data";
 import { currentMystery } from "../src/game/engine";
-describe("the thirty worlds", () => {
-  it("has thirty distinct themed worlds with complete routes", () => {
-    expect(MAPS).toHaveLength(30);
-    expect(new Set(MAPS.map((m) => m.id)).size).toBe(30);
+describe("the thirty-six worlds", () => {
+  it("has thirty-six distinct themed worlds with complete routes", () => {
+    expect(MAPS).toHaveLength(36);
+    expect(new Set(MAPS.map((m) => m.id)).size).toBe(36);
     for (const m of MAPS) {
       const tiles = getTiles(m.id);
       expect(tiles).toHaveLength(93);
@@ -137,7 +137,7 @@ describe("the thirty worlds", () => {
 
 import { shapeField, rawShapeField, MAP_SHAPES } from "../src/world/shapes";
 describe("distinct physical landscapes", () => {
-  it("has thirty different silhouettes while supporting every tile corner", () => {
+  it("has thirty-six different silhouettes while supporting every tile corner", () => {
     const fingerprints = new Set();
     for (const map of MAPS) {
       expect(MAP_SHAPES[map.id]).toBeDefined();
@@ -154,7 +154,7 @@ describe("distinct physical landscapes", () => {
               `${map.id} supports tile ${tile.id}`,
             ).toBeGreaterThan(0);
     }
-    expect(fingerprints.size).toBe(30);
+    expect(fingerprints.size).toBe(36);
   });
   it("keeps an open crater, crescent cutout, and archipelago channels", () => {
     expect(rawShapeField("ember", 0, -2.25)).toBeLessThan(0);
@@ -166,7 +166,7 @@ describe("distinct physical landscapes", () => {
 import { GEOGRAPHY } from "../src/game/geography";
 import { groundHeight } from "../src/game/data";
 describe("varied floors and dimensions", () => {
-  it("uses independent three-to-nine-floor profiles for all thirty maps", () => {
+  it("uses independent three-to-nine-floor profiles for all thirty-six maps", () => {
     const counts = new Set<number>(),
       sizes = new Set<string>();
     for (const m of MAPS) {
