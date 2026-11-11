@@ -85,6 +85,20 @@ import {
   Lightbulb,
   Heart,
   PartyPopper,
+  Layers,
+  Scale,
+  RotateCw,
+  DoorOpen,
+  Coins,
+  Dice5,
+  FerrisWheel,
+  CircleDollarSign,
+  Link,
+  Copy,
+  Timer,
+  EyeOff,
+  Repeat,
+  HandCoins,
 } from "lucide";
 import { roadStop } from "./game/road";
 import { CHARACTERS, getTiles, TILE_INFO } from "./game/data";
@@ -166,6 +180,20 @@ const icons = {
   Lightbulb,
   Heart,
   PartyPopper,
+  Layers,
+  Scale,
+  RotateCw,
+  DoorOpen,
+  Coins,
+  Dice5,
+  FerrisWheel,
+  CircleDollarSign,
+  Link,
+  Copy,
+  Timer,
+  EyeOff,
+  Repeat,
+  HandCoins,
 };
 const icon = (name: string, cls = "") =>
   `<i data-lucide="${name}" class="${cls}"></i>`;
@@ -392,6 +420,24 @@ function update() {
       : busy
         ? "A little courage goes a long way."
         : "Roll the dice. See where the path takes you.";
+  // A pending encounter can always be reopened, whoever closed its dialog.
+  const pending =
+    !busy &&
+    ["event", "road", "challenge"].includes(state.phase) &&
+    (!realtime.session || realtime.room?.phase === "playing");
+  if (pending) {
+    button.disabled = false;
+    button.dataset.pending = "true";
+    button.innerHTML =
+      icon(
+        state.phase === "road"
+          ? "sparkles"
+          : state.phase === "challenge"
+            ? "dices"
+            : "book-open",
+      ) +
+      `<span>${state.phase === "road" ? "Show the card" : state.phase === "challenge" ? "Resume the challenge" : "Resume the mystery"}</span>`;
+  } else delete button.dataset.pending;
   if (realtime.session) {
     $("room-nav-label").textContent = "Room " + (realtime.room?.code || "");
     if (realtime.room?.phase === "lobby") {
@@ -399,7 +445,7 @@ function update() {
       $("turn-title").textContent = "Your party is getting ready.";
       $("turn-description").textContent =
         "Choose a unique hero, mark ready, and let the host begin.";
-    } else if (!realtime.myTurn && state.phase !== "won") {
+    } else if (!realtime.myTurn && state.phase !== "won" && !pending) {
       button.innerHTML =
         icon("moon") + "<span>Waiting for " + safe(player.name) + "</span>";
       $("turn-title").textContent = player.name + "’s turn";
@@ -460,7 +506,21 @@ function randomInt(max: number) {
   if (a[0] >= limit) return randomInt(max);
   return a[0] % max;
 }
+/** Reopen whichever encounter is waiting for a decision. */
+function reopenEncounter() {
+  if (state.phase === "event") showEncounter();
+  else if (state.phase === "road") challengePanel?.openRoad();
+  else if (state.phase === "challenge") challengePanel?.open();
+}
 async function doRoll() {
+  if (
+    !busy &&
+    !dialog.open &&
+    ["event", "road", "challenge"].includes(state.phase)
+  ) {
+    reopenEncounter();
+    return;
+  }
   if (busy || state.phase !== "ready" || dialog.open) return;
   if (realtime.session) {
     if (!realtime.myTurn) return;
@@ -1026,7 +1086,11 @@ function attachScene() {
       return;
     }
     const t = getTiles(state.map)[id];
-    const stop = realtime.room?.challenges ? roadStop(id) : undefined;
+    const layout = realtime.room?.layout;
+    const stop =
+      realtime.room?.challenges && (!layout || layout.stops.includes(id))
+        ? roadStop(id)
+        : undefined;
     if (stop) {
       tip.hidden = false;
       tip.innerHTML = `<span style="color:${theme.accent}">✧</span><div><strong>${stop.title}</strong><small>Tile ${id + 1} · ${stop.description}</small></div>`;
@@ -1408,7 +1472,7 @@ async function receiveRoom(message: RoomUpdate) {
     $("scene-loading").hidden = true;
     busy = false;
   }
-  scene.setRoadEncounters(Boolean(room.challenges));
+  scene.setRoadEncounters(Boolean(room.challenges), room.layout?.stops ?? null);
   if (titleMenu?.isOpen) {
     titleMenu.updateJourney(menuJourney());
     if (launchFromMenu && room.id !== previousMenuRoom) {

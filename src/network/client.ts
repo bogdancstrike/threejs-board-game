@@ -64,8 +64,20 @@ export interface PartyCard {
   points: number;
   gold: number;
 }
+export interface CardMechanic {
+  id: string;
+  name: string;
+  icon: string;
+  rules: string;
+}
 export interface RoadCard extends RoadStop {
   partyCard?: PartyCard;
+  mechanic?: CardMechanic;
+  /** "choose" before a card is revealed, "card" with a card, "result" for a wheel outcome. */
+  stage?: "choose" | "card" | "result";
+  banner?: string;
+  multiplier?: number;
+  wheel?: { segments: string[]; result: number };
   sourceTitle?: string;
   choices: { key: string; label: string; detail: string }[];
   dare?: string;
@@ -73,6 +85,8 @@ export interface RoadCard extends RoadStop {
 }
 export interface Room {
   difficulty?: Difficulty;
+  /** Per-game random layout of roadside stops and mini-game tiles. */
+  layout?: { stops: number[]; minigames: number[] };
   hotseat?: boolean;
   id: string;
   code: string;

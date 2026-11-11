@@ -4520,3 +4520,163 @@ dialog.modal-road:has(.party-card) .card-alternative summary {
   font-size: 24px;
   letter-spacing: 0.08em;
 }
+dialog.modal-road:has(.party-card) .card-alternative {
+  background: #0d1a22e6;
+  border: 1px solid #ffffff22;
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #eee8d6;
+}
+dialog.modal-road:has(.party-card) .card-alternative summary {
+  color: #eee8d6;
+  font-weight: 600;
+}
+dialog.modal-road:has(.party-card) .card-alternative p {
+  margin: 10px 0 2px;
+  color: #f4efe0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ── Card mechanics ─────────────────────────────────────────────── */
+.party-card-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.party-card-category svg {
+  width: 15px;
+  height: 15px;
+}
+.party-card-banner {
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--card-accent) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card-accent) 45%, transparent);
+  font-weight: 600;
+  text-align: center;
+  font-size: 16px;
+}
+.mechanic-intro {
+  flex-direction: column;
+  gap: 10px;
+}
+.mechanic-intro svg {
+  width: 54px;
+  height: 54px;
+  color: var(--card-accent);
+}
+.mechanic-intro strong {
+  font-size: 1.15em;
+}
+.mechanic-intro span {
+  font-family: "DM Sans", sans-serif;
+  font-size: 18px;
+  opacity: 0.85;
+}
+.card-backs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 22px;
+}
+.card-back {
+  aspect-ratio: 2 / 3;
+  border-radius: 14px;
+  border: 2px solid #e8c98a;
+  background:
+    repeating-linear-gradient(45deg, #ffffff10 0 6px, transparent 6px 12px),
+    linear-gradient(160deg, #2c4652, #182a33);
+  color: #f1dcab;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 40px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.card-back small {
+  font-size: 14px;
+  letter-spacing: 0.1em;
+}
+.card-back:hover:enabled {
+  transform: translateY(-8px) rotate(-2deg);
+}
+.mechanic-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 22px;
+}
+.mechanic-options button {
+  display: flex;
+  flex-direction: column;
+  min-height: 72px;
+  justify-content: center;
+  font-size: 19px;
+}
+.mechanic-options small {
+  font-size: 13px;
+  opacity: 0.75;
+}
+.mechanic-wheel {
+  position: relative;
+  width: 210px;
+  height: 210px;
+  margin: 18px auto 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    #f1c983 0 12.5%,
+    #d9636f 0 25%,
+    #8fc5b3 0 37.5%,
+    #a88bcf 0 50%,
+    #f1c983 0 62.5%,
+    #d9636f 0 75%,
+    #8fc5b3 0 87.5%,
+    #a88bcf 0
+  );
+  border: 6px solid #fff6;
+  animation: wheel-spin 3.2s cubic-bezier(0.15, 0.85, 0.25, 1) both;
+  --final: var(--turns);
+}
+.mechanic-wheel span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #1d1a16;
+  transform: rotate(calc(360deg / var(--count) * (var(--n) + 0.5)));
+}
+.mechanic-wheel span.hit {
+  color: #000;
+  text-decoration: underline;
+}
+.wheel-wrap {
+  position: relative;
+  width: 210px;
+  margin: 0 auto;
+}
+.wheel-wrap > b {
+  position: absolute;
+  z-index: 1;
+  top: 8px;
+  left: 50%;
+  translate: -50% 0;
+  border: 12px solid transparent;
+  border-top: 20px solid #fff;
+  filter: drop-shadow(0 2px 3px #0008);
+}
+@keyframes wheel-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(var(--turns));
+  }
+}

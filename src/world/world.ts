@@ -36,6 +36,7 @@ export interface World {
   group: THREE.Group;
   tiles: THREE.InstancedMesh;
   encounters: THREE.Group;
+  setRoadLayout: (stops: number[] | null) => void;
   animated: ((t: number) => void)[];
   configureWater: (options: GraphicsOptions) => void;
   dispose: () => void;
@@ -791,6 +792,7 @@ export function buildWorld(theme: MapTheme): World {
     group,
     tiles,
     encounters: road.group,
+    setRoadLayout: road.setLayout,
     animated,
     configureWater(options) {
       riverFlow.configure(options.waterSpeed, options.foam);

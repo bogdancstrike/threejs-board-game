@@ -246,9 +246,10 @@ async def test_command_key_cannot_be_reused_with_different_intent_and_tokens_are
 async def test_snapshot_survives_a_new_api_instance(api):
     host = await create(api)
     app = create_app()
-    async with app.router.lifespan_context(app), httpx.AsyncClient(
-        transport=httpx.ASGITransport(app), base_url="http://restart"
-    ) as client:
+    async with (
+        app.router.lifespan_context(app),
+        httpx.AsyncClient(transport=httpx.ASGITransport(app), base_url="http://restart") as client,
+    ):
         snapshot = (
             await client.get("/api/v1/rooms/" + host["room"]["id"], headers=headers(host))
         ).json()["room"]

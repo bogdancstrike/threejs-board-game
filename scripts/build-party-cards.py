@@ -183,8 +183,10 @@ def build():
                 cards.append({
                     "id": f"{level}-{index+1:03}", "level": level, "category": category,
                     "title": f"{title} · {topic}" if level == "soft" else title, "prompt": prompt,
-                    "solo": prompt if level == "soft" else prompt + " Playing solo? Act it out with an imaginary partner.",
+                    "solo": prompt,
                     "alternative": soft, "seconds": 120, "points": 25, "gold": 1,
+                    "target": topic if level != "soft" else "",
+                    "reveal": category in {"talk", "truth", "confession", "game"},
                 })
         assert len({c["prompt"] for c in cards}) == 300
         decks[level] = cards

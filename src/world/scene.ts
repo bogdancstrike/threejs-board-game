@@ -440,8 +440,9 @@ export class GameScene {
     this.controls.zoomSpeed = options.zoomSpeed;
     this.follow = options.cameraFollow;
   }
-  setRoadEncounters(enabled: boolean) {
+  setRoadEncounters(enabled: boolean, stops: number[] | null = null) {
     this.world.encounters.visible = enabled;
+    this.world.setRoadLayout(stops);
   }
   resetCamera() {
     this.camera.position.copy(this.homePosition);

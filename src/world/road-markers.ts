@@ -162,9 +162,20 @@ export function roadMarkers(theme: MapTheme) {
     }
     group.add(marker);
   }
-  group.add(cardDeck(theme, tiles, animated));
+  const deck = cardDeck(theme, tiles, animated);
+  group.add(deck);
   group.visible = false;
-  return { group, animated };
+  /** Show this game's roadside stops; every other path tile shows a card. */
+  const setLayout = (stops: number[] | null) => {
+    const active = new Set(stops ?? ROAD_STOPS.map((s) => s.tile));
+    group.children.forEach((child) => {
+      if (child.userData.roadTile !== undefined)
+        child.visible = active.has(child.userData.roadTile);
+    });
+    deck.userData.hidden = active;
+  };
+  setLayout(null);
+  return { group, animated, setLayout };
 }
 function cardFace(accent: string) {
   const canvas = document.createElement("canvas");
@@ -194,9 +205,8 @@ function cardDeck(
   tiles: ReturnType<typeof getTiles>,
   animated: ((time: number) => void)[],
 ) {
-  const stops = new Set(ROAD_STOPS.map((s) => s.tile));
   const cardTiles = tiles.filter(
-    (t) => !stops.has(t.id) && t.kind !== "start" && t.kind !== "finish",
+    (t) => t.kind !== "start" && t.kind !== "finish",
   );
   const texture = cardFace(theme.accent);
   const material = new THREE.MeshStandardMaterial({
@@ -215,7 +225,15 @@ function cardDeck(
   mesh.castShadow = true;
   const dummy = new THREE.Object3D();
   const place = (t: number) => {
+    const hidden: Set<number> = mesh.userData.hidden || new Set();
     cardTiles.forEach((tile, i) => {
+      if (hidden.has(tile.id)) {
+        dummy.scale.setScalar(0);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+        dummy.scale.setScalar(1);
+        return;
+      }
       const side = tile.id % 2 ? 1 : -1;
       dummy.position.set(
         tile.x + side * 0.42,

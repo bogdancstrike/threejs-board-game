@@ -418,12 +418,17 @@ def apply(
         if not all(v["ready"] for v in players):
             raise GameError("not_ready", "Every player must choose a character and mark ready.")
         room["phase"], room["turnDeadline"] = "playing", clock + 120_000
+        room.pop("_plan", None)
+        if room["challenges"]:
+            adventures.layout(room, randbelow)
         journal(game, f"The party begins its expedition through {MAPS[game['map']]['name']}.")
     elif kind == "REQUEST_REMATCH":
         if room["phase"] != "finished":
             raise GameError("not_finished", "Finish this expedition before requesting a rematch.")
         room["phase"], room["finishing"], room["turnDeadline"] = "lobby", False, None
         room.pop("_partyDeck", None)
+        room.pop("_plan", None)
+        room.pop("layout", None)
         game.update(
             active=0,
             turn=1,
@@ -474,10 +479,14 @@ def apply(
             if adventures.begin(room, p, clock, randbelow):
                 return room, [event]
             tile = tile_kind(p["position"])
-            if room["challenges"] and tile == "mystery" and p["position"] % 8 == 0:
+            plan = adventures.layout(room, randbelow) if room["challenges"] else None
+            if plan and p["position"] in plan["minigameTiles"]:
+                kinds = plan["minigames"]
                 game["phase"], game["challenge"] = (
                     "challenge",
-                    challenge(randbelow(100_000), clock),
+                    challenge(
+                        kinds[randbelow(len(kinds)) % len(kinds)] + 10 * randbelow(10_000), clock
+                    ),
                 )
                 room["turnDeadline"] = clock + 30_000
                 return room, [event]
@@ -504,6 +513,7 @@ def apply(
                 if finish(room, active):
                     return room, [event]
             if adventures.draw_card(room, p, clock, randbelow):
+                route.extend(game["road"].pop("route", []))
                 return room, [event]
             end_turn(room, clock)
         elif kind == "RESOLVE_ROAD":

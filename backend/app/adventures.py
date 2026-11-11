@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import secrets
 
-from . import cards
+from . import mechanics
 from .catalogue import CATALOGUE
 
 STOPS = {stop["tile"]: stop for stop in CATALOGUE.get("roadStops", [])}
@@ -15,10 +15,30 @@ def choice(key, label, detail):
 
 
 def draw_card(room, p, clock, randbelow=secrets.randbelow):
-    """Every Adventure tile between the start and the finish holds a party card."""
+    """Every Adventure tile between the start and the finish holds a party card,
+    played through one of the game's randomly chosen mechanics."""
     if not room["challenges"] or not 0 < p["position"] < 92:
         return False
-    return cards.begin(room, p, clock, None, randbelow)
+    return mechanics.begin(room, p, clock, None, randbelow)
+
+
+def layout(room, randbelow=secrets.randbelow):
+    """Per-game layout: a random subset of roadside stops and mini-game tiles."""
+    randbelow = mechanics.bounded(randbelow)
+    plan = room.setdefault("_plan", mechanics.plan(randbelow))
+    if "stops" not in plan:
+        tiles = sorted(STOPS)
+        keep = max(4, len(tiles) - randbelow(len(tiles) // 2 + 1))
+        while len(tiles) > keep:
+            tiles.pop(randbelow(len(tiles)))
+        # Mini-game tiles avoid roadside stops; duplicates simply collapse.
+        candidates = [t for t in range(3, 90) if t not in STOPS]
+        games = set()
+        for _ in range(4 + randbelow(7)):
+            games.add(candidates[randbelow(len(candidates))])
+        plan["stops"], plan["minigameTiles"] = tiles, sorted(games)
+    room["layout"] = {"stops": plan["stops"], "minigames": plan["minigameTiles"]}
+    return plan
 
 
 def begin(room, p, clock, randbelow=secrets.randbelow):
@@ -26,9 +46,11 @@ def begin(room, p, clock, randbelow=secrets.randbelow):
     stop = STOPS.get(p["position"])
     if not stop or not room["challenges"] or p["position"] in p.get("visitedStops", []):
         return False
+    if p["position"] not in layout(room, randbelow)["stops"]:
+        return False
     p.setdefault("visitedStops", []).append(p["position"])
     if stop["kind"] == "dare":
-        return cards.begin(room, p, clock, stop, randbelow)
+        return mechanics.begin(room, p, clock, stop, randbelow, "classic")
     kind = stop["kind"]
     options = []
     if kind == "dragon":
@@ -150,7 +172,13 @@ def resolve(room, p, key, clock, randbelow):
         raise domain.GameError("wrong_phase", "There is no road encounter to resolve.")
     if not any(c["key"] == key for c in card["choices"]):
         raise domain.GameError("invalid_choice", "Choose one of the offered actions.", 422)
+    if card.get("mechanic") and mechanics.advance(room, p, key, randbelow):
+        return []
     game, route = room["game"], []
+    if key in {"duel-win", "duel-lose"}:
+        mechanics.resolve_duel(room, p, key)
+        domain.end_turn(room, clock)
+        return route
     kind = card["kind"]
     if key == "open":
         outcome = randbelow(4)
@@ -214,8 +242,11 @@ def resolve(room, p, key, clock, randbelow):
         domain.award(p, 20)
         p["hex"] = 2
     elif key in {"dare", "alternative"}:
-        domain.award(p, 25)
-        p["gold"] += 1
+        multiplier = card.get("multiplier", 1) if key == "dare" else 1
+        domain.award(p, 25 * multiplier)
+        p["gold"] += multiplier
+    elif key == "leave" and card.get("passCost"):
+        domain.award(p, -card["passCost"])
     elif key == "ward":
         p["wards"] = min(2, p.get("wards", 0) + 1)
     elif key == "study":
@@ -228,5 +259,11 @@ def resolve(room, p, key, clock, randbelow):
         game,
         f"{p['name']} — {card['title']}: {next(c['label'] for c in card['choices'] if c['key'] == key)}.",
     )
+    if card.get("encore") and key != "leave":
+        # Encore: the same player rolls again.
+        game.update(phase="ready", road=None, mystery=None, challenge=None)
+        room["turnDeadline"] = clock + 120_000
+        domain.journal(game, f"Encore! {p['name']} rolls again.")
+        return route
     domain.end_turn(room, clock)
     return route

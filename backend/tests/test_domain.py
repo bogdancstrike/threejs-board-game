@@ -9,15 +9,27 @@ from app import domain
 
 def party(count=2, mode="classic", challenges=True):
     host = str(uuid4())
-    room = domain.initial_room(
-        str(uuid4()), "ABC234", host, "Ada", "verdant", mode, challenges
-    )
+    room = domain.initial_room(str(uuid4()), "ABC234", host, "Ada", "verdant", mode, challenges)
     for i in range(1, count):
         domain.join(room, str(uuid4()), f"Player {i + 1}")
     for p in room["game"]["players"]:
         p["ready"] = True
     room, _ = domain.apply(room, host, "START_GAME", {}, clock=0)
+    pin_plan(room)
     return room
+
+
+def pin_plan(room, mechanics=None):
+    """Deterministic layout for rule tests: every stop, no extra mini-game tiles."""
+    from app.adventures import STOPS
+
+    room["_plan"] = {
+        "mechanics": mechanics or {"classic": 1},
+        "minigames": list(range(10)),
+        "stops": sorted(STOPS),
+        "minigameTiles": [16, 24, 32, 40, 48, 56, 64, 72, 80, 88],
+    }
+    room["layout"] = {"stops": sorted(STOPS), "minigames": room["_plan"]["minigameTiles"]}
 
 
 def test_character_claim_is_unique_and_rejected_command_does_not_mutate_room():
@@ -510,3 +522,81 @@ def test_challenge_result_reveals_the_solution_and_the_given_answer():
     assert payload["solution"] == " ".join(card["_answer"])
     assert payload["given"] == " ".join(wrong)
     assert payload["challengeTitle"] == "Rune memory"
+
+
+@pytest.mark.parametrize(
+    "mechanic", list(__import__("app.mechanics", fromlist=["MECHANICS"]).MECHANICS)
+)
+def test_every_card_mechanic_starts_and_resolves(mechanic):
+    from app import mechanics
+
+    room = party(3)
+    p = room["game"]["players"][0]
+    room["game"]["players"][1]["gold"] = 3
+    p["position"] = 10
+    rand = iter(range(1000))
+    mechanics.begin(room, p, 1000, None, lambda n: next(rand) % n, mechanic)
+    road = room["game"]["road"]
+    assert road["mechanic"]["id"] == mechanic
+    public = domain.public_room(room)["game"]["road"]
+    assert "_hand" not in public
+    if road["stage"] == "choose":
+        key = road["choices"][0]["key"]
+        room, _ = domain.apply(room, p["id"], "RESOLVE_ROAD", {"choice": key}, clock=1100)
+        assert room["game"]["road"]["stage"] == "card"
+        assert room["game"]["road"]["partyCard"]["prompt"]
+    keys = [c["key"] for c in room["game"]["road"]["choices"]]
+    final = keys[0]
+    room, _ = domain.apply(room, p["id"], "RESOLVE_ROAD", {"choice": final}, clock=1200)
+    if mechanic == "encore" or (mechanic == "wheel" and road.get("encore")):
+        assert room["game"]["active"] == 0 and room["game"]["phase"] == "ready"
+    else:
+        assert room["game"]["active"] == 1
+
+
+def test_mechanic_rewards_bottle_target_and_pass_cost():
+    from app import mechanics
+
+    def start(room, mechanic):
+        room["game"].update(active=0, phase="ready")
+        p = room["game"]["players"][0]
+        p["position"] = 10
+        mechanics.begin(room, p, 0, None, lambda n: 0, mechanic)
+        return p["id"]
+
+    room = party(2)
+    actor = start(room, "double")
+    room, _ = domain.apply(room, actor, "RESOLVE_ROAD", {"choice": "dare"})
+    assert room["game"]["players"][0]["points"] >= 50
+    assert room["game"]["players"][0]["gold"] == 2
+    room["game"]["players"][0]["points"] = 30
+    start(room, "double")
+    room, _ = domain.apply(room, actor, "RESOLVE_ROAD", {"choice": "leave"})
+    assert room["game"]["players"][0]["points"] == 10
+    room["difficulty"] = "hot"
+    room.pop("_partyDeck", None)
+    start(room, "bottle")
+    other = room["game"]["players"][1]["name"]
+    assert other in room["game"]["road"]["banner"]
+    assert other in room["game"]["road"]["description"]
+    start(room, "duel")
+    room, _ = domain.apply(room, actor, "RESOLVE_ROAD", {"choice": "duel-lose"})
+    assert room["game"]["players"][1]["points"] >= 50
+
+
+def test_every_game_gets_its_own_plan_and_layout():
+    from app import adventures, mechanics
+
+    plans = [mechanics.plan() for _ in range(30)]
+    assert len({tuple(sorted(p["mechanics"])) for p in plans}) > 20
+    assert all(10 <= len(p["mechanics"]) - 1 <= 19 for p in plans)
+    assert all(p["mechanics"]["classic"] >= 3 for p in plans)
+    layouts = set()
+    for _ in range(20):
+        room = party()
+        room.pop("_plan")
+        adventures.layout(room)
+        layouts.add((tuple(room["layout"]["stops"]), tuple(room["layout"]["minigames"])))
+        assert len(room["layout"]["stops"]) >= 4
+        assert not set(room["layout"]["stops"]) & set(room["layout"]["minigames"])
+    assert len(layouts) > 15

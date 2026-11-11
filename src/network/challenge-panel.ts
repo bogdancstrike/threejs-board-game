@@ -83,7 +83,7 @@ export class ChallengePanel {
     const owner = this.client.myTurn,
       e = this.ui.escape,
       p = room.game.players[room.game.active];
-    if (card.partyCard) {
+    if (card.partyCard || card.mechanic) {
       this.openPartyCard();
       return;
     }
@@ -101,27 +101,48 @@ export class ChallengePanel {
   private openPartyCard() {
     const room = this.client.room!,
       road = room.game.road!,
-      card = road.partyCard!,
+      card = road.partyCard,
+      mechanic = road.mechanic,
       owner = this.client.myTurn,
       e = this.ui.escape,
       i = this.ui.icon,
       p = room.game.players[room.game.active];
-    const level = card.level,
+    const level = card?.level || room.difficulty || "soft",
       labels: Record<string, string> = {
         dare: "Done it",
         alternative: "Did the board-game version",
-        leave: "Pass",
+        leave: road.stage === "result" ? "Continue" : "Pass",
       };
-    this.ui.open(
-      "road",
-      `<div class="party-card" data-level="${level}"><div class="party-card-top"><span class="party-card-level">${e(level.toUpperCase())}</span><span>${e(p.name)}’s card</span><span class="party-card-category">${e(card.category)}</span></div><p class="party-card-text">${e(road.description)}</p><div class="party-card-bottom"><span>${e(card.title)}</span><span id="party-card-clock"></span></div></div><div class="party-card-actions">${road.choices
+    const header = `<div class="party-card-top"><span class="party-card-level">${e(level.toUpperCase())}</span><span>${e(p.name)}’s card</span><span class="party-card-category">${mechanic ? i(mechanic.icon) + e(mechanic.name) : e(card?.category || "")}</span></div>`;
+    const banner = road.banner
+      ? `<p class="party-card-banner">${e(road.banner)}</p>`
+      : "";
+    const wheel = road.wheel
+      ? `<div class="wheel-wrap"><b></b><div class="mechanic-wheel" style="--turns:${5 * 360 + (360 / road.wheel.segments.length) * (road.wheel.segments.length - road.wheel.result) - 360 / road.wheel.segments.length / 2}deg">${road.wheel.segments.map((s, n) => `<span style="--n:${n};--count:${road.wheel!.segments.length}" class="${n === road.wheel!.result ? "hit" : ""}">${e(s)}</span>`).join("")}</div></div>`
+      : "";
+    let body: string;
+    if (road.stage === "choose") {
+      const backs =
+        mechanic?.id === "pick"
+          ? `<div class="card-backs">${road.choices.map((c) => `<button class="card-back" data-challenge-action="road" data-choice="${c.key}" ${owner ? "" : "disabled"}><span>✦</span><small>${e(c.label)}</small></button>`).join("")}</div>`
+          : `<div class="mechanic-options">${road.choices.map((c) => `<button class="${c.key === "risk" || c.key === "higher" ? "primary-button" : "secondary-button"}" data-challenge-action="road" data-choice="${c.key}" ${owner ? "" : "disabled"}><span>${e(c.label)}</span><small>${e(c.detail)}</small></button>`).join("")}</div>`;
+      body = `<div class="party-card" data-level="${level}">${header}<div class="party-card-text mechanic-intro">${i(mechanic?.icon || "sparkles")}<strong>${e(mechanic?.name || "")}</strong><span>${e(mechanic?.rules || "")}</span></div>${banner}<div class="party-card-bottom"><span>${e(road.sourceTitle || "")}</span><span id="party-card-clock"></span></div></div>${backs}`;
+    } else {
+      body = `<div class="party-card" data-level="${level}">${header}${banner}${wheel}<p class="party-card-text">${e(road.description)}</p><div class="party-card-bottom"><span>${e(card?.title || road.title)}</span><span id="party-card-clock"></span></div></div><div class="party-card-actions">${road.choices
         .map(
           (c) =>
-            `<button class="${c.key === "dare" ? "primary-button" : c.key === "leave" ? "text-button" : "secondary-button"}" data-challenge-action="road" data-choice="${c.key}" ${owner ? "" : "disabled"}>${c.key === "dare" ? i("check") : c.key === "alternative" ? i("dices") : ""}<span>${labels[c.key] || e(c.label)}</span>${c.key !== "leave" ? `<small>+${card.points} pts · +${card.gold} gold</small>` : ""}</button>`,
+            `<button class="${c.key === "dare" || c.key === "duel-win" ? "primary-button" : c.key === "leave" && road.stage !== "result" ? "text-button" : c.key === "leave" ? "primary-button" : "secondary-button"}" data-challenge-action="road" data-choice="${c.key}" ${owner ? "" : "disabled"}>${c.key === "dare" ? i("check") : c.key === "alternative" ? i("dices") : ""}<span>${labels[c.key] || e(c.label)}</span>${c.detail ? `<small>${e(c.detail)}</small>` : ""}</button>`,
         )
         .join(
           "",
-        )}</div><details class="card-alternative"><summary>Board-game version</summary><p>${e(card.alternative)}</p></details>${owner ? "" : `<p class="modal-note party-card-wait">${e(p.name)} is playing this card.</p>`}`,
+        )}</div>${card ? `<details class="card-alternative"><summary>Board-game version</summary><p>${e(card.alternative)}</p></details>` : ""}`;
+    }
+    this.ui.open(
+      "road",
+      body +
+        (owner
+          ? ""
+          : `<p class="modal-note party-card-wait">${e(p.name)} is playing this card.</p>`),
     );
     this.roadClock(road.deadline);
   }
