@@ -2,14 +2,13 @@
 
 ## Goal
 
-Add support for English (EN) and Romanian (RO) in Wilder, including a user-visible way to select Romanian from English and render the application in the selected language. The accepted work item requires Romanian UI text after selecting RO.
+Add complete English (EN) and Romanian (RO) language support to Wilder. English is the default. Players can select either language in Settings, see the app's interface and player-facing game text in that language, and have their choice remembered when they return.
+
+Localization covers menus, settings, buttons, labels, prompts, dialogs, panels, status and system messages, and text players read during play, including world descriptions, region and tile descriptions, events, cards, choices, and adventure text. Proper names of worlds and characters remain unchanged between languages.
 
 ## Non-goals
 
-- Adding languages other than EN and RO.
-- Translating server/API payloads or changing game rules and persisted game data.
-- Deciding whether authored game content (world, character, card, and adventure names/descriptions) is included in “all UI texts”; this scope requires the accountable person's answer before the localization requirements can be finalized.
-
-## Decision required
-
-The repository currently presents English text across the main menu, game board, settings, dialogs, online panels, and authored game content. The work item does not clarify whether “all UI texts” includes the authored content surfaced in those screens. The spec delta intentionally does not assert either interpretation until this is answered.
+- Adding languages other than English and Romanian.
+- Translating proper names of worlds or characters, player-entered names, or non-linguistic game data such as scores and identifiers.
+- Changing game rules, server/API behavior, or the content and progress stored in game saves beyond remembering the selected language.
+- Translating developer documentation, credits, or content that is not presented to players by the application.
