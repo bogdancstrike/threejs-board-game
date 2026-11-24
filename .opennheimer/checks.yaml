@@ -1,0 +1,12 @@
+# Opennheimer's gate for this project (detected from package.json): plain commands, no model, run in a sandbox at the
+# branch head. The project has no CI of its own; these checks are the gate. Packages come from the sandbox's mirror,
+# so install scripts that download binaries (sharp) are skipped.
+checks:
+  - id: typecheck
+    command: npm ci --no-audit --no-fund --ignore-scripts && npx tsc --noEmit
+    required: true
+    timeout_s: 900
+  - id: unit-tests
+    command: npm ci --no-audit --no-fund --ignore-scripts && npx vitest run
+    required: true
+    timeout_s: 900
