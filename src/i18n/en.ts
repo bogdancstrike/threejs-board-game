@@ -495,4 +495,6 @@ export const en: Messages = {
   "topbar.brandCaption": "A PATH OF MYSTERIES",
   "chal.skillChallenge": "SKILL CHALLENGE",
   "chal.turnOf": "{name}’S TURN",
+  // ---- HUD and board ----
+  "chal.resetPath": "Reset path",
 };

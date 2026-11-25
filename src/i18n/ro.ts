@@ -495,4 +495,6 @@ export const ro: Messages = {
   "topbar.brandCaption": "UN DRUM AL MISTERELOR",
   "chal.skillChallenge": "PROVOCARE DE ABILITĂȚI",
   "chal.turnOf": "RÂNDUL LUI {name}",
+  // ---- HUD and board ----
+  "chal.resetPath": "Reia traseul",
 };

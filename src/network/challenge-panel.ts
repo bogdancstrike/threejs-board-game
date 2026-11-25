@@ -52,7 +52,7 @@ export class ChallengePanel {
     if (card.type === "count" || card.type === "pattern")
       content += `<div class="challenge-symbols ${card.type}">${card.symbols!.map((s) => `<span>${e(s)}</span>`).join("")}</div>`;
     if (card.type === "maze") {
-      content += `<div class="maze-grid">${Array.from({ length: 25 }, (_, cell) => `<button data-challenge-action="maze" data-choice="${cell}" class="maze-cell ${card.walls!.includes(cell) ? "wall" : ""} ${cell === 0 ? "visited" : ""}" ${!owner || card.walls!.includes(cell) ? "disabled" : ""}>${cell === 0 ? "●" : cell === 24 ? "✦" : "·"}</button>`).join("")}</div><button class="text-button" data-challenge-action="reset" ${owner ? "" : "disabled"}>Reset path</button>`;
+      content += `<div class="maze-grid">${Array.from({ length: 25 }, (_, cell) => `<button data-challenge-action="maze" data-choice="${cell}" class="maze-cell ${card.walls!.includes(cell) ? "wall" : ""} ${cell === 0 ? "visited" : ""}" ${!owner || card.walls!.includes(cell) ? "disabled" : ""}>${cell === 0 ? "●" : cell === 24 ? "✦" : "·"}</button>`).join("")}</div><button class="text-button" data-challenge-action="reset" ${owner ? "" : "disabled"}>${t("chal.resetPath")}</button>`;
     }
     if (card.type === "alchemy")
       content += `<div id="alchemy-progress" class="alchemy-progress">${t("chal.alchemyProgress")}</div><button class="text-button" data-challenge-action="reset" ${owner ? "" : "disabled"}>${t("chal.emptyCauldron")}</button>`;
