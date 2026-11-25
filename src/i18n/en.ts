@@ -461,4 +461,25 @@ export const en: Messages = {
   "world.tiles93": "93 tiles",
   // ---- HUD and board ----
   "hud.worldN": "WORLD {n} / {total}",
+  // ---- HUD and board ----
+  "hud.openRoom": "Open room",
+  "chal.passed": "Challenge passed",
+  "chal.outOfTime": "Out of time",
+  "chal.notThisTime": "Not this time",
+  // ---- HUD and board ----
+  "hud.roomCode": "Room {code}",
+  "hud.you": "YOU",
+  "hud.pts": "PTS",
+  "hud.passAndPlay": "Pass-and-play on this device",
+  "hud.scoreExp": "Score expedition",
+  "hud.classicRace": "Classic race",
+  "hud.passDevice": "PASS THE DEVICE",
+  "hud.liveExpedition": "LIVE EXPEDITION",
+  "hud.turnOrder": "TURN ORDER",
+  "chal.success": "Success!",
+  "chal.points": "points",
+  "chal.gold": "gold",
+  "chal.answer": "Answer",
+  "chal.theAnswerWas": "The answer was",
+  "chal.chose": "{name} chose",
 };

@@ -1448,7 +1448,7 @@ function renderParty() {
   const panel = $("party-panel");
   panel.hidden = state.players.length === 1 && !realtime.session;
   if (panel.hidden) return;
-  panel.innerHTML = `<div class="party-title"><span>${realtime.room?.hotseat ? "PASS THE DEVICE" : realtime.session ? "LIVE EXPEDITION" : "TURN ORDER"}</span><button class="icon-button" data-action="rooms" aria-label="Open room">${icon("users")}</button></div>${state.players.map((p, i) => `<div class="party-score-row ${i === state.active ? "active" : ""}"><span class="party-player-dot" style="--player:${p.tint}">${i === state.active ? "✧" : String(i + 1)}</span><div><strong>${safe(p.name)}${p.id === realtime.session?.playerId ? " <small>YOU</small>" : ""}</strong><span>${CHARACTERS.find((c) => c.id === p.character)!.name} · Tile ${p.position + 1}${p.wards ? " · ◇" + p.wards : ""}${p.hex ? " · Hexed" : ""}</span></div><b>${playerScore(p)}<small>PTS</small></b></div>`).join("")}<div class="party-footer">${realtime.session ? `${realtime.room?.mode === "score" ? "Score expedition" : "Classic race"} · Room ${realtime.room?.code}` : "Pass-and-play on this device"}</div>`;
+  panel.innerHTML = `<div class="party-title"><span>${realtime.room?.hotseat ? t("hud.passDevice") : realtime.session ? t("hud.liveExpedition") : t("hud.turnOrder")}</span><button class="icon-button" data-action="rooms" aria-label="${t("hud.openRoom")}">${icon("users")}</button></div>${state.players.map((p, i) => `<div class="party-score-row ${i === state.active ? "active" : ""}"><span class="party-player-dot" style="--player:${p.tint}">${i === state.active ? "✧" : String(i + 1)}</span><div><strong>${safe(p.name)}${p.id === realtime.session?.playerId ? ` <small>${t("hud.you")}</small>` : ""}</strong><span>${CHARACTERS.find((c) => c.id === p.character)!.name} · Tile ${p.position + 1}${p.wards ? " · ◇" + p.wards : ""}${p.hex ? " · Hexed" : ""}</span></div><b>${playerScore(p)}<small>${t("hud.pts")}</small></b></div>`).join("")}<div class="party-footer">${realtime.session ? `${realtime.room?.mode === "score" ? t("hud.scoreExp") : t("hud.classicRace")} · ${t("hud.roomCode", { code: realtime.room?.code ?? "" })}` : t("hud.passAndPlay")}</div>`;
 }
 async function leaveOnline() {
   challengePanel?.stop();
@@ -1647,12 +1647,12 @@ function challengeResult(
 ) {
   const won = Boolean(p.success);
   const verdict = won
-    ? "Success!"
+    ? t("chal.success")
     : p.skipped
-      ? "Challenge passed"
+      ? t("chal.passed")
       : p.timedOut
-        ? "Out of time"
-        : "Not this time";
+        ? t("chal.outOfTime")
+        : t("chal.notThisTime");
   sound(won ? "treasure" : "land");
-  return `<section class="challenge-result ${won ? "won" : "lost"}"><div class="challenge-result-badge">${icon(won ? "crown" : "x")}</div><span class="eyebrow">${safe(name.toUpperCase())} · ${safe((p.challengeTitle || "").toUpperCase())}</span><h2>${verdict}</h2>${won ? `<p class="challenge-result-reward">+${p.rewardPoints} points · +${p.rewardGold} gold</p>` : ""}${p.solution ? `<dl><dt>${won ? "Answer" : "The answer was"}</dt><dd>${safe(p.solution)}</dd>${!won && p.given ? `<dt>${safe(name)} chose</dt><dd>${safe(p.given)}</dd>` : ""}</dl>` : ""}</section>`;
+  return `<section class="challenge-result ${won ? "won" : "lost"}"><div class="challenge-result-badge">${icon(won ? "crown" : "x")}</div><span class="eyebrow">${safe(name.toUpperCase())} · ${safe((p.challengeTitle || "").toUpperCase())}</span><h2>${verdict}</h2>${won ? `<p class="challenge-result-reward">+${p.rewardPoints} ${t("chal.points")} · +${p.rewardGold} ${t("chal.gold")}</p>` : ""}${p.solution ? `<dl><dt>${won ? t("chal.answer") : t("chal.theAnswerWas")}</dt><dd>${safe(p.solution)}</dd>${!won && p.given ? `<dt>${t("chal.chose", { name: safe(name) })}</dt><dd>${safe(p.given)}</dd>` : ""}</dl>` : ""}</section>`;
 }

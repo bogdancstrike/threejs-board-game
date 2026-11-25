@@ -461,4 +461,25 @@ export const ro: Messages = {
   "world.tiles93": "93 de pătrățele",
   // ---- HUD and board ----
   "hud.worldN": "LUMEA {n} / {total}",
+  // ---- HUD and board ----
+  "hud.openRoom": "Deschide camera",
+  "chal.passed": "Provocare trecută",
+  "chal.outOfTime": "Timpul a expirat",
+  "chal.notThisTime": "De data asta nu",
+  // ---- HUD and board ----
+  "hud.roomCode": "Camera {code}",
+  "hud.you": "TU",
+  "hud.pts": "PCT",
+  "hud.passAndPlay": "Pe rând, pe acest dispozitiv",
+  "hud.scoreExp": "Expediție cu punctaj",
+  "hud.classicRace": "Cursă clasică",
+  "hud.passDevice": "TRECE DISPOZITIVUL",
+  "hud.liveExpedition": "EXPEDIȚIE LIVE",
+  "hud.turnOrder": "ORDINEA TURELOR",
+  "chal.success": "Reușită!",
+  "chal.points": "puncte",
+  "chal.gold": "aur",
+  "chal.answer": "Răspuns",
+  "chal.theAnswerWas": "Răspunsul era",
+  "chal.chose": "{name} a ales",
 };
