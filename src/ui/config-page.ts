@@ -13,6 +13,9 @@ import {
 } from "../settings/preferences";
 import { CHARACTERS } from "../game/data";
 import { DIFFICULTIES } from "../game/decks";
+import pkg from "../../package.json";
+
+export const GAME_VERSION_LABEL = `Version ${pkg.version}`;
 export const CONFIG_SECTIONS = [
   ["profile", "user-round", "Player"],
   ["display", "monitor", "Display & performance"],
@@ -226,5 +229,5 @@ export function configPage(s: ConfigState) {
     "Accessibility",
     `${range("pref", p, ["uiScale", "Interface size", 85, 130, 100, "%", 5])}${toggle("pref-toggle", "reduceMotion", "Reduce motion", "Calmer camera, fewer animated flourishes", s.prefs.reduceMotion)}<button class="secondary-button full-width" data-action="reset-preferences">${i("rotate-ccw")}Restore gameplay & camera defaults</button>`,
   );
-  return `<div class="config-page">${nav}<div class="config-body" id="config-body">${profile}${display}${lighting}${grading}${gameplay}${camera}${audio}${access}</div></div>`;
+  return `<div class="config-page">${nav}<div class="config-body" id="config-body">${profile}${display}${lighting}${grading}${gameplay}${camera}${audio}${access}</div><p class="modal-note config-version">${GAME_VERSION_LABEL}</p></div>`;
 }
