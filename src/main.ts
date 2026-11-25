@@ -500,7 +500,7 @@ function sound(type: SoundEffect) {
 function syncSoundButton() {
   const el = document.querySelector<HTMLButtonElement>(".sound-button")!;
   el.innerHTML = icon(muted ? "volume-x" : "volume-2");
-  el.setAttribute("aria-label", muted ? "Enable sound" : "Mute sound");
+  el.setAttribute("aria-label", muted ? t("topbar.enableSound") : t("hud.muteSound"));
   refreshIcons();
 }
 window.addEventListener(
@@ -798,17 +798,17 @@ function showCharacters(index?: number) {
   openModal(
     "characters",
     modalHeader(t("char.meetEyebrow"), t("char.meetTitle")) +
-      `<div class="character-layout"><div class="character-preview-panel"><div id="character-preview"></div><div class="preview-view"><button data-view="full" class="active">Full body</button><button data-view="upper">Upper body</button><button data-view="face">Close-up</button><button data-view="equipment">Equipment</button></div><div class="preview-caption">${icon("orbit")} Drag to rotate · Scroll to zoom</div><div id="asset-label" class="asset-label"></div></div><div class="character-detail"><div class="character-index"><span id="char-number"></span><div><button data-action="prev-character" class="icon-button" aria-label="Previous character">${icon("chevron-left")}</button><button data-action="next-character" class="icon-button" aria-label="Next character">${icon("chevron-right")}</button></div></div><h3 id="char-name"></h3><p id="char-title" class="char-title"></p><p id="char-bio"></p><div class="section-label">SEE THEM IN MOTION</div><div class="action-options">${[
-        ["idle", "moon", "Idle"],
-        ["walk", "footprints", "Walk"],
-        ["run", "wind", "Run"],
-        ["rest", "feather", "Relax"],
-        ["magic", "wand-sparkles", "Magic"],
-        ["wave", "hand", "Wave"],
-        ["dance", "music", "Dance"],
-        ["think", "lightbulb", "Think"],
-        ["bow", "heart", "Bow"],
-        ["celebrate", "party-popper", "Cheer"],
+      `<div class="character-layout"><div class="character-preview-panel"><div id="character-preview"></div><div class="preview-view"><button data-view="full" class="active">${t("char.viewFull")}</button><button data-view="upper">${t("char.viewUpper")}</button><button data-view="face">${t("char.viewFace")}</button><button data-view="equipment">${t("char.viewEquip")}</button></div><div class="preview-caption">${icon("orbit")} Drag to rotate · Scroll to zoom</div><div id="asset-label" class="asset-label"></div></div><div class="character-detail"><div class="character-index"><span id="char-number"></span><div><button data-action="prev-character" class="icon-button" aria-label="Previous character">${icon("chevron-left")}</button><button data-action="next-character" class="icon-button" aria-label="Next character">${icon("chevron-right")}</button></div></div><h3 id="char-name"></h3><p id="char-title" class="char-title"></p><p id="char-bio"></p><div class="section-label">${t("char.seeMotion")}</div><div class="action-options">${[
+        ["idle", "moon", t("char.anim.idle")],
+        ["walk", "footprints", t("char.anim.walk")],
+        ["run", "wind", t("char.anim.run")],
+        ["rest", "feather", t("char.anim.rest")],
+        ["magic", "wand-sparkles", t("char.anim.magic")],
+        ["wave", "hand", t("char.anim.wave")],
+        ["dance", "music", t("char.anim.dance")],
+        ["think", "lightbulb", t("char.anim.think")],
+        ["bow", "heart", t("char.anim.bow")],
+        ["celebrate", "party-popper", t("char.anim.cheer")],
       ]
         .map(
           ([a, i, n]) =>
@@ -816,7 +816,7 @@ function showCharacters(index?: number) {
         )
         .join(
           "",
-        )}</div><div class="section-label">PAWN AURA <span>Cosmetic only</span></div><div class="color-options">${["#cbb17a", "#a88bcf", "#8fc5b3", "#8dbed2", "#da998d"].map((c, i) => `<button aria-label="${["Gold", "Violet", "Sage", "Ice", "Rose"][i]} aura" data-tint="${c}" style="--swatch:${c}" class="${i === 0 ? "active" : ""}"></button>`).join("")}</div><p class="fair-play">${icon("check")} ${t("char.fairPlay")}</p><button class="primary-button" id="select-character" data-action="select-character">${icon("check")}<span>${t("char.selectAdventurer")}</span></button></div></div><div class="character-roster">${CHARACTERS.map((c, i) => `<button data-character="${i}" class="roster-card" style="--hero-color:${c.color}"><span class="roster-medallion">${icon(["knight", "paladin", "valkyrie"].includes(c.role) ? "shield" : ["rogue", "assassin", "swordsman"].includes(c.role) ? "swords" : "wand-sparkles")}</span><strong>${c.name}</strong><small>${MODEL_PATHS[c.id] ? "3D model" : "Prototype"}</small></button>`).join("")}</div>`,
+        )}</div><div class="section-label">${t("char.auraLabel")} <span>${t("char.cosmetic")}</span></div><div class="color-options">${["#cbb17a", "#a88bcf", "#8fc5b3", "#8dbed2", "#da998d"].map((c, i) => `<button aria-label="${["Gold", "Violet", "Sage", "Ice", "Rose"][i]} aura" data-tint="${c}" style="--swatch:${c}" class="${i === 0 ? "active" : ""}"></button>`).join("")}</div><p class="fair-play">${icon("check")} ${t("char.fairPlay")}</p><button class="primary-button" id="select-character" data-action="select-character">${icon("check")}<span>${t("char.selectAdventurer")}</span></button></div></div><div class="character-roster">${CHARACTERS.map((c, i) => `<button data-character="${i}" class="roster-card" style="--hero-color:${c.color}"><span class="roster-medallion">${icon(["knight", "paladin", "valkyrie"].includes(c.role) ? "shield" : ["rogue", "assassin", "swordsman"].includes(c.role) ? "swords" : "wand-sparkles")}</span><strong>${c.name}</strong><small>${MODEL_PATHS[c.id] ? "3D model" : "Prototype"}</small></button>`).join("")}</div>`,
     true,
   );
   preview = new CharacterPreview($("character-preview"));
