@@ -307,7 +307,7 @@ const realtime = new RealtimeClient(
       .catch((error) => {
         busy = false;
         toast(
-          error instanceof Error ? error.message : "Could not update the room.",
+          error instanceof Error ? error.message : t("toast.roomUpdateFailed"),
         );
         update();
       });
@@ -448,10 +448,10 @@ function update() {
       `<span>${state.phase === "road" ? "Show the card" : state.phase === "challenge" ? "Resume the challenge" : "Resume the mystery"}</span>`;
   } else delete button.dataset.pending;
   if (realtime.session) {
-    $("room-nav-label").textContent = "Room " + (realtime.room?.code || "");
+    $("room-nav-label").textContent = t("status.room", { code: realtime.room?.code || "" });
     if (realtime.room?.phase === "lobby") {
       button.innerHTML = icon("users") + "<span>Gather your party</span>";
-      $("turn-title").textContent = "Your party is getting ready.";
+      $("turn-title").textContent = t("status.gettingReady");
       $("turn-description").textContent =
         "Choose a unique hero, mark ready, and let the host begin.";
     } else if (!realtime.myTurn && state.phase !== "won" && !pending) {
@@ -463,11 +463,11 @@ function update() {
           ? "The whole party sees every roll and discovery."
           : "Reconnecting to your expedition…";
     } else if (realtime.myTurn && !busy && state.phase === "ready") {
-      $("turn-title").textContent = "Your turn, " + player.name + ".";
+      $("turn-title").textContent = t("status.yourTurn", { name: player.name });
       $("turn-description").textContent =
         "The server rolls the die. You choose the adventure.";
     }
-  } else $("room-nav-label").textContent = "Play · Solo & party";
+  } else $("room-nav-label").textContent = t("status.playSolo");
   renderParty();
   if (scene) {
     scene.active = state.active;
@@ -540,7 +540,7 @@ async function doRoll() {
       await realtime.command("ROLL_DIE");
     } catch (error) {
       busy = false;
-      toast(error instanceof Error ? error.message : "Could not roll.");
+      toast(error instanceof Error ? error.message : t("toast.rollFailed"));
       update();
     }
     return;
@@ -669,7 +669,7 @@ function menuJourney(): MenuJourney {
 }
 function showMainMenu() {
   if (busy) {
-    toast("Your hero is moving. Open the menu after this step.");
+    toast(t("toast.heroMovingMenu"));
     return;
   }
   persist();
@@ -685,12 +685,12 @@ function showMainMenu() {
 }
 function exitToMenu() {
   if (busy) {
-    toast("Your hero is moving. Exit after this step.");
+    toast(t("toast.heroMovingExit"));
     return;
   }
   showMainMenu();
   if (realtime.session) realtime.disconnect(false);
-  toast("Progress saved. You can continue from the main menu.");
+  toast(t("toast.progressSaved"));
 }
 async function continueJourney() {
   await restorePromise;
@@ -931,7 +931,7 @@ async function startMap(id: string, count = state.players.length) {
   titleMenu?.hide();
   if (realtime.session) {
     if (realtime.room?.phase !== "lobby" || !realtime.isHost) {
-      toast("Only the host can choose a new world in the lobby.");
+      toast(t("toast.hostWorld"));
       return;
     }
     await realtime.command("SET_WORLD", { map: id });
@@ -965,7 +965,7 @@ async function startMap(id: string, count = state.players.length) {
   showDice(1);
   update();
   sound("transition");
-  toast(`Welcome to ${theme.name}. Your story starts here.`);
+  toast(t("toast.welcomeWorld", { name: theme.name }));
 }
 function showEncounter() {
   const event = currentMystery(state);
@@ -991,7 +991,7 @@ async function resolveChoice(index: number) {
       toast(
         error instanceof Error
           ? error.message
-          : "Could not resolve the choice.",
+          : t("toast.choiceFailed"),
       );
     }
     return;
@@ -1201,8 +1201,8 @@ app.addEventListener("click", async (e) => {
     sound("magic");
     toast(
       muted
-        ? "Sound is off. A quieter kind of adventure."
-        : "Sound is on. Music and ambience follow your world.",
+        ? t("toast.soundOff")
+        : t("toast.soundOn"),
     );
   } else if (action === "prev-character" || action === "next-character") {
     selected =
@@ -1225,7 +1225,7 @@ app.addEventListener("click", async (e) => {
         toast(
           error instanceof Error
             ? error.message
-            : "That character could not be selected.",
+            : t("toast.characterFailed"),
         );
       }
       return;
@@ -1239,7 +1239,7 @@ app.addEventListener("click", async (e) => {
     await scene.setPlayers(state.players, state.active);
     busy = false;
     update();
-    toast(`${CHARACTERS[selected].name} is ready for the journey.`);
+    toast(t("toast.readyJourney", { name: CHARACTERS[selected].name }));
   } else if (action === "confirm-restart") {
     if (realtime.session) {
       roomPanels.open();
@@ -1342,14 +1342,14 @@ app.addEventListener("change", (e) => {
     void realtime
       .command("SET_DIFFICULTY", { difficulty: el.value })
       .then(() =>
-        toast("Deck switched. The next card comes from the new level."),
+        toast(t("toast.deckSwitched")),
       )
       .catch((error) => toast(error.message));
   if (el.id === "quality-setting") {
     graphicsQuality = el.value as Quality;
     scene.setQuality(graphicsQuality);
     saveDisplayPreferences();
-    toast(`Graphics set to ${el.value}.`);
+    toast(t("toast.graphicsSet", { value: el.value }));
   }
   if (el.id === "run-setting") {
     runMovement = el.checked;
@@ -1483,9 +1483,7 @@ async function leaveOnline() {
   await scene.setPlayers(state.players, state.active);
   busy = false;
   update();
-  toast(
-    "You returned to your local expedition. The room is saved on the server.",
-  );
+  toast(t("toast.returnedLocal"));
 }
 async function receiveRoom(message: RoomUpdate) {
   if (!realtime.session || message.room.id !== realtime.session.roomId) return;
