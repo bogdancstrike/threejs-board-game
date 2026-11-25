@@ -700,4 +700,8 @@ export const contentRo: Messages = {
   "High · sharp": "Ridicată · clară",
   "Ultra · cinematic": "Ultra · cinematică",
   "Collect 3 gold": "Strânge 3 monede de aur",
+  // ---- Journal lines written by the game engine ----
+  "A forgotten treasure! Collected 3 gold.": "O comoară uitată! Ai strâns 3 monede de aur.",
+  "Fortune smiles: 2 gold and a new clue.": "Norocul zâmbește: 2 monede de aur și un indiciu nou.",
+  "The ancient portal carries you 3 tiles forward.": "Portalul străvechi te duce cu 3 pătrățele înainte.",
 };

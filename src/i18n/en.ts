@@ -482,4 +482,12 @@ export const en: Messages = {
   "chal.answer": "Answer",
   "chal.theAnswerWas": "The answer was",
   "chal.chose": "{name} chose",
+  // ---- HUD and board ----
+  "net.unreachable": "The game server could not be reached.",
+  "net.rejected": "The game server rejected this action.",
+  "net.invalidSession": "Invalid session",
+  "net.sessionGone": "Your previous room session is unavailable. You can create or join a new expedition.",
+  "net.actionRejected": "Action rejected.",
+  "net.joinFirst": "Join an expedition first.",
+  "net.leftRoom": "You left the room.",
 };

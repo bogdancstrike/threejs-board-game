@@ -11,5 +11,7 @@ import { contentRo } from "./content-ro";
 /** Returns the Romanian text for English game content, or the source text. */
 export function tc(source: string): string {
   if (getLanguage() !== "ro") return source;
+  const start = /^Your expedition begins in (.+)\.$/.exec(source);
+  if (start) return `Expediția ta începe în ${start[1]}.`; // region name kept
   return contentRo[source] ?? source;
 }

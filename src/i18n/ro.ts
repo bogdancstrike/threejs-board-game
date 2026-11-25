@@ -482,4 +482,12 @@ export const ro: Messages = {
   "chal.answer": "Răspuns",
   "chal.theAnswerWas": "Răspunsul era",
   "chal.chose": "{name} a ales",
+  // ---- HUD and board ----
+  "net.unreachable": "Serverul de joc nu a putut fi contactat.",
+  "net.rejected": "Serverul de joc a respins această acțiune.",
+  "net.invalidSession": "Sesiune nevalidă",
+  "net.sessionGone": "Sesiunea ta anterioară din cameră nu mai este disponibilă. Poți crea sau alătura-te unei expediții noi.",
+  "net.actionRejected": "Acțiune respinsă.",
+  "net.joinFirst": "Alătură-te mai întâi unei expediții.",
+  "net.leftRoom": "Ai părăsit camera.",
 };

@@ -2,6 +2,7 @@ import type { Difficulty } from "../game/decks";
 import type { RoadStop } from "../game/road";
 import { CHARACTERS } from "../game/data";
 import type { GameState } from "../game/engine";
+import { t } from "../i18n";
 export interface OnlinePlayer {
   id: string;
   name: string;
@@ -193,13 +194,13 @@ export class RealtimeClient {
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
     const data = await response.json().catch(() => ({
-      error: { message: "The game server could not be reached." },
+      error: { message: t("net.unreachable") },
     }));
     if (!response.ok)
       throw new Error(
         data.error?.message ||
           data.detail?.[0]?.msg ||
-          "The game server rejected this action.",
+          t("net.rejected"),
       );
     return data;
   }
@@ -263,7 +264,7 @@ export class RealtimeClient {
         typeof session.playerId !== "string" ||
         typeof session.token !== "string"
       )
-        throw new Error("Invalid session");
+        throw new Error(t("net.invalidSession"));
       this.session = session;
       const result = await this.request<RoomUpdate>("/rooms/" + session.roomId);
       this.accept({ ...result, type: "SNAPSHOT" });
@@ -271,7 +272,7 @@ export class RealtimeClient {
     } catch {
       this.disconnect(true);
       this.onError(
-        "Your previous room session is unavailable. You can create or join a new expedition.",
+        t("net.sessionGone"),
       );
     }
   }
@@ -353,7 +354,7 @@ export class RealtimeClient {
             clearTimeout(request.timer);
             this.pending.delete(message.commandId);
             request.reject(
-              new Error(message.error?.message || "Action rejected."),
+              new Error(message.error?.message || t("net.actionRejected")),
             );
           }
           if (message.error?.code === "version_mismatch") void this.refresh();
@@ -405,7 +406,7 @@ export class RealtimeClient {
     payload: Record<string, unknown> = {},
   ): Promise<RoomUpdate> {
     if (!this.session || !this.room)
-      throw new Error("Join an expedition first.");
+      throw new Error(t("net.joinFirst"));
     const command = {
       type,
       payload,
@@ -438,7 +439,7 @@ export class RealtimeClient {
     this.socket = null;
     for (const p of this.pending.values()) {
       clearTimeout(p.timer);
-      p.reject(new Error("You left the room."));
+      p.reject(new Error(t("net.leftRoom")));
     }
     this.pending.clear();
     if (clearSession) {
