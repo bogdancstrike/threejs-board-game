@@ -23,8 +23,7 @@ export function getLanguage(): Language {
 /** Applies the saved language (or English by default) at startup. */
 export function initLanguage(): Language {
   current = readSavedLanguage();
-  if (typeof document !== "undefined")
-    document.documentElement.lang = current;
+  if (typeof document !== "undefined") document.documentElement.lang = current;
   return current;
 }
 
@@ -32,8 +31,7 @@ export function initLanguage(): Language {
 export function setLanguage(lang: Language): void {
   current = lang;
   saveLanguage(lang);
-  if (typeof document !== "undefined")
-    document.documentElement.lang = lang;
+  if (typeof document !== "undefined") document.documentElement.lang = lang;
 }
 
 /** Looks up a message in the current language, falling back to English. */

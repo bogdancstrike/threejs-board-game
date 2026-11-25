@@ -1,5 +1,13 @@
 import { configPage, formatSetting } from "./ui/config-page";
 import {
+  initLanguage,
+  setLanguage,
+  getLanguage,
+  t,
+  SUPPORTED_LANGUAGES,
+  type Language,
+} from "./i18n";
+import {
   readGraphics,
   saveGraphics,
   GRAPHICS_DEFAULTS,
@@ -199,6 +207,7 @@ const icon = (name: string, cls = "") =>
   `<i data-lucide="${name}" class="${cls}"></i>`;
 const refreshIcons = () =>
   createIcons({ icons, attrs: { "stroke-width": 1.6 } });
+initLanguage();
 const app = document.querySelector<HTMLDivElement>("#app")!;
 let state: GameState;
 let hasLocalJourney = false;
@@ -271,7 +280,7 @@ const safe = (s: string) =>
       ]!,
   );
 app.innerHTML = `
-<header class="topbar"><a class="brand" href="#" aria-label="Wilder main menu"><span class="brand-mark"><img src="/brand/wilder-mark.svg" alt=""/></span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> A little courage. A little magic. <span class="tiny-star">✧</span></div><nav><button class="nav-link exit-game-button" data-action="exit-game" aria-label="Exit game to main menu">${icon("chevron-left")}<span>Exit game</span></button><button class="icon-button" data-action="main-menu" aria-label="Open main menu">${icon("compass")}</button><button class="nav-link online-nav" data-action="rooms" title="Play · Solo & party">${icon("users")}<span id="room-nav-label">Play · Solo & party</span></button><button class="nav-link" data-action="journey" aria-label="Toggle journey details">${icon("book-open")}<span>Journey</span></button><button class="nav-link" data-action="characters" aria-label="Choose character">${icon("users")}<span>Adventurer</span></button><button class="nav-link" data-action="maps" aria-label="Choose a world" title="Worlds">${icon("map")}<span>Worlds</span><span class="count-badge">${MAPS.length}</span></button><button class="nav-link" data-action="help" title="How to play">${icon("circle-help")}<span>How to play</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="Enable sound">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="Game settings">${icon("settings-2")}</button></nav></header>
+<header class="topbar"><a class="brand" href="#" aria-label="Wilder main menu"><span class="brand-mark"><img src="/brand/wilder-mark.svg" alt=""/></span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> ${t("topbar.tagline")} <span class="tiny-star">✧</span></div><nav><button class="nav-link exit-game-button" data-action="exit-game" aria-label="${t("topbar.exitGameAria")}">${icon("chevron-left")}<span>${t("topbar.exitGame")}</span></button><button class="icon-button" data-action="main-menu" aria-label="${t("topbar.mainMenuAria")}">${icon("compass")}</button><button class="nav-link online-nav" data-action="rooms" title="${t("topbar.playSolo")}">${icon("users")}<span id="room-nav-label">${t("topbar.playSolo")}</span></button><button class="nav-link" data-action="journey" aria-label="${t("topbar.journeyAria")}">${icon("book-open")}<span>${t("topbar.journey")}</span></button><button class="nav-link" data-action="characters" aria-label="${t("topbar.chooseCharacterAria")}">${icon("users")}<span>${t("topbar.adventurer")}</span></button><button class="nav-link" data-action="maps" aria-label="${t("topbar.chooseWorldAria")}" title="${t("topbar.worlds")}">${icon("map")}<span>${t("topbar.worlds")}</span><span class="count-badge">${MAPS.length}</span></button><button class="nav-link" data-action="help" title="${t("topbar.howToPlay")}">${icon("circle-help")}<span>${t("topbar.howToPlay")}</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="${t("topbar.enableSound")}">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="${t("topbar.settingsAria")}">${icon("settings-2")}</button></nav></header>
 <main class="game-shell"><aside class="sidebar"><div class="expedition-intro"><div class="eyebrow">AN ADVENTURE AWAITS</div><h1 id="map-title"></h1><p class="intro-copy">Follow the path.<br>Find your own story.</p><button class="map-link" data-action="maps">${icon("map")}<span>Explore another world</span>${icon("arrow-up-right")}</button></div>
 <div class="sidebar-rule"></div><div class="section-label">YOUR ADVENTURER<button data-action="characters">Change ${icon("chevron-right")}</button></div><button class="hero-card" data-action="characters"><div id="hero-avatar" class="hero-avatar">${icon("wand-sparkles")}</div><div><strong id="hero-name"></strong><span id="hero-class"></span></div><span class="hero-online"></span></button>
 <div class="journey"><div class="section-label"><span>THE JOURNEY</span><span class="tile-counter"><b id="tile-current">01</b> / 93</span></div><div class="progress-track"><div id="progress-fill"></div></div><div id="region-list" class="region-list"></div></div>
@@ -1282,6 +1291,14 @@ app.addEventListener("click", async (e) => {
 });
 app.addEventListener("change", (e) => {
   const el = e.target as HTMLInputElement;
+  if (el.id === "language-setting") {
+    const lang = el.value as Language;
+    if (SUPPORTED_LANGUAGES.includes(lang) && lang !== getLanguage()) {
+      setLanguage(lang);
+      location.reload();
+    }
+    return;
+  }
   if (el.id === "lighting-setting")
     updateGraphics((o) => (o.lighting = el.value as LightingStyle));
   if (el.dataset.graphicsToggle) {

@@ -5,7 +5,8 @@ export const DEFAULT_LANGUAGE: Language = "en";
 export const SUPPORTED_LANGUAGES: readonly Language[] = ["en", "ro"];
 
 export const isLanguage = (v: unknown): v is Language =>
-  typeof v === "string" && (SUPPORTED_LANGUAGES as readonly string[]).includes(v);
+  typeof v === "string" &&
+  (SUPPORTED_LANGUAGES as readonly string[]).includes(v);
 
 /** Reads the saved language; falls back to English when none or unsupported. */
 export function readSavedLanguage(): Language {

@@ -1,5 +1,6 @@
 import { MAPS } from "../game/maps";
 import { MAP_SHAPES } from "../world/shapes";
+import { t } from "../i18n";
 export interface MenuJourney {
   available: boolean;
   title: string;
@@ -25,8 +26,8 @@ export class StartMenu {
   private selected = 0;
   private journey: MenuJourney = {
     available: false,
-    title: "Your next chapter",
-    detail: "A new adventure is waiting.",
+    title: t("menu.newJourneyDefault"),
+    detail: t("menu.newJourneyDetail"),
     online: false,
   };
   constructor(
@@ -37,7 +38,7 @@ export class StartMenu {
     this.root.id = "start-menu";
     this.root.className = "start-menu";
     this.root.hidden = true;
-    this.root.setAttribute("aria-label", "Wilder main menu");
+    this.root.setAttribute("aria-label", t("menu.mainAria"));
     parent.append(this.root);
     this.root.addEventListener("click", (event) => {
       const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
@@ -73,7 +74,7 @@ export class StartMenu {
     this.root.hidden = false;
     document.body.classList.add("on-title-screen");
     const i = this.actions.icon;
-    this.root.innerHTML = `<div class="title-vignette"></div><div class="title-topline"><span>AN ADVENTURE IN ${MAPS.length} WORLDS</span><button data-menu-action="settings" class="title-icon" aria-label="Main menu settings">${i("settings-2")}</button></div><div class="title-content"><img class="title-emblem" src="/brand/wilder-mark.svg" alt="Wilder compass emblem"/><p class="title-eyebrow">A LITTLE COURAGE. A LITTLE MAGIC.</p><h1>Wilder<span>A PATH OF MYSTERIES</span></h1><p class="title-intro">Every path holds a story.<br>Yours begins here.</p><nav class="title-actions" aria-label="Start playing"><button class="title-new" data-menu-action="new"><span>${i("compass")}New game</span>${i("arrow-up-right")}</button><button class="title-continue" data-menu-action="continue" ${journey.available ? "" : "disabled"}>${i("footprints")}<span>Continue journey<small id="menu-continue-detail"></small></span>${i("chevron-right")}</button><div class="title-secondary"><button data-menu-action="settings">${i("settings-2")}Settings</button><button data-menu-action="help">${i("book-open")}How to play</button></div>${journey.online ? "" : `<button class="title-classic" data-menu-action="classic">Explore offline Classic ${i("chevron-right")}</button>`}</nav><p class="title-mode-note">SOLO · SAME-DEVICE PARTY · ONLINE MULTIPLAYER</p></div><div class="title-world"><div class="title-world-heading"><span>WHERE WILL YOU WANDER?</span><div><button data-menu-action="previous" aria-label="Previous featured world">${i("chevron-left")}</button><button data-menu-action="next" aria-label="Next featured world">${i("chevron-right")}</button></div></div><button class="title-world-card" data-menu-action="world"><img id="menu-world-image" alt=""/><span><small id="menu-world-shape"></small><strong id="menu-world-name"></strong><em>Explore this world ${i("arrow-up-right")}</em></span></button></div><footer class="title-footer"><span>12 ADVENTURERS <b>✧</b> 93 STEPS <b>✧</b> COUNTLESS STORIES</span><span id="menu-save-note"></span></footer>`;
+    this.root.innerHTML = `<div class="title-vignette"></div><div class="title-topline"><span>${t("menu.worldsCount", { count: MAPS.length })}</span><button data-menu-action="settings" class="title-icon" aria-label="${t("menu.settingsAria")}">${i("settings-2")}</button></div><div class="title-content"><img class="title-emblem" src="/brand/wilder-mark.svg" alt="${t("menu.emblemAlt")}"/><p class="title-eyebrow">${t("menu.eyebrow")}</p><h1>Wilder<span>A PATH OF MYSTERIES</span></h1><p class="title-intro">${t("menu.intro")}<br>${t("menu.introLine2")}</p><nav class="title-actions" aria-label="${t("menu.startAria")}"><button class="title-new" data-menu-action="new"><span>${i("compass")}${t("menu.newGame")}</span>${i("arrow-up-right")}</button><button class="title-continue" data-menu-action="continue" ${journey.available ? "" : "disabled"}>${i("footprints")}<span>${t("menu.continue")}<small id="menu-continue-detail"></small></span>${i("chevron-right")}</button><div class="title-secondary"><button data-menu-action="settings">${i("settings-2")}${t("menu.settings")}</button><button data-menu-action="help">${i("book-open")}${t("menu.howToPlay")}</button></div>${journey.online ? "" : `<button class="title-classic" data-menu-action="classic">${t("menu.classic")} ${i("chevron-right")}</button>`}</nav><p class="title-mode-note">${t("menu.modeNote")}</p></div><div class="title-world"><div class="title-world-heading"><span>${t("menu.worldHeading").toUpperCase()}</span><div><button data-menu-action="previous" aria-label="${t("menu.previousWorld")}">${i("chevron-left")}</button><button data-menu-action="next" aria-label="${t("menu.nextWorld")}">${i("chevron-right")}</button></div></div><button class="title-world-card" data-menu-action="world"><img id="menu-world-image" alt=""/><span><small id="menu-world-shape"></small><strong id="menu-world-name"></strong><em>${t("menu.exploreWorld")} ${i("arrow-up-right")}</em></span></button></div><footer class="title-footer"><span>${t("menu.footer")}</span><span id="menu-save-note"></span></footer>`;
     this.updateJourney(journey);
     this.renderWorld();
     this.actions.toggle(true);
@@ -85,7 +86,7 @@ export class StartMenu {
     if (detail)
       detail.textContent = journey.available
         ? journey.title + " · " + journey.detail
-        : "Begin a new story to create a save";
+        : t("menu.continueEmpty");
     const button = this.root.querySelector<HTMLButtonElement>(
       '[data-menu-action="continue"]',
     );
@@ -93,8 +94,8 @@ export class StartMenu {
     const save = this.root.querySelector("#menu-save-note");
     if (save)
       save.textContent = journey.online
-        ? "Your room stays live while you visit the menu."
-        : "Your journey is saved automatically.";
+        ? t("menu.roomLive")
+        : t("menu.savedAuto");
   }
   private renderWorld() {
     const map = MAPS[this.selected],
@@ -102,7 +103,7 @@ export class StartMenu {
     const image =
       this.root.querySelector<HTMLImageElement>("#menu-world-image")!;
     image.src = `/previews/${map.id}.webp`;
-    image.alt = `Preview of ${map.name}`;
+    image.alt = t("menu.worldPreviewAlt", { name: map.name });
     this.root.querySelector("#menu-world-name")!.textContent = map.name;
     this.root.querySelector("#menu-world-shape")!.textContent =
       `${String(this.selected + 1).padStart(2, "0")} / ${MAPS.length} · ${shape.name} · ${shape.floors} floors`;

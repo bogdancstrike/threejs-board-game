@@ -13,6 +13,7 @@ import {
 } from "../settings/preferences";
 import { CHARACTERS } from "../game/data";
 import { DIFFICULTIES } from "../game/decks";
+import { t, getLanguage } from "../i18n";
 export const CONFIG_SECTIONS = [
   ["profile", "user-round", "Player"],
   ["display", "monitor", "Display & performance"],
@@ -97,7 +98,17 @@ export function configPage(s: ConfigState) {
         `${c.name} · ${c.title.replace(/^The /, "")}`,
       ]),
       s.profile.character,
-    )}<div class="settings-label">Aura colour<div class="color-options profile-auras">${AURAS.map(([c, n]) => `<button aria-label="${n} aura" data-profile-tint="${c}" style="--swatch:${c}" class="${c === s.profile.tint ? "active" : ""}"></button>`).join("")}</div></div><p class="modal-note">Your profile pre-fills new games and rooms. Choose your hero again any time from the adventurer gallery.</p></div></div>${select(
+    )}<div class="settings-label">Aura colour<div class="color-options profile-auras">${AURAS.map(([c, n]) => `<button aria-label="${n} aura" data-profile-tint="${c}" style="--swatch:${c}" class="${c === s.profile.tint ? "active" : ""}"></button>`).join("")}</div></div><label class="settings-label">${t("settings.languageLabel")}<select id="language-setting" aria-label="${t("settings.languageLabel")}">${[
+      ["en", t("settings.languageEn")],
+      ["ro", t("settings.languageRo")],
+    ]
+      .map(
+        ([v, l]) =>
+          `<option value="${v}" ${getLanguage() === v ? "selected" : ""}>${l}</option>`,
+      )
+      .join(
+        "",
+      )}</select><small>${t("settings.languageHint")}</small></label><p class="modal-note">Your profile pre-fills new games and rooms. Choose your hero again any time from the adventurer gallery.</p></div></div>${select(
       "profile-difficulty",
       'data-profile="difficulty"',
       "Default card difficulty",
