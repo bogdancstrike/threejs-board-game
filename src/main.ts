@@ -712,8 +712,8 @@ function beginMenuGame(map: string) {
   if (realtime.room) {
     openModal(
       "new-game-menu",
-      modalHeader("ANOTHER STORY AWAITS", "Begin a new expedition?") +
-        `<p class="modal-intro">Your current room will continue for its party. Creating a new game moves this browser to the new expedition.</p><div class="modal-actions"><button class="secondary-button" data-action="close-modal">Keep this journey</button><button class="primary-button" data-action="new-game-setup" data-world="${map}">Choose new game</button></div>`,
+      modalHeader(t("modal.anotherStory"), t("modal.beginNewQ")) +
+        `<p class="modal-intro">${t("modal.roomContinues")}</p><div class="modal-actions"><button class="secondary-button" data-action="close-modal">${t("modal.keepJourney")}</button><button class="primary-button" data-action="new-game-setup" data-world="${map}">${t("modal.chooseNewGame")}</button></div>`,
     );
   } else openGameSetup(map);
 }
@@ -797,7 +797,7 @@ function showCharacters(index?: number) {
   previewTint = undefined;
   openModal(
     "characters",
-    modalHeader("MEET YOUR NEXT ADVENTURER", "Every hero has a story.") +
+    modalHeader(t("char.meetEyebrow"), t("char.meetTitle")) +
       `<div class="character-layout"><div class="character-preview-panel"><div id="character-preview"></div><div class="preview-view"><button data-view="full" class="active">Full body</button><button data-view="upper">Upper body</button><button data-view="face">Close-up</button><button data-view="equipment">Equipment</button></div><div class="preview-caption">${icon("orbit")} Drag to rotate · Scroll to zoom</div><div id="asset-label" class="asset-label"></div></div><div class="character-detail"><div class="character-index"><span id="char-number"></span><div><button data-action="prev-character" class="icon-button" aria-label="Previous character">${icon("chevron-left")}</button><button data-action="next-character" class="icon-button" aria-label="Next character">${icon("chevron-right")}</button></div></div><h3 id="char-name"></h3><p id="char-title" class="char-title"></p><p id="char-bio"></p><div class="section-label">SEE THEM IN MOTION</div><div class="action-options">${[
         ["idle", "moon", "Idle"],
         ["walk", "footprints", "Walk"],
@@ -816,7 +816,7 @@ function showCharacters(index?: number) {
         )
         .join(
           "",
-        )}</div><div class="section-label">PAWN AURA <span>Cosmetic only</span></div><div class="color-options">${["#cbb17a", "#a88bcf", "#8fc5b3", "#8dbed2", "#da998d"].map((c, i) => `<button aria-label="${["Gold", "Violet", "Sage", "Ice", "Rose"][i]} aura" data-tint="${c}" style="--swatch:${c}" class="${i === 0 ? "active" : ""}"></button>`).join("")}</div><p class="fair-play">${icon("check")} Every character shares the same game rules.</p><button class="primary-button" id="select-character" data-action="select-character">${icon("check")}<span>Select adventurer</span></button></div></div><div class="character-roster">${CHARACTERS.map((c, i) => `<button data-character="${i}" class="roster-card" style="--hero-color:${c.color}"><span class="roster-medallion">${icon(["knight", "paladin", "valkyrie"].includes(c.role) ? "shield" : ["rogue", "assassin", "swordsman"].includes(c.role) ? "swords" : "wand-sparkles")}</span><strong>${c.name}</strong><small>${MODEL_PATHS[c.id] ? "3D model" : "Prototype"}</small></button>`).join("")}</div>`,
+        )}</div><div class="section-label">PAWN AURA <span>Cosmetic only</span></div><div class="color-options">${["#cbb17a", "#a88bcf", "#8fc5b3", "#8dbed2", "#da998d"].map((c, i) => `<button aria-label="${["Gold", "Violet", "Sage", "Ice", "Rose"][i]} aura" data-tint="${c}" style="--swatch:${c}" class="${i === 0 ? "active" : ""}"></button>`).join("")}</div><p class="fair-play">${icon("check")} ${t("char.fairPlay")}</p><button class="primary-button" id="select-character" data-action="select-character">${icon("check")}<span>${t("char.selectAdventurer")}</span></button></div></div><div class="character-roster">${CHARACTERS.map((c, i) => `<button data-character="${i}" class="roster-card" style="--hero-color:${c.color}"><span class="roster-medallion">${icon(["knight", "paladin", "valkyrie"].includes(c.role) ? "shield" : ["rogue", "assassin", "swordsman"].includes(c.role) ? "swords" : "wand-sparkles")}</span><strong>${c.name}</strong><small>${MODEL_PATHS[c.id] ? "3D model" : "Prototype"}</small></button>`).join("")}</div>`,
     true,
   );
   preview = new CharacterPreview($("character-preview"));
@@ -831,8 +831,8 @@ function updateCharacter() {
     `${tc(c.title)} · ${t("char.age", { age: c.age })}`;
   $("char-bio").textContent = tc(c.bio);
   $("asset-label").textContent = MODEL_PATHS[c.id]
-    ? "Adapted character art · supplied GLB"
-    : "Stylized prototype · production art pending";
+    ? t("char.assetGlb")
+    : t("char.assetProto");
   document
     .querySelectorAll<HTMLElement>("[data-character]")
     .forEach((el) =>
@@ -849,7 +849,7 @@ function updateCharacter() {
   b.disabled = taken || locked;
   b.innerHTML =
     icon(taken ? "users" : "check") +
-    `<span>${taken ? "Claimed by another player" : locked ? "Heroes are locked during the expedition" : `Select ${c.name}`}</span>`;
+    `<span>${taken ? t("char.claimed") : locked ? t("char.locked") : t("char.select", { name: c.name })}</span>`;
   document.querySelectorAll<HTMLElement>("[data-character]").forEach((card) => {
     const hero = CHARACTERS[Number(card.dataset.character)],
       owner = state.players.find(
@@ -1032,7 +1032,7 @@ function showVictory() {
       `${online ? safe(winner.name) : c.name} wins the expedition.`,
       false,
     ) +
-      `<div class="victory-art">${icon("crown")}<span>✧</span><span>✧</span></div><p class="encounter-text">Through every twist, every mystery, and every leap of faith, your party found its way to ${theme.regions[3]}.</p><div class="victory-stats"><div><strong>${state.turn}</strong><span>Turns traveled</span></div><div><strong>${winner.gold}</strong><span>${t("hud.gold")}</span></div><div><strong>${winner.clues}</strong><span>${t("hud.clues")}</span></div><div><strong>${playerScore(winner)}</strong><span>Winning points</span></div></div><div class="victory-standings">${standings.map((p, i) => `<div><span>${i + 1}. ${safe(p.name)} · ${CHARACTERS.find((c) => c.id === p.character)!.name}</span><strong>${playerScore(p)} pts</strong></div>`).join("")}</div>${online ? `<button class="primary-button" data-action="rooms">${icon("users")}Return to the party · ${realtime.isHost ? "Play again" : "Wait for a rematch"}</button>` : `<button class="primary-button" data-action="victory-maps">${icon("map")}Find your next adventure</button>`}<button class="text-button" data-action="view-board">Stay a little longer</button>`,
+      `<div class="victory-art">${icon("crown")}<span>✧</span><span>✧</span></div><p class="encounter-text">${t("victory.story", { region: tc(theme.regions[3]) })}</p><div class="victory-stats"><div><strong>${state.turn}</strong><span>${t("victory.turns")}</span></div><div><strong>${winner.gold}</strong><span>${t("hud.gold")}</span></div><div><strong>${winner.clues}</strong><span>${t("hud.clues")}</span></div><div><strong>${playerScore(winner)}</strong><span>${t("victory.points")}</span></div></div><div class="victory-standings">${standings.map((p, i) => `<div><span>${i + 1}. ${safe(p.name)} · ${CHARACTERS.find((c) => c.id === p.character)!.name}</span><strong>${t("victory.pts", { n: playerScore(p) })}</strong></div>`).join("")}</div>${online ? `<button class="primary-button" data-action="rooms">${icon("users")}${t("victory.returnParty")} · ${realtime.isHost ? t("victory.playAgain") : t("victory.waitRematch")}</button>` : `<button class="primary-button" data-action="victory-maps">${icon("map")}${t("victory.nextAdventure")}</button>`}<button class="text-button" data-action="view-board">${t("victory.stay")}</button>`,
   );
 }
 
@@ -1040,7 +1040,7 @@ let profilePreview: CharacterPreview | null = null;
 function showSettings(section = "") {
   openModal(
     "settings",
-    modalHeader("MAKE YOURSELF AT HOME", "Configuration") +
+    modalHeader(t("config.eyebrow"), t("config.title")) +
       configPage({
         graphics: readGraphics(),
         prefs,
@@ -1239,8 +1239,8 @@ app.addEventListener("click", async (e) => {
     const count = Number($<HTMLSelectElement>("party-setting").value);
     openModal(
       "restart",
-      modalHeader("A FRESH START", "Another story is waiting.") +
-        `<p class="modal-intro">Begin a new ${count === 1 ? "solo" : count + " player"} expedition in ${theme.name}? This replaces your saved progress.</p><div class="modal-actions"><button class="secondary-button" data-action="close-modal">Keep my journey</button><button class="primary-button" data-restart="${count}">Begin again</button></div>`,
+      modalHeader(t("modal.freshEyebrow"), t("modal.freshTitle")) +
+        `<p class="modal-intro">${t("modal.freshIntro", { mode: count === 1 ? t("modal.solo") : t("modal.playersN", { n: count }), world: theme.name })}</p><div class="modal-actions"><button class="secondary-button" data-action="close-modal">${t("modal.keepMyJourney")}</button><button class="primary-button" data-restart="${count}">${t("modal.beginAgain")}</button></div>`,
     );
   } else if (action === "victory-maps") {
     modalType = "";
@@ -1442,7 +1442,7 @@ try {
 } catch (err) {
   console.error(err);
   $("scene-loading").innerHTML =
-    `<div><h2>Your browser couldn’t open the 3D world.</h2><p>Enable WebGL and hardware acceleration, then refresh to continue.</p><button class="secondary-button" onclick="location.reload()">Try again</button></div>`;
+    `<div><h2>${t("error.webgl")}</h2><p>${t("error.webglHint")}</p><button class="secondary-button" onclick="location.reload()">${t("error.tryAgain")}</button></div>`;
 }
 
 function renderParty() {
