@@ -68,7 +68,7 @@ export class ChallengePanel {
     this.ui.open(
       "challenge",
       this.ui.header(
-        `SKILL CHALLENGE · ${e(player.name)}’S TURN`,
+        `${t("chal.skillChallenge")} · ${e(t("chal.turnOf", { name: player.name }))}`,
         card.title,
         false,
       ) +

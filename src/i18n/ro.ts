@@ -490,4 +490,9 @@ export const ro: Messages = {
   "net.actionRejected": "Acțiune respinsă.",
   "net.joinFirst": "Alătură-te mai întâi unei expediții.",
   "net.leftRoom": "Ai părăsit camera.",
+  // ---- HUD and board ----
+  "topbar.brandAria": "Meniul principal Wilder",
+  "topbar.brandCaption": "UN DRUM AL MISTERELOR",
+  "chal.skillChallenge": "PROVOCARE DE ABILITĂȚI",
+  "chal.turnOf": "RÂNDUL LUI {name}",
 };

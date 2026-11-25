@@ -490,4 +490,9 @@ export const en: Messages = {
   "net.actionRejected": "Action rejected.",
   "net.joinFirst": "Join an expedition first.",
   "net.leftRoom": "You left the room.",
+  // ---- HUD and board ----
+  "topbar.brandAria": "Wilder main menu",
+  "topbar.brandCaption": "A PATH OF MYSTERIES",
+  "chal.skillChallenge": "SKILL CHALLENGE",
+  "chal.turnOf": "{name}’S TURN",
 };
