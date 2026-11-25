@@ -48,7 +48,8 @@ export const ro: Messages = {
   "settings.languageEn": "Engleză",
   "settings.languageRo": "Română",
   "difficulty.label": "Dificultatea cărților",
-  "difficulty.note": "Fiecare casă de pe drum are o carte. Pachetele Băuturi, Flirt, Picant și Fierbinte sunt pentru adulți.",
+  "difficulty.note":
+    "Fiecare casă de pe drum are o carte. Pachetele Băuturi, Flirt, Picant și Fierbinte sunt pentru adulți.",
   "difficulty.cards": "{count} cărți",
   "difficulty.adults": "Adulți",
   "difficulty.soft": "Blând",

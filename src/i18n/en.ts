@@ -48,7 +48,8 @@ export const en: Messages = {
   "settings.languageEn": "English",
   "settings.languageRo": "Romanian",
   "difficulty.label": "Card difficulty",
-  "difficulty.note": "Every tile on the path holds a card. Drinking, Teasing, Spicy and Hot decks are for adults.",
+  "difficulty.note":
+    "Every tile on the path holds a card. Drinking, Teasing, Spicy and Hot decks are for adults.",
   "difficulty.cards": "{count} cards",
   "difficulty.adults": "Adults",
   "difficulty.soft": "Soft",
