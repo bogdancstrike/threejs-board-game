@@ -282,14 +282,14 @@ const safe = (s: string) =>
   );
 app.innerHTML = `
 <header class="topbar"><a class="brand" href="#" aria-label="Wilder main menu"><span class="brand-mark"><img src="/brand/wilder-mark.svg" alt=""/></span><span>Wilder<span class="brand-caption">A PATH OF MYSTERIES</span></span></a><div class="header-center"><span class="tiny-star">✧</span> ${t("topbar.tagline")} <span class="tiny-star">✧</span></div><nav><button class="nav-link exit-game-button" data-action="exit-game" aria-label="${t("topbar.exitGameAria")}">${icon("chevron-left")}<span>${t("topbar.exitGame")}</span></button><button class="icon-button" data-action="main-menu" aria-label="${t("topbar.mainMenuAria")}">${icon("compass")}</button><button class="nav-link online-nav" data-action="rooms" title="${t("topbar.playSolo")}">${icon("users")}<span id="room-nav-label">${t("topbar.playSolo")}</span></button><button class="nav-link" data-action="journey" aria-label="${t("topbar.journeyAria")}">${icon("book-open")}<span>${t("topbar.journey")}</span></button><button class="nav-link" data-action="characters" aria-label="${t("topbar.chooseCharacterAria")}">${icon("users")}<span>${t("topbar.adventurer")}</span></button><button class="nav-link" data-action="maps" aria-label="${t("topbar.chooseWorldAria")}" title="${t("topbar.worlds")}">${icon("map")}<span>${t("topbar.worlds")}</span><span class="count-badge">${MAPS.length}</span></button><button class="nav-link" data-action="help" title="${t("topbar.howToPlay")}">${icon("circle-help")}<span>${t("topbar.howToPlay")}</span></button><span class="nav-divider"></span><button class="icon-button sound-button" data-action="sound" aria-label="${t("topbar.enableSound")}">${icon("volume-x")}</button><button class="icon-button" data-action="settings" aria-label="${t("topbar.settingsAria")}">${icon("settings-2")}</button></nav></header>
-<main class="game-shell"><aside class="sidebar"><div class="expedition-intro"><div class="eyebrow">AN ADVENTURE AWAITS</div><h1 id="map-title"></h1><p class="intro-copy">Follow the path.<br>Find your own story.</p><button class="map-link" data-action="maps">${icon("map")}<span>Explore another world</span>${icon("arrow-up-right")}</button></div>
-<div class="sidebar-rule"></div><div class="section-label">YOUR ADVENTURER<button data-action="characters">Change ${icon("chevron-right")}</button></div><button class="hero-card" data-action="characters"><div id="hero-avatar" class="hero-avatar">${icon("wand-sparkles")}</div><div><strong id="hero-name"></strong><span id="hero-class"></span></div><span class="hero-online"></span></button>
-<div class="journey"><div class="section-label"><span>THE JOURNEY</span><span class="tile-counter"><b id="tile-current">01</b> / 93</span></div><div class="progress-track"><div id="progress-fill"></div></div><div id="region-list" class="region-list"></div></div>
-<div class="inventory"><div>${icon("gem")}<strong id="gold">0</strong><span>Gold found</span></div><div>${icon("sparkles")}<strong id="clues">0</strong><span>Clues collected</span></div><div>${icon("crown")}<strong id="points">0</strong><span>Points</span></div></div>
-<div class="journal-section"><div class="section-label">TRAVELER’S JOURNAL<button data-action="journal">View all ${icon("arrow-up-right")}</button></div><div id="journal"></div></div><div class="sidebar-footer"><span class="save-dot"></span> Your journey is saved automatically</div></aside>
-<section class="world-area" aria-label="Game board"><div class="sky-stars"></div><div class="world-grain"></div><div id="viewport"></div><div id="party-panel" class="party-overlay" hidden></div><div class="world-heading"><span class="eyebrow" id="chapter">CHAPTER I</span><h2 id="region-name">Hearthwick Village</h2><p id="region-subtitle">Every great tale begins with a small step.</p></div><div class="world-meta"><span class="live-dot"></span><span id="player-count">SOLO EXPEDITION</span><span class="meta-divider"></span><span id="turn-label">TURN 01</span></div><div class="world-label castle-label" id="destination-label">${icon("flag")}<span>CROWNFALL CASTLE</span></div><div id="tile-tooltip" class="tile-tooltip" hidden></div><div class="compass-rose"><span>N</span><div>✧</div></div><div class="camera-controls"><button data-action="focus" aria-label="Focus active character" title="Focus character (F)">${icon("crosshair")}</button><span></span><button data-action="zoom-in" aria-label="Zoom in">${icon("plus")}</button><button data-action="zoom-out" aria-label="Zoom out">${icon("minus")}</button><span></span><button data-action="reset-camera" aria-label="Reset camera" title="Reset camera (R)">${icon("scan")}</button></div><div class="camera-hint">${icon("orbit")} Drag to explore <span>·</span> Scroll to zoom</div>
-<div class="turn-panel"><div class="turn-icon">${icon("sparkles")}</div><div class="turn-copy"><span class="eyebrow" id="turn-eyebrow">YOUR STORY STARTS HERE</span><h3 id="turn-title">The first step is yours.</h3><p id="turn-description">Roll the dice. See where the path takes you.</p></div><div class="dice-separator"></div><div id="dice" class="dice-face" aria-label="Dice"><span class="dice-pip"></span></div><button id="roll-button" class="primary-button" data-action="roll">${icon("dices")}<span>Roll the dice</span><kbd>SPACE</kbd></button></div>
-<div id="fps-meter" class="fps-meter" hidden></div><div class="board-legend"><span><i style="--dot:#b4a0dc"></i>Mystery</span><span><i style="--dot:#edbf67"></i>Treasure</span><span><i style="--dot:#83cbb4"></i>Fortune</span><span><i style="--dot:#82c9dd"></i>Portal</span></div><div class="scene-loading" id="scene-loading"><span class="loading-orbit"></span>Unfolding your world…</div></section></main>
+<main class="game-shell"><aside class="sidebar"><div class="expedition-intro"><div class="eyebrow">${t("hud.adventureAwaits")}</div><h1 id="map-title"></h1><p class="intro-copy">${t("hud.followPath")}</p><button class="map-link" data-action="maps">${icon("map")}<span>${t("hud.exploreOther")}</span>${icon("arrow-up-right")}</button></div>
+<div class="sidebar-rule"></div><div class="section-label">${t("hud.yourAdventurer")}<button data-action="characters">${t("hud.change")} ${icon("chevron-right")}</button></div><button class="hero-card" data-action="characters"><div id="hero-avatar" class="hero-avatar">${icon("wand-sparkles")}</div><div><strong id="hero-name"></strong><span id="hero-class"></span></div><span class="hero-online"></span></button>
+<div class="journey"><div class="section-label"><span>${t("hud.theJourney")}</span><span class="tile-counter"><b id="tile-current">01</b> / 93</span></div><div class="progress-track"><div id="progress-fill"></div></div><div id="region-list" class="region-list"></div></div>
+<div class="inventory"><div>${icon("gem")}<strong id="gold">0</strong><span>${t("hud.gold")}</span></div><div>${icon("sparkles")}<strong id="clues">0</strong><span>${t("hud.clues")}</span></div><div>${icon("crown")}<strong id="points">0</strong><span>${t("hud.points")}</span></div></div>
+<div class="journal-section"><div class="section-label">${t("hud.travelerJournal")}<button data-action="journal">${t("hud.viewAll")} ${icon("arrow-up-right")}</button></div><div id="journal"></div></div><div class="sidebar-footer"><span class="save-dot"></span> ${t("hud.autoSaved")}</div></aside>
+<section class="world-area" aria-label="${t("hud.gameBoard")}"><div class="sky-stars"></div><div class="world-grain"></div><div id="viewport"></div><div id="party-panel" class="party-overlay" hidden></div><div class="world-heading"><span class="eyebrow" id="chapter">${t("hud.chapterOne")}</span><h2 id="region-name">Hearthwick Village</h2><p id="region-subtitle">Every great tale begins with a small step.</p></div><div class="world-meta"><span class="live-dot"></span><span id="player-count">${t("hud.soloLabel")}</span><span class="meta-divider"></span><span id="turn-label">${t("hud.turnLabel", { n: "01" })}</span></div><div class="world-label castle-label" id="destination-label">${icon("flag")}<span>${t("hud.castle")}</span></div><div id="tile-tooltip" class="tile-tooltip" hidden></div><div class="compass-rose"><span>N</span><div>✧</div></div><div class="camera-controls"><button data-action="focus" aria-label="${t("hud.focusChar")}" title="${t("hud.focusTitle")}">${icon("crosshair")}</button><span></span><button data-action="zoom-in" aria-label="${t("hud.zoomIn")}">${icon("plus")}</button><button data-action="zoom-out" aria-label="${t("hud.zoomOut")}">${icon("minus")}</button><span></span><button data-action="reset-camera" aria-label="${t("hud.resetCamera")}" title="${t("hud.resetCameraTitle")}">${icon("scan")}</button></div><div class="camera-hint">${icon("orbit")} ${t("hud.dragExplore")} <span>·</span> ${t("hud.scrollZoom")}</div>
+<div class="turn-panel"><div class="turn-icon">${icon("sparkles")}</div><div class="turn-copy"><span class="eyebrow" id="turn-eyebrow">${t("hud.storyStarts")}</span><h3 id="turn-title">${t("hud.firstStepYours")}</h3><p id="turn-description">${t("hud.rollHint")}</p></div><div class="dice-separator"></div><div id="dice" class="dice-face" aria-label="${t("hud.dice")}"><span class="dice-pip"></span></div><button id="roll-button" class="primary-button" data-action="roll">${icon("dices")}<span>${t("hud.rollDice")}</span><kbd>SPACE</kbd></button></div>
+<div id="fps-meter" class="fps-meter" hidden></div><div class="board-legend"><span><i style="--dot:#b4a0dc"></i>${t("hud.legendMystery")}</span><span><i style="--dot:#edbf67"></i>${t("hud.legendTreasure")}</span><span><i style="--dot:#83cbb4"></i>${t("hud.legendFortune")}</span><span><i style="--dot:#82c9dd"></i>${t("hud.legendPortal")}</span></div><div class="scene-loading" id="scene-loading"><span class="loading-orbit"></span>${t("hud.unfolding")}</div></section></main>
 <dialog id="modal" class="modal"><div id="modal-content"></div></dialog><div id="toast" class="toast" role="status"></div>`;
 const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
   document.getElementById(id) as T;
@@ -405,31 +405,31 @@ function update() {
     );
   button.innerHTML =
     icon(busy ? "footprints" : state.phase === "won" ? "crown" : "dices") +
-    `<span>${busy ? "On the path…" : state.phase === "event" ? "A mystery awaits" : state.phase === "won" ? "Journey complete" : "Roll the dice"}</span>${!busy && state.phase === "ready" ? "<kbd>SPACE</kbd>" : ""}`;
+    `<span>${busy ? t("hud.onPath") : state.phase === "event" ? t("hud.mysteryAwaits") : state.phase === "won" ? t("hud.journeyComplete") : t("hud.rollDice")}</span>${!busy && state.phase === "ready" ? "<kbd>SPACE</kbd>" : ""}`;
   $("turn-eyebrow").textContent =
     state.phase === "won"
-      ? "A LEGEND IS WRITTEN"
+      ? t("hud.legendWritten")
       : busy
-        ? "ONE STEP CLOSER"
+        ? t("hud.oneStepCloser")
         : state.players.length > 1
           ? `${player.name.toUpperCase()} · ${c.name.toUpperCase()}`
           : state.turn === 1
-            ? "YOUR STORY STARTS HERE"
-            : "YOUR NEXT CHAPTER";
+            ? t("hud.storyStarts")
+            : t("hud.nextChapter");
   $("turn-title").textContent =
     state.phase === "won"
-      ? "You made it, wanderer."
+      ? t("hud.youMadeIt")
       : busy
-        ? `${c.name} is exploring…`
+        ? t("hud.exploring", { name: c.name })
         : state.turn === 1
-          ? "The first step is yours."
-          : `${c.name}, the path is calling.`;
+          ? t("hud.firstStepYours")
+          : t("hud.pathCalling", { name: c.name });
   $("turn-description").textContent =
     state.phase === "won"
-      ? "The destination is only half the story."
+      ? t("hud.destinationHalf")
       : busy
-        ? "A little courage goes a long way."
-        : "Roll the dice. See where the path takes you.";
+        ? t("hud.courageWay")
+        : t("hud.rollHint");
   // A pending encounter can always be reopened, whoever closed its dialog.
   const pending =
     !busy &&
@@ -446,29 +446,29 @@ function update() {
             ? "dices"
             : "book-open",
       ) +
-      `<span>${state.phase === "road" ? "Show the card" : state.phase === "challenge" ? "Resume the challenge" : "Resume the mystery"}</span>`;
+      `<span>${state.phase === "road" ? t("hud.showCard") : state.phase === "challenge" ? t("hud.resumeChallenge") : t("hud.resumeMystery")}</span>`;
   } else delete button.dataset.pending;
   if (realtime.session) {
     $("room-nav-label").textContent = t("status.room", {
       code: realtime.room?.code || "",
     });
     if (realtime.room?.phase === "lobby") {
-      button.innerHTML = icon("users") + "<span>Gather your party</span>";
+      button.innerHTML = icon("users") + `<span>${t("hud.gatherParty")}</span>`;
       $("turn-title").textContent = t("status.gettingReady");
       $("turn-description").textContent =
-        "Choose a unique hero, mark ready, and let the host begin.";
+        t("hud.chooseHero");
     } else if (!realtime.myTurn && state.phase !== "won" && !pending) {
       button.innerHTML =
-        icon("moon") + "<span>Waiting for " + safe(player.name) + "</span>";
-      $("turn-title").textContent = player.name + "’s turn";
+        icon("moon") + `<span>${t("hud.waitingFor", { name: safe(player.name) })}</span>`;
+      $("turn-title").textContent = t("hud.turnOf", { name: player.name });
       $("turn-description").textContent =
         realtime.status === "online"
-          ? "The whole party sees every roll and discovery."
-          : "Reconnecting to your expedition…";
+          ? t("hud.liveDesc")
+          : t("hud.reconnecting");
     } else if (realtime.myTurn && !busy && state.phase === "ready") {
       $("turn-title").textContent = t("status.yourTurn", { name: player.name });
       $("turn-description").textContent =
-        "The server rolls the die. You choose the adventure.";
+        t("hud.serverRolls");
     }
   } else $("room-nav-label").textContent = t("status.playSolo");
   renderParty();
@@ -1032,7 +1032,7 @@ function showVictory() {
       `${online ? safe(winner.name) : c.name} wins the expedition.`,
       false,
     ) +
-      `<div class="victory-art">${icon("crown")}<span>✧</span><span>✧</span></div><p class="encounter-text">Through every twist, every mystery, and every leap of faith, your party found its way to ${theme.regions[3]}.</p><div class="victory-stats"><div><strong>${state.turn}</strong><span>Turns traveled</span></div><div><strong>${winner.gold}</strong><span>Gold found</span></div><div><strong>${winner.clues}</strong><span>Clues collected</span></div><div><strong>${playerScore(winner)}</strong><span>Winning points</span></div></div><div class="victory-standings">${standings.map((p, i) => `<div><span>${i + 1}. ${safe(p.name)} · ${CHARACTERS.find((c) => c.id === p.character)!.name}</span><strong>${playerScore(p)} pts</strong></div>`).join("")}</div>${online ? `<button class="primary-button" data-action="rooms">${icon("users")}Return to the party · ${realtime.isHost ? "Play again" : "Wait for a rematch"}</button>` : `<button class="primary-button" data-action="victory-maps">${icon("map")}Find your next adventure</button>`}<button class="text-button" data-action="view-board">Stay a little longer</button>`,
+      `<div class="victory-art">${icon("crown")}<span>✧</span><span>✧</span></div><p class="encounter-text">Through every twist, every mystery, and every leap of faith, your party found its way to ${theme.regions[3]}.</p><div class="victory-stats"><div><strong>${state.turn}</strong><span>Turns traveled</span></div><div><strong>${winner.gold}</strong><span>${t("hud.gold")}</span></div><div><strong>${winner.clues}</strong><span>${t("hud.clues")}</span></div><div><strong>${playerScore(winner)}</strong><span>Winning points</span></div></div><div class="victory-standings">${standings.map((p, i) => `<div><span>${i + 1}. ${safe(p.name)} · ${CHARACTERS.find((c) => c.id === p.character)!.name}</span><strong>${playerScore(p)} pts</strong></div>`).join("")}</div>${online ? `<button class="primary-button" data-action="rooms">${icon("users")}Return to the party · ${realtime.isHost ? "Play again" : "Wait for a rematch"}</button>` : `<button class="primary-button" data-action="victory-maps">${icon("map")}Find your next adventure</button>`}<button class="text-button" data-action="view-board">Stay a little longer</button>`,
   );
 }
 
