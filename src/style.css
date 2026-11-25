@@ -4085,6 +4085,12 @@ a {
   gap: 30px;
   margin-top: 8px;
 }
+.config-version {
+  margin: 18px 0 4px;
+  text-align: center;
+  font-size: 13px;
+  color: #3d5047;
+}
 .config-nav {
   position: sticky;
   top: 0;

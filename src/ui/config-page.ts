@@ -13,6 +13,9 @@ import {
 } from "../settings/preferences";
 import { CHARACTERS } from "../game/data";
 import { DIFFICULTIES } from "../game/decks";
+import { GAME_VERSION, versionLabel } from "./version";
+
+export { versionLabel };
 export const CONFIG_SECTIONS = [
   ["profile", "user-round", "Player"],
   ["display", "monitor", "Display & performance"],
@@ -73,6 +76,8 @@ export interface ConfigState {
   quality: Quality;
   audio: { enabled: boolean; music: number; ambience: number; effects: number };
   partySize: number;
+  /** Game version shown in the footer; defaults to package.json. */
+  version?: string;
   /** Present while in an Adventure room: the shared card deck. */
   room?: { difficulty: string; host: boolean };
   escape: (s: string) => string;
@@ -226,5 +231,6 @@ export function configPage(s: ConfigState) {
     "Accessibility",
     `${range("pref", p, ["uiScale", "Interface size", 85, 130, 100, "%", 5])}${toggle("pref-toggle", "reduceMotion", "Reduce motion", "Calmer camera, fewer animated flourishes", s.prefs.reduceMotion)}<button class="secondary-button full-width" data-action="reset-preferences">${i("rotate-ccw")}Restore gameplay & camera defaults</button>`,
   );
-  return `<div class="config-page">${nav}<div class="config-body" id="config-body">${profile}${display}${lighting}${grading}${gameplay}${camera}${audio}${access}</div></div>`;
+  const version = `<p class="config-version">${versionLabel(s.version ?? GAME_VERSION)}</p>`;
+  return `<div class="config-page">${nav.replace(/<\/nav>$/, version + "</nav>")}<div class="config-body" id="config-body">${profile}${display}${lighting}${grading}${gameplay}${camera}${audio}${access}</div></div>`;
 }
