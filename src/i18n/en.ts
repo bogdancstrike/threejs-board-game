@@ -459,4 +459,6 @@ export const en: Messages = {
   "preview.beginJourney": "Begin this journey",
   "preview.seeAll": "See all worlds",
   "world.tiles93": "93 tiles",
+  // ---- HUD and board ----
+  "hud.worldN": "WORLD {n} / {total}",
 };

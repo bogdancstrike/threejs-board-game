@@ -459,4 +459,6 @@ export const ro: Messages = {
   "preview.beginJourney": "Începe această călătorie",
   "preview.seeAll": "Vezi toate lumile",
   "world.tiles93": "93 de pătrățele",
+  // ---- HUD and board ----
+  "hud.worldN": "LUMEA {n} / {total}",
 };
