@@ -366,11 +366,11 @@ function update() {
   $("region-list").innerHTML = theme.regions
     .map(
       (r, i) =>
-        `<div class="region-step ${i === tile.region ? "current" : i < tile.region ? "completed" : ""}"><span class="region-dot">${i < tile.region ? "✓" : i === tile.region ? "✧" : ""}</span><span>${tc(r)}</span>${i === tile.region ? '<span class="here-tag">YOU ARE HERE</span>' : ""}</div>`,
+        `<div class="region-step ${i === tile.region ? "current" : i < tile.region ? "completed" : ""}"><span class="region-dot">${i < tile.region ? "✓" : i === tile.region ? "✧" : ""}</span><span>${tc(r)}</span>${i === tile.region ? `<span class="here-tag">${t("hud.youAreHere")}</span>` : ""}</div>`,
     )
     .join("");
   $("chapter").textContent =
-    `CHAPTER ${["I", "II", "III", "IV"][tile.region]} · ${tc(theme.tagline).toUpperCase()}`;
+    `${t("hud.chapter", { n: ["I", "II", "III", "IV"][tile.region] })} · ${tc(theme.tagline).toUpperCase()}`;
   $("region-name").textContent = tc(theme.regions[tile.region]);
   $("region-subtitle").textContent =
     [
@@ -386,9 +386,9 @@ function update() {
     icon("flag") + `<span>${tc(theme.regions[3]).toUpperCase()}</span>`;
   $("player-count").textContent =
     state.players.length === 1
-      ? "SOLO EXPEDITION"
-      : `${state.players.length} TRAVELERS · ${player.name.toUpperCase()}`;
-  $("turn-label").textContent = `TURN ${String(state.turn).padStart(2, "0")}`;
+      ? t("hud.soloLabel")
+      : t("hud.travelers", { count: state.players.length, name: player.name.toUpperCase() });
+  $("turn-label").textContent = t("hud.turnLabel", { n: String(state.turn).padStart(2, "0") });
   $("journal").innerHTML = state.journal
     .slice(0, 3)
     .map(
@@ -1110,7 +1110,7 @@ function showJournal() {
   openModal(
     "journal",
     modalHeader(t("journal.eyebrow"), t("journal.title")) +
-      `<div class="full-journal">${state.journal.map((j) => `<div><span>TURN ${String(j.turn).padStart(2, "0")}</span><p>${safe(tc(j.text))}</p></div>`).join("")}</div>`,
+      `<div class="full-journal">${state.journal.map((j) => `<div><span>${t("hud.turnLabel", { n: String(j.turn).padStart(2, "0") })}</span><p>${safe(tc(j.text))}</p></div>`).join("")}</div>`,
   );
 }
 function attachScene() {

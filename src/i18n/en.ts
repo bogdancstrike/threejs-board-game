@@ -350,4 +350,8 @@ export const en: Messages = {
   "hud.reconnecting": "Reconnecting to your expedition…",
   "hud.serverRolls": "The server rolls the die. You choose the adventure.",
   "hud.youAreHere": "YOU ARE HERE",
+  // ---- HUD and board ----
+  "hud.chapter": "CHAPTER {n}",
+  // ---- HUD and board ----
+  "hud.travelers": "{count} TRAVELERS · {name}",
 };

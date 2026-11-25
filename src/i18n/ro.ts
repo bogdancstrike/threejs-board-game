@@ -350,4 +350,8 @@ export const ro: Messages = {
   "hud.reconnecting": "Te reconectezi la expediția ta…",
   "hud.serverRolls": "Serverul aruncă zarul. Tu alegi aventura.",
   "hud.youAreHere": "EȘTI AICI",
+  // ---- HUD and board ----
+  "hud.chapter": "CAPITOLUL {n}",
+  // ---- HUD and board ----
+  "hud.travelers": "{count} CĂLĂTORI · {name}",
 };
