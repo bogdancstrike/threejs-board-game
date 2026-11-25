@@ -5,6 +5,8 @@ All APIs are illustrative and should adapt to existing backend. JSON contracts i
 `POST /api/v1/rooms/{roomId}/join` -> join by validated code.
 `GET /api/v1/rooms/{roomId}` -> authorized snapshot.
 `GET /api/v1/characters` -> available roster metadata.
+`GET /api/v1/catalogue` -> game catalogue (`roadStops`, `characters`, `maps`, `difficulties`, `ruleset`, `tileCount`).
+`GET /api/v1/catalogue?kind=<kind>` -> optional filter. `roadStops` contains only entries whose `kind` equals the value (e.g. `box`, `hazard`, `minigame`, `dare`, `dragon`, `shrine`, `camp`, `curse`). `characters` and `maps` carry no `kind`, so they are returned empty. An unknown kind returns 200 with empty lists, not an error. Without the parameter the response is unchanged.
 `GET /api/v1/rooms/{roomId}/events?after_seq=42` -> replay delta.
 `POST /api/v1/rooms/{roomId}/ready` -> ready status.
 ## WS

@@ -230,8 +230,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return {"status": "ok", "database": "postgresql", "realtime": "websocket"}
 
     @app.get("/api/v1/catalogue")
-    async def catalogue():
-        return {**CATALOGUE, "difficulties": list(LEVELS.values())}
+    async def catalogue(kind: str | None = Query(default=None, max_length=32)):
+        if kind is None:
+            return {**CATALOGUE, "difficulties": list(LEVELS.values())}
+        # Only road stops carry a kind; other entry sections cannot match a kind filter.
+        return {
+            **CATALOGUE,
+            "roadStops": [stop for stop in CATALOGUE["roadStops"] if stop.get("kind") == kind],
+            "characters": [],
+            "maps": [],
+            "difficulties": list(LEVELS.values()),
+        }
 
     @app.post("/api/v1/rooms")
     async def create(body: CreateRoom, request: Request):

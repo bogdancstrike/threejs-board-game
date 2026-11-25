@@ -5,6 +5,7 @@ import httpx
 import pytest
 
 from app import domain
+from app.catalogue import CATALOGUE
 from app.main import create_app
 
 
@@ -286,3 +287,35 @@ async def test_background_worker_advances_expired_turn_and_publishes(api):
     events = await app.state.repo.events(room["id"], host["playerId"], room["eventSeq"])
     assert len(events) == 1
     assert current["turnDeadline"] > domain.now_ms()
+
+
+async def test_catalogue_without_kind_is_unfiltered(api):
+    client, _, _ = api
+    body = (await client.get("/api/v1/catalogue")).json()
+    assert body["roadStops"] == CATALOGUE["roadStops"]
+    assert body["characters"] == CATALOGUE["characters"]
+    assert body["maps"] == CATALOGUE["maps"]
+    assert "difficulties" in body
+
+
+async def test_catalogue_kind_returns_only_entries_of_that_kind(api):
+    client, _, _ = api
+    kind = CATALOGUE["roadStops"][0]["kind"]
+    expected = [stop for stop in CATALOGUE["roadStops"] if stop["kind"] == kind]
+    response = await client.get("/api/v1/catalogue", params={"kind": kind})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["roadStops"] == expected
+    assert all(stop["kind"] == kind for stop in body["roadStops"])
+    assert body["characters"] == [] and body["maps"] == []
+    assert body["ruleset"] == CATALOGUE["ruleset"]
+    assert "difficulties" in body
+
+
+async def test_catalogue_unknown_kind_is_empty_not_an_error(api):
+    client, _, _ = api
+    response = await client.get("/api/v1/catalogue", params={"kind": "no-such-kind"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["roadStops"] == []
+    assert body["characters"] == [] and body["maps"] == []
