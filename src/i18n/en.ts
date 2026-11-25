@@ -288,4 +288,8 @@ export const en: Messages = {
   // Proper names of worlds and characters: identical in every language.
   "names.verdantCrown": "The Verdant Crown",
   "names.elowen": "Elowen",
+  // ---- HUD (board sidebar, tooltips) ----
+  "char.age": "Age {age}",
+  "hud.regionSub2": "There’s more to this place than meets the eye.",
+  "tooltip.tile": "Tile {n}",
 };

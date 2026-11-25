@@ -1,4 +1,5 @@
 import { configPage, formatSetting } from "./ui/config-page";
+import { tc } from "./i18n/content";
 import {
   initLanguage,
   setLanguage,
@@ -348,7 +349,7 @@ function update() {
     tile = getTiles(state.map)[player.position];
   $("map-title").innerHTML = theme.name.replace(/ (\S+)$/, "<br>$1");
   $("hero-name").textContent = c.name;
-  $("hero-class").textContent = c.title.replace(/^The /, "");
+  $("hero-class").textContent = tc(c.title).replace(/^The /, "");
   $("hero-avatar").style.setProperty("--hero-color", c.color);
   $("hero-avatar").innerHTML = icon(
     ["knight", "paladin", "valkyrie"].includes(c.role)
@@ -370,13 +371,13 @@ function update() {
     .join("");
   $("chapter").textContent =
     `CHAPTER ${["I", "II", "III", "IV"][tile.region]} · ${theme.tagline.toUpperCase()}`;
-  $("region-name").textContent = theme.regions[tile.region];
+  $("region-name").textContent = tc(theme.regions[tile.region]);
   $("region-subtitle").textContent =
     [
-      "Every great tale begins with a small step.",
-      "There’s more to this place than meets the eye.",
-      "Old magic waits beneath the stone.",
-      "One final climb. A thousand untold stories.",
+      tc("Every great tale begins with a small step."),
+      t("hud.regionSub2"),
+      tc("Old magic waits beneath the stone."),
+      tc("One final climb. A thousand untold stories."),
     ][tile.region] +
     (SKY_ROUTES[theme.id]?.length
       ? ` · ${layerName(theme.id, player.position)}`
@@ -824,8 +825,8 @@ function updateCharacter() {
   $("char-number").textContent =
     `${String(selected + 1).padStart(2, "0")} / ${CHARACTERS.length} ADVENTURERS`;
   $("char-name").textContent = c.name;
-  $("char-title").textContent = `${c.title} · Age ${c.age}`;
-  $("char-bio").textContent = c.bio;
+  $("char-title").textContent = `${tc(c.title)} · ${t("char.age", { age: c.age })}`;
+  $("char-bio").textContent = tc(c.bio);
   $("asset-label").textContent = MODEL_PATHS[c.id]
     ? "Adapted character art · supplied GLB"
     : "Stylized prototype · production art pending";
@@ -1137,7 +1138,7 @@ function attachScene() {
       realtime.room?.challenges && tile.kind !== "start" && tile.kind !== "finish"
         ? ` · Then draw a ${realtime.room.difficulty || "soft"} party card.`
         : "";
-    tip.innerHTML = `<span style="color:${TILE_INFO[tile.kind].color}">${TILE_INFO[tile.kind].icon}</span><div><strong>${tile.kind === "finish" ? theme.regions[3] : tile.kind === "start" ? theme.regions[0] : TILE_INFO[tile.kind].label}</strong><small>Tile ${id + 1} · ${tile.kind === "finish" ? "The end of this path. The beginning of your legend." : TILE_INFO[tile.kind].description}${card}</small></div>`;
+    tip.innerHTML = `<span style="color:${TILE_INFO[tile.kind].color}">${TILE_INFO[tile.kind].icon}</span><div><strong>${tile.kind === "finish" ? tc(theme.regions[3]) : tile.kind === "start" ? tc(theme.regions[0]) : tc(TILE_INFO[tile.kind].label)}</strong><small>${t("tooltip.tile", { n: id + 1 })} · ${tile.kind === "finish" ? tc("The end of this path. The beginning of your legend.") : tc(TILE_INFO[tile.kind].description)}${card}</small></div>`;
     tip.hidden = false;
   };
 }

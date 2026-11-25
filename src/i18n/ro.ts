@@ -288,4 +288,8 @@ export const ro: Messages = {
   // Proper names of worlds and characters: identical in every language.
   "names.verdantCrown": "The Verdant Crown",
   "names.elowen": "Elowen",
+  // ---- HUD (board sidebar, tooltips) ----
+  "char.age": "Vârsta {age}",
+  "hud.regionSub2": "Locul acesta are mai mult decât se vede la prima privire.",
+  "tooltip.tile": "Pătrățelul {n}",
 };
