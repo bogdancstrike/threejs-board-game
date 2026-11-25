@@ -43,6 +43,7 @@ Wilder brings a tabletop adventure into an interactive 3D diorama. Your characte
 - 🌿 **A path in the landscape:** low weathered stones, moss, plants, bridges, and visible changes in elevation.
 - 🌙 **Twilight rendering:** cool moonlight, warm windows, flickering forge light, soft shadows, ambient occlusion, restrained bloom, and drifting mist.
 - 🦋 **A living world:** rotating windmills, flowing rivers and waterfalls, swaying foliage, portal energy, fireflies, weather, and animated themed creatures.
+- 🌐 **English and Romanian:** English is the default. Choose **EN** or **RO** in Settings; the choice is remembered on later visits. World and character names stay unchanged. Localization is partial: the title menu, top bar, and difficulty labels are translated, and the rest of the interface and the game content are still in English.
 - 🎧 **An original soundscape:** procedural ambient music, environmental textures, footsteps, discovery sounds, and separate volume controls.
 - 💾 **Your journey stays with you:** validated local saves preserve progress, pending choices, party members, and appearance.
 - 🎛️ **A full configuration page:** player profile with a live 3D hero preview, quality presets (Low/Medium/High/Ultra), render scale, dynamic resolution, frame-rate cap, shadow resolution, FXAA, eight lighting moods including a living day-and-night cycle, storms and auroras, sun direction, colour grading, wind, water, camera, pacing, audio and accessibility.
