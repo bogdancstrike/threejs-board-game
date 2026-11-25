@@ -624,12 +624,12 @@ function openModal(type: string, html: string, wide = false) {
     (titleMenu?.isOpen ||
     ["encounter", "challenge", "road", "victory", "handoff"].includes(type)
       ? ""
-      : `<div class="modal-exit"><button class="text-button" data-action="exit-game">${icon("chevron-left")} Exit game · save & return to menu</button></div>`);
+      : `<div class="modal-exit"><button class="text-button" data-action="exit-game">${icon("chevron-left")} ${t("modal.exitSave")}</button></div>`);
   if (!dialog.open) dialog.showModal();
   refreshIcons();
 }
 const modalHeader = (eyebrow: string, title: string, close = true) =>
-  `<div class="modal-header"><div><span class="eyebrow">${eyebrow}</span><h2>${title}</h2></div>${close ? `<button class="icon-button" data-action="close-modal" aria-label="Close dialog">${icon("x")}</button>` : ""}</div>`;
+  `<div class="modal-header"><div><span class="eyebrow">${eyebrow}</span><h2>${title}</h2></div>${close ? `<button class="icon-button" data-action="close-modal" aria-label="${t("modal.closeDialog")}">${icon("x")}</button>` : ""}</div>`;
 const roomPanels = new RoomPanels(
   realtime,
   {
@@ -1102,20 +1102,14 @@ function updateProfile(change: (p: Profile) => void) {
 function showHelp() {
   openModal(
     "help",
-    modalHeader(
-      "A SMALL GUIDE TO A BIG ADVENTURE",
-      "Let curiosity lead the way.",
-    ) +
-      `<div class="help-steps"><div><span>01</span><div><h3>Choose your wanderer</h3><p>Open your character card to meet the 12 adventurers. Rotate the preview, try their actions, and select your favorite.</p></div></div><div><span>02</span><div><h3>Follow the path</h3><p>Roll a six-sided die and travel along 93 tiles through four rising regions. Reach the final tile to win; an exact roll is not required.</p></div></div><div><span>03</span><div><h3>Expect the unexpected</h3><p>Mysteries offer choices. Treasure gives 3 gold. Fortune gives 2 gold and a clue. Portals move you 3 extra tiles. Extra movement ends safely without triggering another encounter.</p></div></div><div><span>04</span><div><h3>Make it your adventure</h3><p>Use New Game for solo, 1–8 players on one device, or online rooms. Everyone chooses a unique hero. Adventure adds dragon guardians, mystery boxes, dares, dangers and ten mini-games. Classic races reward the first finisher; Score expeditions reward the highest points. Offline Classic supports 1–4 players in settings.</p></div></div></div><div class="keyboard-guide"><span><kbd>SPACE</kbd> Roll</span><span><kbd>F</kbd> Find hero</span><span><kbd>R</kbd> Reset view</span><span><kbd>ESC</kbd> Close</span></div><p class="modal-note">Drag the world to orbit. Scroll or pinch to zoom. Right-drag to pan. Sound is optional. <a href="/ASSET-CREDITS.md" target="_blank" rel="noopener">3D asset credits</a>.</p>`,
+    modalHeader(t("help.eyebrow"), t("help.title")) +
+      `<div class="help-steps"><div><span>01</span><div><h3>${t("help.s1Title")}</h3><p>${t("help.s1Text")}</p></div></div><div><span>02</span><div><h3>${t("help.s2Title")}</h3><p>${t("help.s2Text")}</p></div></div><div><span>03</span><div><h3>${t("help.s3Title")}</h3><p>${t("help.s3Text")}</p></div></div><div><span>04</span><div><h3>${t("help.s4Title")}</h3><p>${t("help.s4Text")}</p></div></div></div><div class="keyboard-guide"><span><kbd>SPACE</kbd> ${t("help.roll")}</span><span><kbd>F</kbd> ${t("help.findHero")}</span><span><kbd>R</kbd> ${t("help.resetView")}</span><span><kbd>ESC</kbd> ${t("help.close")}</span></div><p class="modal-note">${t("help.orbitNote")} <a href="/ASSET-CREDITS.md" target="_blank" rel="noopener">${t("help.assetCredits")}</a>.</p>`,
   );
 }
 function showJournal() {
   openModal(
     "journal",
-    modalHeader(
-      "LITTLE MOMENTS. LASTING MEMORIES.",
-      "Your traveler’s journal",
-    ) +
+    modalHeader(t("journal.eyebrow"), t("journal.title")) +
       `<div class="full-journal">${state.journal.map((j) => `<div><span>TURN ${String(j.turn).padStart(2, "0")}</span><p>${safe(j.text)}</p></div>`).join("")}</div>`,
   );
 }
@@ -1128,7 +1122,7 @@ function attachScene() {
       tip.hidden = true;
       return;
     }
-    const t = getTiles(state.map)[id];
+    const tile = getTiles(state.map)[id];
     const layout = realtime.room?.layout;
     const stop =
       realtime.room?.challenges && (!layout || layout.stops.includes(id))
@@ -1140,10 +1134,10 @@ function attachScene() {
       return;
     }
     const card =
-      realtime.room?.challenges && t.kind !== "start" && t.kind !== "finish"
+      realtime.room?.challenges && tile.kind !== "start" && tile.kind !== "finish"
         ? ` · Then draw a ${realtime.room.difficulty || "soft"} party card.`
         : "";
-    tip.innerHTML = `<span style="color:${TILE_INFO[t.kind].color}">${TILE_INFO[t.kind].icon}</span><div><strong>${t.kind === "finish" ? theme.regions[3] : t.kind === "start" ? theme.regions[0] : TILE_INFO[t.kind].label}</strong><small>Tile ${id + 1} · ${t.kind === "finish" ? "The end of this path. The beginning of your legend." : TILE_INFO[t.kind].description}${card}</small></div>`;
+    tip.innerHTML = `<span style="color:${TILE_INFO[tile.kind].color}">${TILE_INFO[tile.kind].icon}</span><div><strong>${tile.kind === "finish" ? theme.regions[3] : tile.kind === "start" ? theme.regions[0] : TILE_INFO[tile.kind].label}</strong><small>Tile ${id + 1} · ${tile.kind === "finish" ? "The end of this path. The beginning of your legend." : TILE_INFO[tile.kind].description}${card}</small></div>`;
     tip.hidden = false;
   };
 }
