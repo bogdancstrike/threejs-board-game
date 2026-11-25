@@ -1,3 +1,4 @@
+import { t } from "../i18n";
 import type { RealtimeClient, Challenge } from "./client";
 interface UI {
   icon: (name: string) => string;
@@ -54,14 +55,14 @@ export class ChallengePanel {
       content += `<div class="maze-grid">${Array.from({ length: 25 }, (_, cell) => `<button data-challenge-action="maze" data-choice="${cell}" class="maze-cell ${card.walls!.includes(cell) ? "wall" : ""} ${cell === 0 ? "visited" : ""}" ${!owner || card.walls!.includes(cell) ? "disabled" : ""}>${cell === 0 ? "●" : cell === 24 ? "✦" : "·"}</button>`).join("")}</div><button class="text-button" data-challenge-action="reset" ${owner ? "" : "disabled"}>Reset path</button>`;
     }
     if (card.type === "alchemy")
-      content += `<div id="alchemy-progress" class="alchemy-progress">0 / 3 ingredients · total 0 / 10</div><button class="text-button" data-challenge-action="reset" ${owner ? "" : "disabled"}>Empty the cauldron</button>`;
+      content += `<div id="alchemy-progress" class="alchemy-progress">${t("chal.alchemyProgress")}</div><button class="text-button" data-challenge-action="reset" ${owner ? "" : "disabled"}>${t("chal.emptyCauldron")}</button>`;
     if (card.type === "memory")
       content +=
         '<div id="memory-display" class="challenge-symbols memory"></div>';
     if (card.type === "balance")
       content += `<div class="balance-track"><span class="balance-target" style="left:${card.target!.min}%;width:${card.target!.max - card.target!.min}%"></span><span id="balance-marker"></span></div><button class="primary-button full-width" data-challenge-action="balance" ${owner ? "" : "disabled"}>${i("crosshair")}Stop the lantern</button>`;
     if (card.type === "rhythm")
-      content += `<div id="rhythm-beat" class="rhythm-beat">${i("sparkles")}</div><p id="rhythm-progress" class="modal-note">0 / 4 beats</p><button class="primary-button full-width" data-challenge-action="rhythm" ${owner ? "" : "disabled"}>${i("sparkles")}Tap the beat</button>`;
+      content += `<div id="rhythm-beat" class="rhythm-beat">${i("sparkles")}</div><p id="rhythm-progress" class="modal-note">${t("chal.beatsProgress", { count: 0 })}</p><button class="primary-button full-width" data-challenge-action="rhythm" ${owner ? "" : "disabled"}>${i("sparkles")}Tap the beat</button>`;
     if (card.options.length)
       content += `<div class="challenge-options">${card.options.map((option, index) => `<button data-challenge-action="choice" data-choice="${index}" ${owner ? "" : "disabled"}>${e(option)}</button>`).join("")}</div>`;
     this.ui.open(
@@ -71,7 +72,7 @@ export class ChallengePanel {
         card.title,
         false,
       ) +
-        `<p class="challenge-prompt">${e(card.prompt)}</p>${card.sourceTitle ? `<p class="trial-source">${e(card.sourceTitle)} · ${e(card.failure || "No penalty.")}</p>` : ""}${content}<div class="challenge-footer"><span id="challenge-clock"></span><span>Success: +${card.rewardPoints || 50} points · +${card.rewardGold || 2} gold</span></div><button class="text-button" data-challenge-action="skip" ${owner ? "" : "disabled"}>${owner ? (card.context && ["dragon", "hazard", "curse"].includes(card.context) ? "Forfeit trial · stated setback applies" : "Pass this challenge · no penalty") : e(player.name) + " is playing. Watch their progress."}</button>`,
+        `<p class="challenge-prompt">${e(card.prompt)}</p>${card.sourceTitle ? `<p class="trial-source">${e(card.sourceTitle)} · ${e(card.failure || t("chal.noPenalty"))}</p>` : ""}${content}<div class="challenge-footer"><span id="challenge-clock"></span><span>Success: +${card.rewardPoints || 50} points · +${card.rewardGold || 2} gold</span></div><button class="text-button" data-challenge-action="skip" ${owner ? "" : "disabled"}>${owner ? (card.context && ["dragon", "hazard", "curse"].includes(card.context) ? "Forfeit trial · stated setback applies" : "Pass this challenge · no penalty") : e(player.name) + " is playing. Watch their progress."}</button>`,
     );
     this.tick();
   }
@@ -109,9 +110,9 @@ export class ChallengePanel {
       p = room.game.players[room.game.active];
     const level = card?.level || room.difficulty || "soft",
       labels: Record<string, string> = {
-        dare: "Done it",
-        alternative: "Did the board-game version",
-        leave: road.stage === "result" ? "Continue" : "Pass",
+        dare: t("chal.doneIt"),
+        alternative: t("chal.boardVersion"),
+        leave: road.stage === "result" ? t("chal.continue") : t("chal.pass"),
       };
     const header = `<div class="party-card-top"><span class="party-card-level">${e(level.toUpperCase())}</span><span>${e(p.name)}’s card</span><span class="party-card-category">${mechanic ? i(mechanic.icon) + e(mechanic.name) : e(card?.category || "")}</span></div>`;
     const banner = road.banner
@@ -135,7 +136,7 @@ export class ChallengePanel {
         )
         .join(
           "",
-        )}</div>${card ? `<details class="card-alternative"><summary>Board-game version</summary><p>${e(card.alternative)}</p></details>` : ""}`;
+        )}</div>${card ? `<details class="card-alternative"><summary>${t("chal.boardGameVersion")}</summary><p>${e(card.alternative)}</p></details>` : ""}`;
     }
     this.ui.open(
       "road",
@@ -200,13 +201,13 @@ export class ChallengePanel {
         ?.classList.toggle("lit", age % beat < 160);
       const progress = document.getElementById("rhythm-progress");
       if (progress)
-        progress.textContent = (card.taps?.length || 0) + " / 4 beats";
+        progress.textContent = t("chal.beatsProgress", { count: card.taps?.length || 0 });
       const button = document.querySelector<HTMLButtonElement>(
         '[data-challenge-action="rhythm"]',
       );
       if (button)
         button.textContent =
-          (card.taps?.length || 0) >= 4 ? "Finish rhythm" : "Tap the beat";
+          (card.taps?.length || 0) >= 4 ? t("chal.finishRhythm") : t("chal.tapBeat");
       if (currentBeat !== this.lastBeat) {
         this.lastBeat = currentBeat;
         this.ui.sound();
@@ -240,11 +241,11 @@ export class ChallengePanel {
             Math.abs((cell % 5) - (last % 5)) !==
           1
         ) {
-          this.ui.toast("Choose a square beside your current path.");
+          this.ui.toast(t("chal.besideSquare"));
           return;
         }
         if (this.path.length >= 30) {
-          this.ui.toast("Reset and try a shorter route.");
+          this.ui.toast(t("chal.shorterRoute"));
           return;
         }
         this.path.push(cell);
@@ -271,7 +272,7 @@ export class ChallengePanel {
           );
           const progress = document.getElementById("alchemy-progress");
           if (progress)
-            progress.textContent = `${this.ingredients.length} / 3 ingredients · total ${total} / 10`;
+            progress.textContent = t("chal.alchemyTotal", { count: this.ingredients.length, total });
           if (this.ingredients.length === 3)
             await this.client.command("SUBMIT_CHALLENGE", {
               answer: this.ingredients,
@@ -293,7 +294,7 @@ export class ChallengePanel {
       this.ui.toast(
         error instanceof Error
           ? error.message
-          : "Could not submit your challenge.",
+          : t("chal.submitFailed"),
       );
     } finally {
       this.sending = false;
