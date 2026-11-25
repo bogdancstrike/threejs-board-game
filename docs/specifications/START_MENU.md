@@ -4,7 +4,7 @@ Implemented 2026-11-11. The title screen is the default entry point for desktop 
 
 - **New game:** choose a featured world, then configure solo, same-device party, or an online room. Enter names, choose classic or score victory, and enable/disable road adventures. Characters remain unique within each party.
 - **Continue journey:** enabled for a saved local journey or room session. Restores the current turn, pending encounter, challenge, or finished-game standings. Reloading returns to the title screen before resuming.
-- **Settings:** independent music, ambience and effects volumes; audio toggle; graphics quality; walking/running preference. Local Classic party size is applied only when starting a new Classic journey.
+- **Settings:** independent music, ambience and effects volumes; audio toggle; graphics quality; walking/running preference. The panel shows the game version (`Version <semver>`, read from `package.json`) in its sticky navigation. Local Classic party size is applied only when starting a new Classic journey.
 - **World previews:** previous/next cycles through all 30 actual map thumbnails. Inspect a live orbitable 3D preview before choosing a world for New game.
 - **How to play:** explains turn order, points, mysteries, road adventures and supported play styles.
 - **Offline Classic:** available without the API; supports the original 1–4 local players. Adventure modes use FastAPI and PostgreSQL even on a single device.
