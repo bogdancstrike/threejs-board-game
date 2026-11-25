@@ -366,11 +366,11 @@ function update() {
   $("region-list").innerHTML = theme.regions
     .map(
       (r, i) =>
-        `<div class="region-step ${i === tile.region ? "current" : i < tile.region ? "completed" : ""}"><span class="region-dot">${i < tile.region ? "✓" : i === tile.region ? "✧" : ""}</span><span>${r}</span>${i === tile.region ? '<span class="here-tag">YOU ARE HERE</span>' : ""}</div>`,
+        `<div class="region-step ${i === tile.region ? "current" : i < tile.region ? "completed" : ""}"><span class="region-dot">${i < tile.region ? "✓" : i === tile.region ? "✧" : ""}</span><span>${tc(r)}</span>${i === tile.region ? '<span class="here-tag">YOU ARE HERE</span>' : ""}</div>`,
     )
     .join("");
   $("chapter").textContent =
-    `CHAPTER ${["I", "II", "III", "IV"][tile.region]} · ${theme.tagline.toUpperCase()}`;
+    `CHAPTER ${["I", "II", "III", "IV"][tile.region]} · ${tc(theme.tagline).toUpperCase()}`;
   $("region-name").textContent = tc(theme.regions[tile.region]);
   $("region-subtitle").textContent =
     [
@@ -383,7 +383,7 @@ function update() {
       ? ` · ${layerName(theme.id, player.position)}`
       : "");
   $("destination-label").innerHTML =
-    icon("flag") + `<span>${theme.regions[3].toUpperCase()}</span>`;
+    icon("flag") + `<span>${tc(theme.regions[3]).toUpperCase()}</span>`;
   $("player-count").textContent =
     state.players.length === 1
       ? "SOLO EXPEDITION"
@@ -393,7 +393,7 @@ function update() {
     .slice(0, 3)
     .map(
       (j, i) =>
-        `<div class="journal-entry ${i === 0 ? "latest" : ""}"><span class="journal-dot"></span><p>${safe(j.text)}</p><small>${String(j.turn).padStart(2, "0")}</small></div>`,
+        `<div class="journal-entry ${i === 0 ? "latest" : ""}"><span class="journal-dot"></span><p>${safe(tc(j.text))}</p><small>${String(j.turn).padStart(2, "0")}</small></div>`,
     )
     .join("");
   const button = $<HTMLButtonElement>("roll-button");
@@ -449,7 +449,9 @@ function update() {
       `<span>${state.phase === "road" ? "Show the card" : state.phase === "challenge" ? "Resume the challenge" : "Resume the mystery"}</span>`;
   } else delete button.dataset.pending;
   if (realtime.session) {
-    $("room-nav-label").textContent = t("status.room", { code: realtime.room?.code || "" });
+    $("room-nav-label").textContent = t("status.room", {
+      code: realtime.room?.code || "",
+    });
     if (realtime.room?.phase === "lobby") {
       button.innerHTML = icon("users") + "<span>Gather your party</span>";
       $("turn-title").textContent = t("status.gettingReady");
@@ -825,7 +827,8 @@ function updateCharacter() {
   $("char-number").textContent =
     `${String(selected + 1).padStart(2, "0")} / ${CHARACTERS.length} ADVENTURERS`;
   $("char-name").textContent = c.name;
-  $("char-title").textContent = `${tc(c.title)} · ${t("char.age", { age: c.age })}`;
+  $("char-title").textContent =
+    `${tc(c.title)} · ${t("char.age", { age: c.age })}`;
   $("char-bio").textContent = tc(c.bio);
   $("asset-label").textContent = MODEL_PATHS[c.id]
     ? "Adapted character art · supplied GLB"
@@ -916,7 +919,7 @@ function confirmMap(id: string) {
     "new-world",
     modalHeader("EXPLORE YOUR NEXT WORLD", m.name) +
       `
-  <div class="map-preview-layout"><div class="map-preview-stage"><div id="map-preview-canvas"></div><span class="map-preview-badge">${icon(m.icon)} LIVE 3D PREVIEW</span><div id="map-preview-loading" class="map-preview-loading"><span class="loading-orbit"></span>Bringing this world to life…</div><div class="map-preview-tools"><button data-action="preview-map-reset" aria-label="Reset preview">${icon("scan")}</button><button data-action="preview-map-in" aria-label="Zoom preview in">${icon("plus")}</button><button data-action="preview-map-out" aria-label="Zoom preview out">${icon("minus")}</button></div><div class="map-preview-hint">${icon("orbit")} Drag to rotate · Scroll to explore</div></div><div class="map-preview-copy"><div class="character-index"><span>WORLD ${String(index + 1).padStart(2, "0")} / ${MAPS.length}</span><div><button class="icon-button" data-preview-map="${MAPS[(index + MAPS.length - 1) % MAPS.length].id}" aria-label="Previous map">${icon("chevron-left")}</button><button class="icon-button" data-preview-map="${MAPS[(index + 1) % MAPS.length].id}" aria-label="Next map">${icon("chevron-right")}</button></div></div><h3>${m.tagline}</h3><p class="modal-intro">${m.description}</p><div class="map-preview-chapters">${m.regions.map((region, i) => `<div><span>${String(i + 1).padStart(2, "0")}</span>${region}</div>`).join("")}</div><div class="map-preview-stats"><span>${icon("footprints")} 93 tiles</span><span>${icon("map")} ${MAP_SHAPES[m.id].name}</span><span>${icon("mountain")} ${MAP_SHAPES[m.id].floors} terraces · ${MAP_SHAPES[m.id].size}</span><span>${icon("wind")} ${SKY_ROUTES[m.id]?.length ? `Ground + ${SKY_ROUTES[m.id].length} sky route${SKY_ROUTES[m.id].length > 1 ? "s" : ""}` : "Ground realm"}</span><span>${icon("sparkles")} Unique mysteries</span></div><p class="modal-note">${current ? "You are exploring this world. Your journey is waiting." : "Start at tile 1 with your current party. This replaces the saved expedition."}</p><button class="primary-button full-width" ${fromMenu ? `data-action="new-game-setup" data-world="${m.id}"` : current ? 'data-action="close-modal"' : `data-start-map="${m.id}"`}>${icon("compass")}${fromMenu ? "New game in this world" : current ? "Return to my expedition" : "Begin this journey"}</button><button class="text-button" data-action="maps">See all worlds</button></div></div>`,
+  <div class="map-preview-layout"><div class="map-preview-stage"><div id="map-preview-canvas"></div><span class="map-preview-badge">${icon(m.icon)} LIVE 3D PREVIEW</span><div id="map-preview-loading" class="map-preview-loading"><span class="loading-orbit"></span>Bringing this world to life…</div><div class="map-preview-tools"><button data-action="preview-map-reset" aria-label="Reset preview">${icon("scan")}</button><button data-action="preview-map-in" aria-label="Zoom preview in">${icon("plus")}</button><button data-action="preview-map-out" aria-label="Zoom preview out">${icon("minus")}</button></div><div class="map-preview-hint">${icon("orbit")} Drag to rotate · Scroll to explore</div></div><div class="map-preview-copy"><div class="character-index"><span>WORLD ${String(index + 1).padStart(2, "0")} / ${MAPS.length}</span><div><button class="icon-button" data-preview-map="${MAPS[(index + MAPS.length - 1) % MAPS.length].id}" aria-label="Previous map">${icon("chevron-left")}</button><button class="icon-button" data-preview-map="${MAPS[(index + 1) % MAPS.length].id}" aria-label="Next map">${icon("chevron-right")}</button></div></div><h3>${tc(m.tagline)}</h3><p class="modal-intro">${tc(m.description)}</p><div class="map-preview-chapters">${m.regions.map((region, i) => `<div><span>${String(i + 1).padStart(2, "0")}</span>${tc(region)}</div>`).join("")}</div><div class="map-preview-stats"><span>${icon("footprints")} 93 tiles</span><span>${icon("map")} ${MAP_SHAPES[m.id].name}</span><span>${icon("mountain")} ${MAP_SHAPES[m.id].floors} terraces · ${MAP_SHAPES[m.id].size}</span><span>${icon("wind")} ${SKY_ROUTES[m.id]?.length ? `Ground + ${SKY_ROUTES[m.id].length} sky route${SKY_ROUTES[m.id].length > 1 ? "s" : ""}` : "Ground realm"}</span><span>${icon("sparkles")} Unique mysteries</span></div><p class="modal-note">${current ? "You are exploring this world. Your journey is waiting." : "Start at tile 1 with your current party. This replaces the saved expedition."}</p><button class="primary-button full-width" ${fromMenu ? `data-action="new-game-setup" data-world="${m.id}"` : current ? 'data-action="close-modal"' : `data-start-map="${m.id}"`}>${icon("compass")}${fromMenu ? "New game in this world" : current ? "Return to my expedition" : "Begin this journey"}</button><button class="text-button" data-action="maps">See all worlds</button></div></div>`,
     true,
   );
   mapPreview = new GameScene($("map-preview-canvas"), m, graphicsQuality);
@@ -976,10 +979,10 @@ function showEncounter() {
     "encounter",
     modalHeader(
       `TILE ${state.players[state.active].position + 1} · A MYSTERY UNFOLDS`,
-      event.title,
+      tc(event.title),
       false,
     ) +
-      `<div class="encounter-art">${icon(event.icon)}<span>✧</span><span>✦</span></div><p class="encounter-text">${event.text}</p><div class="encounter-choices">${event.choices.map((c, i) => `<button data-choice="${i}" ${state.players[state.active].gold + c.gold < 0 || (realtime.session && !realtime.myTurn) ? "disabled" : ""}><div><strong>${c.label}</strong><span>${c.detail}</span></div>${icon("arrow-up-right")}</button>`).join("")}</div><p class="modal-note">${icon("sparkles")} Your choices make the journey.</p>`,
+      `<div class="encounter-art">${icon(event.icon)}<span>✧</span><span>✦</span></div><p class="encounter-text">${tc(event.text)}</p><div class="encounter-choices">${event.choices.map((c, i) => `<button data-choice="${i}" ${state.players[state.active].gold + c.gold < 0 || (realtime.session && !realtime.myTurn) ? "disabled" : ""}><div><strong>${tc(c.label)}</strong><span>${tc(c.detail)}</span></div>${icon("arrow-up-right")}</button>`).join("")}</div><p class="modal-note">${icon("sparkles")} Your choices make the journey.</p>`,
   );
 }
 async function resolveChoice(index: number) {
@@ -989,11 +992,7 @@ async function resolveChoice(index: number) {
     try {
       await realtime.command("CHOOSE", { index });
     } catch (error) {
-      toast(
-        error instanceof Error
-          ? error.message
-          : t("toast.choiceFailed"),
-      );
+      toast(error instanceof Error ? error.message : t("toast.choiceFailed"));
     }
     return;
   }
@@ -1111,7 +1110,7 @@ function showJournal() {
   openModal(
     "journal",
     modalHeader(t("journal.eyebrow"), t("journal.title")) +
-      `<div class="full-journal">${state.journal.map((j) => `<div><span>TURN ${String(j.turn).padStart(2, "0")}</span><p>${safe(j.text)}</p></div>`).join("")}</div>`,
+      `<div class="full-journal">${state.journal.map((j) => `<div><span>TURN ${String(j.turn).padStart(2, "0")}</span><p>${safe(tc(j.text))}</p></div>`).join("")}</div>`,
   );
 }
 function attachScene() {
@@ -1131,11 +1130,13 @@ function attachScene() {
         : undefined;
     if (stop) {
       tip.hidden = false;
-      tip.innerHTML = `<span style="color:${theme.accent}">✧</span><div><strong>${stop.title}</strong><small>Tile ${id + 1} · ${stop.description}</small></div>`;
+      tip.innerHTML = `<span style="color:${theme.accent}">✧</span><div><strong>${tc(stop.title)}</strong><small>${t("tooltip.tile", { n: id + 1 })} · ${tc(stop.description)}</small></div>`;
       return;
     }
     const card =
-      realtime.room?.challenges && tile.kind !== "start" && tile.kind !== "finish"
+      realtime.room?.challenges &&
+      tile.kind !== "start" &&
+      tile.kind !== "finish"
         ? ` · Then draw a ${realtime.room.difficulty || "soft"} party card.`
         : "";
     tip.innerHTML = `<span style="color:${TILE_INFO[tile.kind].color}">${TILE_INFO[tile.kind].icon}</span><div><strong>${tile.kind === "finish" ? tc(theme.regions[3]) : tile.kind === "start" ? tc(theme.regions[0]) : tc(TILE_INFO[tile.kind].label)}</strong><small>${t("tooltip.tile", { n: id + 1 })} · ${tile.kind === "finish" ? tc("The end of this path. The beginning of your legend.") : tc(TILE_INFO[tile.kind].description)}${card}</small></div>`;
@@ -1194,11 +1195,7 @@ app.addEventListener("click", async (e) => {
     await gameAudio.setEnabled(!muted);
     syncSoundButton();
     sound("magic");
-    toast(
-      muted
-        ? t("toast.soundOff")
-        : t("toast.soundOn"),
-    );
+    toast(muted ? t("toast.soundOff") : t("toast.soundOn"));
   } else if (action === "prev-character" || action === "next-character") {
     selected =
       (selected + (action === "next-character" ? 1 : CHARACTERS.length - 1)) %
@@ -1218,9 +1215,7 @@ app.addEventListener("click", async (e) => {
         roomPanels.lobby();
       } catch (error) {
         toast(
-          error instanceof Error
-            ? error.message
-            : t("toast.characterFailed"),
+          error instanceof Error ? error.message : t("toast.characterFailed"),
         );
       }
       return;
@@ -1336,9 +1331,7 @@ app.addEventListener("change", (e) => {
   if (el.id === "game-difficulty")
     void realtime
       .command("SET_DIFFICULTY", { difficulty: el.value })
-      .then(() =>
-        toast(t("toast.deckSwitched")),
-      )
+      .then(() => toast(t("toast.deckSwitched")))
       .catch((error) => toast(error.message));
   if (el.id === "quality-setting") {
     graphicsQuality = el.value as Quality;
