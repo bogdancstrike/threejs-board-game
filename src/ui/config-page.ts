@@ -231,5 +231,6 @@ export function configPage(s: ConfigState) {
     "Accessibility",
     `${range("pref", p, ["uiScale", "Interface size", 85, 130, 100, "%", 5])}${toggle("pref-toggle", "reduceMotion", "Reduce motion", "Calmer camera, fewer animated flourishes", s.prefs.reduceMotion)}<button class="secondary-button full-width" data-action="reset-preferences">${i("rotate-ccw")}Restore gameplay & camera defaults</button>`,
   );
-  return `<div class="config-page">${nav}<div class="config-body" id="config-body">${profile}${display}${lighting}${grading}${gameplay}${camera}${audio}${access}<p class="config-version">${versionLabel(s.version ?? GAME_VERSION)}</p></div></div>`;
+  const version = `<p class="config-version">${versionLabel(s.version ?? GAME_VERSION)}</p>`;
+  return `<div class="config-page">${nav.replace(/<\/nav>$/, version + "</nav>")}<div class="config-body" id="config-body">${profile}${display}${lighting}${grading}${gameplay}${camera}${audio}${access}</div></div>`;
 }
